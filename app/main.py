@@ -1,8 +1,9 @@
-from websch.common import example_generator as ex
+from common import example_generator as ex
 
 from fastapi import FastAPI
 
 app = FastAPI()
+
 
 # class DomainList(BaseModel):
 #     domain: str

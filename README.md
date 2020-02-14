@@ -16,10 +16,13 @@ The project runs on the following python packages (with the also following subde
 
 - tiangolo/uvicorn-gunicorn-fastapi:latest
 
-# Server Run
 
-```code
-uvicorn websch.app:app --reload
+# Local test Runs
+
+```code(PowerShell)
+docker ps -q | % { docker stop $_ }
+docker build -t websch .
+docker run -d -p 80:80 websch
 ```
 
 

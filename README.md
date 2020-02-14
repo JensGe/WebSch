@@ -12,6 +12,9 @@ The project runs on the following python packages (with the also following subde
     - uvicorn (https://www.uvicorn.org/).
   - pydantic (https://pydantic-docs.helpmanual.io/)
 
+# Docker
+
+- tiangolo/uvicorn-gunicorn-fastapi:latest
 
 # Server Run
 

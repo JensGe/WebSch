@@ -1,3 +1,3 @@
 FROM tiangolo/uvicorn-gunicorn-fastapi:latest
 
-COPY ./app /app
+COPY ./app app

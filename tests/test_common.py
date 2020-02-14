@@ -15,6 +15,10 @@ class MyTestCase(unittest.TestCase):
         random_list = ex.generate_tld_url_list(10, 'all')
         self.assertEqual(random_list[9]['url'][:11], 'http://www.')
 
+    def test_create_url_list(self):
+        random_collection = ex.create_url_lists(3, 10, 'de')
+        self.assertEqual(random_collection[0][9]['url'][-3:], '.de')
+
 
 if __name__ == '__main__':
     unittest.main()

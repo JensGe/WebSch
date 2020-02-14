@@ -1,4 +1,4 @@
-from .common import example_generator as ex
+from app.common import example_generator as ex
 
 from fastapi import FastAPI
 

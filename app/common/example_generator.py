@@ -1,29 +1,44 @@
 import random
 import string
-
-tlds = ['com', 'de', 'co.uk', 'org', 'fr']
-
-
-def get_random_chars(length):
-    letters = string.ascii_lowercase
-    return ''.join(random.choice(letters) for i in range(length))
+from app.common.models import TLD
 
 
-def generate_tld_url_list(length, tld):
+def get_random_sld():
+    length = random.randint(4, 12)
+    first_char = random.choice(string.ascii_lowercase)
+    random_allowed_characters = string.ascii_lowercase + "0123456789-"
+    sld = first_char + "".join(
+        random.choice(random_allowed_characters) for i in range(length - 1)
+    )
+    return sld
+
+
+def generate_tld_url_list(location, length):
     url_list = []
-    if tld == 'all':
+
+    if location is None:
         for i in range(length):
-            url = 'http://www.' + get_random_chars(5) + '.' + random.choice(tlds)
-            url_list.append({'url': url})
+            url = (
+                "http://www."
+                + get_random_sld()
+                + "."
+                + random.choice(["de", "co.uk", "fr", "com", "org"])
+            )
+            url_list.append({"url": url})
     else:
         for i in range(length):
-            url = 'http://www.' + get_random_chars(5) + '.' + tld
-            url_list.append({'url': url})
+            url = "http://www." + get_random_sld() + "." + location
+            url_list.append({"url": url})
 
     return url_list
 
-def create_url_lists(amount, length, tld):
+
+def generate_frontier(location, amount, length):
     url_collection = []
     for i in range(amount):
-        url_collection.append(generate_tld_url_list(length, tld))
+        url_collection.append(generate_tld_url_list(location, length))
     return url_collection
+
+
+def create_new_crawler(crawler):
+    return True

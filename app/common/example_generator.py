@@ -1,6 +1,6 @@
 import random
 import string
-from app.common.models import TLD
+from datetime import datetime
 
 
 def get_random_sld():
@@ -41,4 +41,6 @@ def generate_frontier(location, amount, length):
 
 
 def create_new_crawler(crawler):
-    return True
+    crawler.uuid = "123e4567-e89b-12d3-a456-426655440000"
+    crawler.reg_date = datetime.now()
+    return crawler

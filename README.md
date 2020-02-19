@@ -24,15 +24,29 @@ The project is deployed on an AWS EC2 Ubuntu Machine.
 
 [Link to Online Docs] http://ec2-3-16-31-169.us-east-2.compute.amazonaws.com/docs
 
-# Local test Runs
+# Commands
 
-```code
+Re-Run local Docker-Image (Windows PowerShell)
+
+```shell script
 docker ps -q | % { docker stop $_ }
 docker build -t websch .
 docker run -d -p 80:80 websch
 ```
 
-or with venv
+Re-Run remote Docker-Image (Ubuntu)
+```shell script
+sudo docker stop $(sudo docker ps -q)
+sudo docker pull dockerjens23/websch
+sudo docker run -d -p 80:80 dockerjens23/websch
+```
+
+Get Loginfo of running Container
+```shell script
+sudo docker logs --follow $(sudo docker ps -q)
+```
+
+
 
 
 

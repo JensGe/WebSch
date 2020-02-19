@@ -21,20 +21,27 @@ async def get_frontier(
         },
     )
 ):
-    example_urls = ex.generate_frontier(request.crawler.location, request.amount, request.length)
+    example_urls = ex.generate_frontier(
+        request.crawler.location, request.amount, request.length
+    )
     return example_urls
 
 
-@app.post("/crawler/", status_code=HTTP_201_CREATED)
+@app.post(
+    "/crawler/",
+    status_code=HTTP_201_CREATED,
+    response_model=models.Crawler,
+    response_model_exclude_unset=True,
+)
 async def register_crawler(
     crawler: models.Crawler = Body(
         ...,
         example={
-            "uuid": "123e4567-e89b-12d3-a456-426655440000",
-            "reg_date": "2020-02-02T20:02:02.200Z",
+            "contact": "jens@example.com",
             "location": "Germany - Hannover",
+            "pref_tld": "de"
         },
     )
 ):
-    rv = ex.create_new_crawler(crawler)
-    return rv
+    new_crawler = ex.create_new_crawler(crawler)
+    return new_crawler

@@ -8,18 +8,19 @@ from pydantic import BaseModel, HttpUrl, EmailStr
 
 
 class TLD(str, Enum):
+    germany = 'de'
     commercial = 'com'
     france = 'fr'
-    germany = 'de'
     organisation = 'org'
     united_kingdom = 'co.uk'
 
 
 class Crawler(BaseModel):
-    uuid: UUID
-    reg_date: datetime
-    contact: EmailStr
+    uuid: UUID = None
+    reg_date: datetime = None
+    contact: EmailStr = None
     location: str = None
+    pref_tld: TLD = None
 
 
 class CrawlRequest(BaseModel):

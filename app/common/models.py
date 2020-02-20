@@ -39,6 +39,7 @@ class URLList(BaseModel):
 
 class Frontier(BaseModel):
     amount: int = 1
+    deliver_url: HttpUrl = "http://www.example.com/submit"
     url_lists: List[URLList]
 
 

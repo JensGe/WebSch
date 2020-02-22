@@ -6,24 +6,40 @@ from app.common import models
 from fastapi import FastAPI, Body
 from starlette.status import HTTP_201_CREATED
 
+
 app = FastAPI()
 
 
-@app.post("/frontiers/", response_model=models.Frontier)
+@app.post(
+    "/frontiers/",
+    response_model=models.Frontier,
+    tags=["Frontier"],
+    summary="Get URL-Lists",
+    response_description="The received URL-Lists",
+)
 async def get_frontier(
     request: models.CrawlRequest = Body(
         ...,
         example={
-            "crawler": "123e4567-e89b-12d3-a456-426655440000",
+            "crawler_uuid": "12345678-90ab-cdef-0000-000000000000",
             "amount": 5,
             "length": 3,
             "tld": None,
         },
     )
 ):
+    """
+    Get a Sub List of the global Frontier
+
+    - **crawler_uuid**: Your crawlers UUID
+    - **amount**: The amount of URL-Lists you want to receive
+    - **length**: The amount of URLs in each list
+    - **tld** (optional): Filter the Response to contain only URLs of this Top-Level-Domain
+    """
     example_urls = ex.generate_frontier(
-        request.crawler.location, request.amount, request.length
+        request.crawler_uuid, request.amount, request.length, request.tld
     )
+
     return example_urls
 
 
@@ -32,16 +48,91 @@ async def get_frontier(
     status_code=HTTP_201_CREATED,
     response_model=models.Crawler,
     response_model_exclude_unset=True,
+    tags=["Crawler"],
+    summary="Create a crawler",
+    response_description="Information about the newly created crawler"
 )
 async def register_crawler(
     crawler: models.Crawler = Body(
         ...,
         example={
             "contact": "jens@example.com",
-            "location": "Germany - Hannover",
-            "pref_tld": "de"
+            "location": "Germany, Baden-Württemberg, Stuttgart",  # ToDo Location Codes verwenden
+            "pref_tld": "de",
         },
     )
 ):
+    """
+    Create or Update a Crawler
+
+    - **contact**: The e-mail address of the crawlers owner
+    - **location** (optional): The location where the crawler resides
+    - **pref_tld** (optional): The Top-Level-Domain, which the crawler prefers to crawl
+    """
     new_crawler = ex.create_new_crawler(crawler)
     return new_crawler
+
+
+@app.put(
+    "/crawler/",
+    status_code=200,
+    response_model=models.Crawler,
+    response_model_exclude_unset=True,
+    tags=["Crawler"],
+    summary="Update a crawler",
+    response_description="Information about the updated created crawler"
+)
+async def update_crawler(
+    crawler: models.Crawler = Body(
+        ...,
+        example={
+            "uuid": "12345678-90ab-cdef-0000-000000000000",
+            "contact": "jens@example.com",
+            "location": "USA, Texas, Houston",
+            "pref_tld": "com",
+        },
+    )
+):
+    """
+    Update a Crawler
+
+    - **crawler_uuid**: The crawlers UUID to update
+    - **contact**: The e-mail address of the crawlers owner
+    - **location** (optional): The location where the crawler resides
+    - **pref_tld** (optional): The Top-Level-Domain, which the crawler prefers to crawl
+    """
+    updated_crawler = ex.update_crawler(crawler)
+    return updated_crawler
+
+
+
+@app.patch(
+    "/crawler/",
+    status_code=200,
+    response_model=models.Crawler,
+    response_model_exclude_unset=True,
+    tags=["Crawler"],
+    summary="Update a crawler",
+    response_description="Information about the updated created crawler"
+)
+async def update_crawler(
+    crawler: models.Crawler = Body(
+        ...,
+        example={
+            "uuid": "12345678-90ab-cdef-0000-000000000000",
+            "contact": "jens@example.com",
+            "location": "USA, Texas, Houston",
+            "pref_tld": "com",
+        },
+    )
+):
+    """
+    Update a Crawler, but instead of the similar put request, you only need to provide the elements to update and ignore else.
+
+    - **crawler_uuid**: The crawlers UUID to update
+    - **contact**: The e-mail address of the crawlers owner
+    - **location** (optional): The location where the crawler resides
+    - **pref_tld** (optional): The Top-Level-Domain, which the crawler prefers to crawl
+    """
+    updated_crawler = ex.update_crawler(crawler)
+    return updated_crawler

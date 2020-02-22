@@ -45,7 +45,7 @@ def generate_tld_url_list(tld, length):
 def generate_frontier(crawler_uuid, amount, length, tld):
     if crawler_uuid != "12345678-90ab-cdef-0000-000000000000":
         raise HTTPException(
-            status_code=404, detail="Crawler UUID not Found, register at /crawler/"
+            status_code=404, detail="Crawler UUID not Found, please register at /crawler/"
         )
 
     frontier = {

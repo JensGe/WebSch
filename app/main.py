@@ -63,7 +63,7 @@ async def register_crawler(
     )
 ):
     """
-    Create or Update a Crawler
+    Create a Crawler
 
     - **contact**: The e-mail address of the crawlers owner
     - **location** (optional): The location where the crawler resides
@@ -79,8 +79,8 @@ async def register_crawler(
     response_model=models.Crawler,
     response_model_exclude_unset=True,
     tags=["Crawler"],
-    summary="Update a crawler",
-    response_description="Information about the updated created crawler"
+    summary="Reset crawler information",
+    response_description="Information about the crawler"
 )
 async def update_crawler(
     crawler: models.Crawler = Body(
@@ -94,7 +94,7 @@ async def update_crawler(
     )
 ):
     """
-    Update a Crawler
+    Update a Crawler - Unprovided Fields will be reset
 
     - **crawler_uuid**: The crawlers UUID to update
     - **contact**: The e-mail address of the crawlers owner
@@ -127,7 +127,7 @@ async def update_crawler(
     )
 ):
     """
-    Update a Crawler, but instead of the similar put request, you only need to provide the elements to update and ignore else.
+    Update a Crawler -  Unprovided Fields will be ignored
 
     - **crawler_uuid**: The crawlers UUID to update
     - **contact**: The e-mail address of the crawlers owner

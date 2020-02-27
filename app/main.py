@@ -3,11 +3,16 @@ from app.common import example_generator as ex
 from app.common import models
 
 # external packages
-from fastapi import FastAPI, Body
+from fastapi import FastAPI, Body, BackgroundTasks
 from starlette.status import HTTP_201_CREATED
 
 
-app = FastAPI()
+app = FastAPI(
+    title="WebSch",
+    description="A Scheduler for a distributed Web Fetcher System",
+    version="0.0.1",
+    redoc_url=None
+)
 
 
 @app.post(
@@ -25,8 +30,8 @@ async def get_frontier(
             "amount": 5,
             "length": 3,
             "tld": None,
-        },
-    )
+        }
+        )
 ):
     """
     Get a Sub List of the global Frontier

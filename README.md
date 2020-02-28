@@ -30,6 +30,7 @@ Re-Run local Docker-Image (Windows PowerShell)
 
 ```shell script
 docker ps -q | % { docker stop $_ }
+docker pull dockerjens23/websch
 docker build -t websch .
 docker run -d -p 80:80 websch
 ```

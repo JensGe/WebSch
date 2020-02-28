@@ -16,7 +16,7 @@ class TLD(str, Enum):
 
 
 class Crawler(BaseModel):
-    uuid: UUID = None
+    uuid: UUID
     reg_date: datetime = None
     contact: EmailStr
     location: str = None

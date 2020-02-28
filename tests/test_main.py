@@ -1,6 +1,6 @@
 from starlette.testclient import TestClient
 
-from ..app.main import app
+from app.main import app
 
 client = TestClient(app)
 
@@ -11,7 +11,7 @@ def test_get_frontier():
         json={
             "crawler_uuid": "12345678-90ab-cdef-0000-000000000000",
             "amount": 2,
-            "length": 0
+            "length": 0,
         },
     )
     assert response.status_code == 200
@@ -36,3 +36,17 @@ def test_get_frontier():
         ],
     }
 
+
+def test_get_frontier_bad_uuid():
+    response = client.post(
+        "/frontiers/",
+        json={
+            "crawler_uuid": "12345678-90ab-cdef-0000-000000000001",
+            "amount": 2,
+            "length": 0,
+        },
+    )
+    assert response.status_code == 404
+    assert response.json() == {
+        "detail": "Crawler UUID 12345678-90ab-cdef-0000-000000000001 not Found, please register at /crawler/"
+    }

@@ -10,7 +10,7 @@ from starlette.status import HTTP_201_CREATED
 app = FastAPI(
     title="WebSch",
     description="A Scheduler for a distributed Web Fetcher System",
-    version="0.0.1",
+    version="0.0.2",
     redoc_url=None
 )
 

@@ -5,6 +5,18 @@ from app.main import app
 client = TestClient(app)
 
 
+def test_create_crawler():
+    response = client.post(
+        "/crawler/",
+        json={
+            "contact": "jens@honzont.de",
+            "location": "Germany",
+            "tld_preference": "de",
+        },
+    )
+    assert response.status_code == 201
+
+
 def test_get_frontier():
     response = client.post(
         "/frontiers/",

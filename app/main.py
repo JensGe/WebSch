@@ -8,7 +8,7 @@ from app.database.database import SessionLocal, engine
 
 from fastapi import FastAPI, Body, Depends, HTTPException
 from sqlalchemy.orm import Session
-from starlette.status import HTTP_201_CREATED
+from starlette import status
 
 
 models.Base.metadata.create_all(bind=engine)
@@ -46,13 +46,13 @@ def read_crawler(db: Session = Depends(get_db)):
 
     - **crawler_uuid**
     """
-    all_crawler = crud.get_crawlers(db)
+    all_crawler = crud.get_all_crawler(db)
     return all_crawler
 
 
 @app.post(
     "/crawler/",
-    status_code=HTTP_201_CREATED,
+    status_code=status.HTTP_201_CREATED,
     response_model=schemas.Crawler,
     response_model_exclude_unset=True,
     tags=["Crawler"],
@@ -66,12 +66,48 @@ def register_crawler(
     Create a Crawler
 
     - **contact**: The e-mail address of the crawlers owner
+    - **name**: A unique Name per Owner
     - **location** (optional): The location where the crawler resides
     - **pref_tld** (optional): The Top-Level-Domain, which the crawler prefers to crawl
     """
     new_crawler = crud.create_crawler(db, crawler)
     return new_crawler
 
+
+@app.delete(
+    "/crawler/",
+    status_code=status.HTTP_200_OK,
+    tags=["Crawler"],
+    summary="Delete a Crawler",
+    response_description="The deleted Crawler"
+)
+def delete_crawler(
+    crawler: schemas.DeleteCrawler, db: Session = Depends(get_db)
+):
+    """
+    Delete a specific Crawler
+
+    - **uuid**: UUID of the crawler, which has to be deleted
+    """
+    deleted_crawler = crud.delete_crawler(db, crawler)
+    return deleted_crawler
+
+
+@app.delete(
+    "/all_crawler/",
+    status_code=status.HTTP_200_OK,
+    tags=["Crawler"],
+    summary="Delete all Crawler"
+)
+def delete_all_crawler(db: Session = Depends(get_db)
+):
+    """
+    Delete a specific Crawler
+
+    - **uuid**: UUID of the crawler, which has to be deleted
+    """
+    deleted_crawler = crud.delete_all_crawler(db)
+    return deleted_crawler
 
 ############################
 # Before DB

@@ -35,6 +35,13 @@ class CreateCrawler(BaseModel):
     class Config:
         orm_mode = True
 
+
+class DeleteCrawler(BaseModel):
+    uuid: UUID
+
+    class Config:
+        orm_mode = True
+
 #
 # class CrawlRequest(BaseModel):
 #     crawler_uuid: UUID

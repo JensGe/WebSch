@@ -1,6 +1,7 @@
 from typing import List
 
 from app.common import example_generator as ex
+
 # from app.common import models
 
 from app.database import crud, models, schemas
@@ -18,7 +19,7 @@ app = FastAPI(
     title="WebSch",
     description="A Scheduler for a distributed Web Fetcher System",
     version="0.0.3",
-    redoc_url=None
+    redoc_url=None,
 )
 
 
@@ -32,13 +33,12 @@ def get_db():
 
 
 # Crawler
-
 @app.get(
     "/crawler/",
     response_model=List[schemas.Crawler],
     tags=["Crawler"],
     summary="List all created Crawlers",
-    response_description="A List of all Crawler in the Database"
+    response_description="A List of all Crawler in the Database",
 )
 def read_crawler(db: Session = Depends(get_db)):
     """
@@ -57,11 +57,9 @@ def read_crawler(db: Session = Depends(get_db)):
     response_model_exclude_unset=True,
     tags=["Crawler"],
     summary="Create a crawler",
-    response_description="Information about the newly created crawler"
+    response_description="Information about the newly created crawler",
 )
-def register_crawler(
-    crawler: schemas.CreateCrawler, db: Session = Depends(get_db)
-):
+def register_crawler(crawler: schemas.CreateCrawler, db: Session = Depends(get_db)):
     """
     Create a Crawler
 
@@ -74,16 +72,36 @@ def register_crawler(
     return new_crawler
 
 
+@app.put(
+    "/crawler/",
+    status_code=status.HTTP_200_OK,
+    response_model=schemas.Crawler,
+    response_model_exclude_unset=True,
+    tags=["Crawler"],
+    summary="Reset crawler information",
+    response_description="Information about the crawler",
+)
+def update_crawler(crawler: schemas.UpdateCrawler, db: Session = Depends(get_db)):
+    """
+    Update a Crawler - Unprovided Fields will be reset
+
+    - **crawler_uuid**: The crawlers UUID to update
+    - **contact**: The e-mail address of the crawlers owner
+    - **location** (optional): The location where the crawler resides
+    - **pref_tld** (optional): The Top-Level-Domain, which the crawler prefers to crawl
+    """
+    updated_crawler = crud.update_crawler(db, crawler)
+    return updated_crawler
+
+
 @app.delete(
     "/crawler/",
     status_code=status.HTTP_200_OK,
     tags=["Crawler"],
     summary="Delete a Crawler",
-    response_description="The deleted Crawler"
+    response_description="The deleted Crawler",
 )
-def delete_crawler(
-    crawler: schemas.DeleteCrawler, db: Session = Depends(get_db)
-):
+def delete_crawler(crawler: schemas.DeleteCrawler, db: Session = Depends(get_db)):
     """
     Delete a specific Crawler
 
@@ -93,55 +111,11 @@ def delete_crawler(
     return deleted_crawler
 
 
-@app.delete(
-    "/all_crawler/",
-    status_code=status.HTTP_200_OK,
-    tags=["Crawler"],
-    summary="Delete all Crawler"
-)
-def delete_all_crawler(db: Session = Depends(get_db)
-):
-    """
-    Delete a specific Crawler
-
-    - **uuid**: UUID of the crawler, which has to be deleted
-    """
-    deleted_crawler = crud.delete_all_crawler(db)
-    return deleted_crawler
 
 ############################
-# Before DB
+# ToDo Check: This is old Stuff
 #
-# @app.put(
-#     "/crawler/",
-#     status_code=200,
-#     response_model=models.Crawler,
-#     response_model_exclude_unset=True,
-#     tags=["Crawler"],
-#     summary="Reset crawler information",
-#     response_description="Information about the crawler"
-# )
-# async def update_crawler(
-#     crawler: models.Crawler = Body(
-#         ...,
-#         example={
-#             "uuid": "12345678-90ab-cdef-0000-000000000000",
-#             "contact": "jens@example.com",
-#             "location": "USA, Texas, Houston",
-#             "pref_tld": "com",
-#         },
-#     )
-# ):
-#     """
-#     Update a Crawler - Unprovided Fields will be reset
-#
-#     - **crawler_uuid**: The crawlers UUID to update
-#     - **contact**: The e-mail address of the crawlers owner
-#     - **location** (optional): The location where the crawler resides
-#     - **pref_tld** (optional): The Top-Level-Domain, which the crawler prefers to crawl
-#     """
-#     updated_crawler = ex.update_crawler(crawler)
-#     return updated_crawler
+
 #
 #
 #
@@ -208,5 +182,3 @@ def delete_all_crawler(db: Session = Depends(get_db)
 #     )
 #
 #     return example_urls
-
-

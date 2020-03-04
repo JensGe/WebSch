@@ -36,6 +36,17 @@ class CreateCrawler(BaseModel):
         orm_mode = True
 
 
+class UpdateCrawler(BaseModel):
+    uuid: UUID
+    contact: EmailStr
+    name: str
+    location: str = None
+    tld_preference: str = None
+
+    class Config:
+        orm_mode = True
+
+
 class DeleteCrawler(BaseModel):
     uuid: UUID
 

@@ -7,6 +7,18 @@ from datetime import datetime
 from fastapi import HTTPException
 
 
+def uuid_exists(db: Session, crawler):
+    if (
+        db.query(models.Crawler)
+        .filter(models.Crawler.uuid == str(crawler.uuid))
+        .count()
+        == 1
+    ):
+        return True
+    else:
+        return False
+
+
 # Crawler
 def create_crawler(db: Session, crawler: schemas.CreateCrawler):
     if (
@@ -40,28 +52,49 @@ def get_all_crawler(db: Session):
     return db.query(models.Crawler).all()
 
 
-def delete_crawler(db: Session, crawler: schemas.DeleteCrawler):
-    if (
-        db.query(models.Crawler).filter(models.Crawler.uuid == str(crawler.uuid)).count()
-        == 0
-    ):
+def update_crawler(db: Session, crawler: schemas.UpdateCrawler):
+    if uuid_exists(db, crawler):
+        print(crawler)
+
+        db_crawler = (
+            db.query(models.Crawler)
+            .filter(models.Crawler.uuid == str(crawler.uuid))
+            .first()
+        )
+
+        db_crawler.contact = crawler.contact
+        db_crawler.name = crawler.name
+        db_crawler.location = crawler.location
+        db_crawler.tld_preference = crawler.tld_preference
+
+        db.commit()
+        db.refresh(db_crawler)
+        return db_crawler
+    else:
         raise HTTPException(
             status_code=404,
             detail="Crawler with UUID: {} was not found".format(crawler.uuid),
         )
 
-    db.query(models.Crawler).filter(models.Crawler.uuid == str(crawler.uuid)).delete()
-    # db_crawler = models.Crawler(
-    #     uuid=str(crawler.uuid)
-    # )
-    # db.delete(db_crawler)
-    db.commit()
-    return True
+
+def delete_crawler(db: Session, crawler: schemas.DeleteCrawler):
+    if uuid_exists(db, crawler):
+        db.query(models.Crawler).filter(
+            models.Crawler.uuid == str(crawler.uuid)
+        ).delete()
+        db.commit()
+        return True
+    else:
+        raise HTTPException(
+            status_code=404,
+            detail="Crawler with UUID: {} was not found".format(crawler.uuid),
+        )
 
 
 def delete_all_crawler(db: Session):
     db.query(models.Crawler).delete()
     db.commit()
+
 
 # Frontier
 # def get_fqdn_frontier(db: Session, fqdn: str):

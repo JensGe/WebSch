@@ -59,11 +59,3 @@ def generate_frontier(crawler_uuid, amount, length, tld):
     return frontier
 
 
-def create_new_crawler(crawler):
-    crawler.uuid = "12345678-90ab-cdef-0000-000000000000"
-    crawler.reg_date = datetime.now()
-    return crawler
-
-
-def update_crawler(crawler):
-    return crawler

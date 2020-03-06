@@ -55,8 +55,6 @@ def get_all_crawler(db: Session):
 
 def update_crawler(db: Session, crawler: schemas.UpdateCrawler):
     if uuid_exists(db, crawler):
-        print(crawler)
-
         db_crawler = (
             db.query(models.Crawler)
             .filter(models.Crawler.uuid == str(crawler.uuid))
@@ -67,6 +65,36 @@ def update_crawler(db: Session, crawler: schemas.UpdateCrawler):
         db_crawler.name = crawler.name
         db_crawler.location = crawler.location
         db_crawler.tld_preference = crawler.tld_preference
+
+        db.commit()
+        db.refresh(db_crawler)
+        return db_crawler
+    else:
+        raise HTTPException(
+            status_code=404,
+            detail="Crawler with UUID: {} was not found".format(crawler.uuid),
+        )
+
+
+def patch_crawler(db: Session, crawler: schemas.UpdateCrawler):
+    if uuid_exists(db, crawler):
+        db_crawler = (
+            db.query(models.Crawler)
+            .filter(models.Crawler.uuid == str(crawler.uuid))
+            .first()
+        )
+
+        if crawler.contact is not None:
+            db_crawler.contact = crawler.contact
+
+        if crawler.name is not None:
+            db_crawler.name = crawler.name
+
+        if crawler.location is not None:
+            db_crawler.location = crawler.location
+
+        if crawler.tld_preference is not None:
+            db_crawler.tld_preference = crawler.tld_preference
 
         db.commit()
         db.refresh(db_crawler)
@@ -92,7 +120,7 @@ def delete_crawler(db: Session, crawler: schemas.DeleteCrawler):
         )
 
 
-def delete_all_crawler(db: Session):
+def delete_crawlers(db: Session):
     db.query(models.Crawler).delete()
     db.commit()
 

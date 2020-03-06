@@ -39,8 +39,8 @@ class CreateCrawler(BaseModel):
 
 class UpdateCrawler(BaseModel):
     uuid: UUID
-    contact: EmailStr
-    name: str
+    contact: EmailStr = None
+    name: str = None
     location: str = None
     tld_preference: str = None
 

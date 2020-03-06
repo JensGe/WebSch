@@ -8,6 +8,8 @@ from app.database import crud, models, schemas
 from app.database.database import SessionLocal, engine
 
 from fastapi import FastAPI, Body, Depends, HTTPException
+from fastapi.routing import JSONResponse
+
 from sqlalchemy.orm import Session
 from starlette import status
 
@@ -34,7 +36,7 @@ def get_db():
 
 # Crawler
 @app.get(
-    "/crawler/",
+    "/crawlers/",
     response_model=List[schemas.Crawler],
     tags=["Crawler"],
     summary="List all created Crawlers",
@@ -49,7 +51,7 @@ def read_crawler(db: Session = Depends(get_db)):
 
 
 @app.post(
-    "/crawler/",
+    "/crawlers/",
     status_code=status.HTTP_201_CREATED,
     response_model=schemas.Crawler,
     response_model_exclude_unset=True,
@@ -72,7 +74,7 @@ def register_crawler(crawler: schemas.CreateCrawler, db: Session = Depends(get_d
 
 
 @app.put(
-    "/crawler/",
+    "/crawlers/",
     status_code=status.HTTP_200_OK,
     response_model=schemas.Crawler,
     response_model_exclude_unset=True,
@@ -93,12 +95,34 @@ def update_crawler(crawler: schemas.UpdateCrawler, db: Session = Depends(get_db)
     return updated_crawler
 
 
+@app.patch(
+    "/crawlers/",
+    status_code=200,
+    response_model=schemas.Crawler,
+    response_model_exclude_unset=True,
+    tags=["Crawler"],
+    summary="Update a crawler",
+    response_description="Information about the updated created crawler"
+)
+def patch_crawler(crawler: schemas.UpdateCrawler, db: Session = Depends(get_db)):
+    """
+    Update a Crawler -  Unprovided Fields will be ignored
+
+    - **crawler_uuid**: The crawlers UUID to update
+    - **contact**: The e-mail address of the crawlers owner
+    - **location** (optional): The location where the crawler resides
+    - **pref_tld** (optional): The Top-Level-Domain, which the crawler prefers to crawl
+    """
+
+    patched_crawler = crud.patch_crawler(db, crawler)
+    return patched_crawler
+
+
 @app.delete(
-    "/crawler/",
-    status_code=status.HTTP_200_OK,
+    "/crawlers/",
     tags=["Crawler"],
     summary="Delete a Crawler",
-    response_description="The deleted Crawler",
+    response_description="No Content",
 )
 def delete_crawler(crawler: schemas.DeleteCrawler, db: Session = Depends(get_db)):
     """
@@ -106,10 +130,8 @@ def delete_crawler(crawler: schemas.DeleteCrawler, db: Session = Depends(get_db)
 
     - **uuid**: UUID of the crawler, which has to be deleted
     """
-    deleted_crawler = crud.delete_crawler(db, crawler)
-    return deleted_crawler
-
-
+    crud.delete_crawler(db, crawler)
+    return JSONResponse(content=None, status_code=status.HTTP_204_NO_CONTENT)
 
 ############################
 # ToDo Check: This is old Stuff
@@ -118,36 +140,6 @@ def delete_crawler(crawler: schemas.DeleteCrawler, db: Session = Depends(get_db)
 #
 #
 #
-# @app.patch(
-#     "/crawler/",
-#     status_code=200,
-#     response_model=models.Crawler,
-#     response_model_exclude_unset=True,
-#     tags=["Crawler"],
-#     summary="Update a crawler",
-#     response_description="Information about the updated created crawler"
-# )
-# async def update_crawler(
-#     crawler: models.Crawler = Body(
-#         ...,
-#         example={
-#             "uuid": "12345678-90ab-cdef-0000-000000000000",
-#             "contact": "jens@example.com",
-#             "location": "USA, Texas, Houston",
-#             "pref_tld": "com",
-#         },
-#     )
-# ):
-#     """
-#     Update a Crawler -  Unprovided Fields will be ignored
-#
-#     - **crawler_uuid**: The crawlers UUID to update
-#     - **contact**: The e-mail address of the crawlers owner
-#     - **location** (optional): The location where the crawler resides
-#     - **pref_tld** (optional): The Top-Level-Domain, which the crawler prefers to crawl
-#     """
-#     updated_crawler = ex.update_crawler(crawler)
-#     return updated_crawler
 #
 #
 # @app.post(

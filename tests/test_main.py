@@ -93,6 +93,14 @@ def test_delete_crawler():
     json_response = client.get("/crawlers/").json()
     assert len(json_response) == 0
 
+
+def test_generate_example_db():
+    sampledata = client.post("/database/").json()
+
+    assert sampledata != None
+
+
+
 #
 # def test_delete_crawler_not_found():
 #     assert 1 == 0

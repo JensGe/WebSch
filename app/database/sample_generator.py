@@ -49,7 +49,9 @@ def get_random_hex():
 
 
 def get_random_ipv6():
-    return "2001:DB8::{}".format(get_random_hex() * 4)
+    return "2001:DB8::{}".format(
+        get_random_hex(), get_random_hex(), get_random_hex(), get_random_hex()
+    )
 
 
 def get_random_pagerank():
@@ -113,7 +115,7 @@ def get_random_url(fqdn):
 #     return frontier
 
 
-def create_sample_crawler(db: Session):
+def create_sample_crawler(db: Session, amount: int = 3):
     crawler_1 = db_models.Crawler(
         uuid="12345678-90ab-cdef-0000-000000000001",
         contact="admin@german-crawler.de",
@@ -155,9 +157,8 @@ def create_sample_crawler(db: Session):
 
 
 def create_sample_frontier(
-    db: Session, fqdns: int = 20, url_range: (int, int) = (50, 100)
+    db: Session, fqdns: int = 20, min_url_amount: int = 50, max_url_amount: int = 100
 ):
-
     fqdn_basis = [get_random_fqdn() for _ in range(fqdns)]
 
     fqdn_frontier = []
@@ -179,7 +180,7 @@ def create_sample_frontier(
     for item in fqdn_frontier:
         db.add(item)
 
-        for i in range(random.randrange(*url_range)):
+        for i in range(random.randrange(min_url_amount, max_url_amount)):
             global_url_list.append(
                 db_models.Url(
                     url=get_random_url(item.fqdn),
@@ -195,5 +196,4 @@ def create_sample_frontier(
 
     db.commit()
 
-    return {"frontier": fqdn_frontier,
-            "url_list": global_url_list}
+    return {"frontier": fqdn_frontier, "url_list": global_url_list}

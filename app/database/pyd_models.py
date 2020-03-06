@@ -61,6 +61,20 @@ class CrawlRequest(BaseModel):
     length: int = 10
     tld: TLD = None
 
+    class Config:
+        orm_mode = True
+
+
+class GenerateRequest(BaseModel):
+    crawler_amount: int
+    fqdn_amount: int = 20
+    min_url_amount: int = 50
+    max_url_amount: int = 100
+
+
+    class Config:
+        orm_mode = True
+
 
 class FqdnFrontier(BaseModel):
     fqdn: str

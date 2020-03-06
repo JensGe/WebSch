@@ -29,3 +29,5 @@ def test_get_random_hex():
 def test_get_random_ipv6():
     rand_ipv6 = sample_generator.get_random_ipv6()
     assert len(rand_ipv6) == 14
+
+

@@ -36,7 +36,7 @@ def get_db():
     "/crawlers/",
     response_model=List[pyd_models.Crawler],
     tags=["Crawler"],
-    summary="List all created Crawlers",
+    summary="List all Crawlers",
     response_description="A List of all Crawler in the Database",
 )
 def read_crawler(db: Session = Depends(get_db)):
@@ -152,18 +152,32 @@ def get_frontier(request: pyd_models.CrawlRequest, db: Session = Depends(get_db)
     return fqdn_frontier
 
 
-@app.post("/database/", tags=["Development Tools"], summary="Generate Example Database")
-def generate_example_db(db: Session = Depends(get_db)):
+@app.post(
+    "/database/",
+    response_model=pyd_models.FqdnFrontier,
+    tags=["Development Tools"],
+    summary="Generate Example Database",
+)
+def generate_example_db(
+    request: pyd_models.GenerateRequest, db: Session = Depends(get_db)
+):
     """
     Cleans the Database and generates a new example Database for testing purposes
     """
     crud.reset(db)
     sample_data = {}
 
-    sample_crawler = sample_generator.create_sample_crawler(db)
+    sample_crawler = sample_generator.create_sample_crawler(
+        db, amount=request.crawler_amount
+    )
     sample_data["crawler"] = sample_crawler
 
-    sample_frontier = sample_generator.create_sample_frontier(db)
+    sample_frontier = sample_generator.create_sample_frontier(
+        db,
+        fqdns=request.fqdn_amount,
+        min_url_amount=request.min_url_amount,
+        max_url_amount=request.max_url_amount,
+    )
     sample_data["frontier"] = sample_frontier["frontier"]
     sample_data["url_list"] = sample_frontier["url_list"]
     return sample_data

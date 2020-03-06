@@ -1,5 +1,5 @@
 import random
-from app.database.schemas import TLD
+from app.database.pyd_models import TLD
 
 
 def get_random_tld():

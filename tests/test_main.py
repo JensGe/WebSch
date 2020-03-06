@@ -88,7 +88,7 @@ def test_delete_crawler():
     delete_response = client.delete("/crawlers/", json={"uuid": created_uuid})
 
     assert delete_response.status_code == status.HTTP_204_NO_CONTENT
-    assert delete_response.content == b"null"
+    assert delete_response.content == b''
 
     json_response = client.get("/crawlers/").json()
     assert len(json_response) == 0
@@ -104,6 +104,11 @@ def test_update_crawler_bad_uuid():
     client.post("/crawlers/", json={"contact": "jens@honzont.de", "name": "IsaacIV"})
     assert 1 == 0
     # ToDo test_update_crawler_bad_uuid
+
+
+def test_update_crawler_no_unique_contact_name_combination():
+    assert 1 == 0
+    # ToDo test_update_crawler_no_unique_contact_name_combination()
 
 
 # ToDo Check: This is old stuff

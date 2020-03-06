@@ -4,23 +4,23 @@ from app.common import example_generator as ex
 
 # from app.common import models
 
-from app.database import crud, models, schemas
+from app.database import crud, db_models, pyd_models
 from app.database.database import SessionLocal, engine
 
 from fastapi import FastAPI, Body, Depends, HTTPException
-from fastapi.routing import JSONResponse
+from fastapi.routing import Response
 
 from sqlalchemy.orm import Session
 from starlette import status
 
 
-models.Base.metadata.create_all(bind=engine)
+db_models.Base.metadata.create_all(bind=engine)
 
 
 app = FastAPI(
     title="WebSch",
     description="A Scheduler for a distributed Web Fetcher System",
-    version="0.0.3",
+    version="0.0.4",
     redoc_url=None,
 )
 
@@ -37,7 +37,7 @@ def get_db():
 # Crawler
 @app.get(
     "/crawlers/",
-    response_model=List[schemas.Crawler],
+    response_model=List[pyd_models.Crawler],
     tags=["Crawler"],
     summary="List all created Crawlers",
     response_description="A List of all Crawler in the Database",
@@ -53,13 +53,13 @@ def read_crawler(db: Session = Depends(get_db)):
 @app.post(
     "/crawlers/",
     status_code=status.HTTP_201_CREATED,
-    response_model=schemas.Crawler,
+    response_model=pyd_models.Crawler,
     response_model_exclude_unset=True,
     tags=["Crawler"],
     summary="Create a crawler",
     response_description="Information about the newly created crawler",
 )
-def register_crawler(crawler: schemas.CreateCrawler, db: Session = Depends(get_db)):
+def register_crawler(crawler: pyd_models.CreateCrawler, db: Session = Depends(get_db)):
     """
     Create a Crawler
 
@@ -76,13 +76,13 @@ def register_crawler(crawler: schemas.CreateCrawler, db: Session = Depends(get_d
 @app.put(
     "/crawlers/",
     status_code=status.HTTP_200_OK,
-    response_model=schemas.Crawler,
+    response_model=pyd_models.Crawler,
     response_model_exclude_unset=True,
     tags=["Crawler"],
     summary="Reset crawler information",
     response_description="Information about the crawler",
 )
-def update_crawler(crawler: schemas.UpdateCrawler, db: Session = Depends(get_db)):
+def update_crawler(crawler: pyd_models.UpdateCrawler, db: Session = Depends(get_db)):
     """
     Update a Crawler - Unprovided Fields will be reset
 
@@ -97,14 +97,14 @@ def update_crawler(crawler: schemas.UpdateCrawler, db: Session = Depends(get_db)
 
 @app.patch(
     "/crawlers/",
-    status_code=200,
-    response_model=schemas.Crawler,
+    status_code=status.HTTP_200_OK,
+    response_model=pyd_models.Crawler,
     response_model_exclude_unset=True,
     tags=["Crawler"],
     summary="Update a crawler",
-    response_description="Information about the updated created crawler"
+    response_description="Information about the updated created crawler",
 )
-def patch_crawler(crawler: schemas.UpdateCrawler, db: Session = Depends(get_db)):
+def patch_crawler(crawler: pyd_models.UpdateCrawler, db: Session = Depends(get_db)):
     """
     Update a Crawler -  Unprovided Fields will be ignored
 
@@ -120,56 +120,36 @@ def patch_crawler(crawler: schemas.UpdateCrawler, db: Session = Depends(get_db))
 
 @app.delete(
     "/crawlers/",
+    status_code=status.HTTP_204_NO_CONTENT,
     tags=["Crawler"],
     summary="Delete a Crawler",
     response_description="No Content",
 )
-def delete_crawler(crawler: schemas.DeleteCrawler, db: Session = Depends(get_db)):
+def delete_crawler(crawler: pyd_models.DeleteCrawler, db: Session = Depends(get_db)):
     """
     Delete a specific Crawler
 
     - **uuid**: UUID of the crawler, which has to be deleted
     """
     crud.delete_crawler(db, crawler)
-    return JSONResponse(content=None, status_code=status.HTTP_204_NO_CONTENT)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
-############################
-# ToDo Check: This is old Stuff
-#
 
-#
-#
-#
-#
-#
-# @app.post(
-#     "/frontiers/",
-#     response_model=models.Frontier,
-#     tags=["Frontier"],
-#     summary="Get URL-Lists",
-#     response_description="The received URL-Lists",
-# )
-# async def get_frontier(
-#     request: models.CrawlRequest = Body(
-#         ...,
-#         example={
-#             "crawler_uuid": "12345678-90ab-cdef-0000-000000000000",
-#             "amount": 5,
-#             "length": 3,
-#             "tld": None,
-#         }
-#         )
-# ):
-#     """
-#     Get a Sub List of the global Frontier
-#
-#     - **crawler_uuid**: Your crawlers UUID
-#     - **amount**: The amount of URL-Lists you want to receive
-#     - **length**: The amount of URLs in each list
-#     - **tld** (optional): Filter the Response to contain only URLs of this Top-Level-Domain
-#     """
-#     example_urls = ex.generate_frontier(
-#         request.crawler_uuid, request.amount, request.length, request.tld
-#     )
-#
-#     return example_urls
+@app.post(
+    "/frontiers/",
+    response_model=pyd_models.FqdnFrontier,
+    tags=["Frontier"],
+    summary="Get URL-Lists",
+    response_description="The received URL-Lists",
+)
+def get_frontier(request: pyd_models.CrawlRequest, db: Session = Depends(get_db)):
+    """
+    Get a Sub List of the global Frontier
+
+    - **crawler_uuid**: Your crawlers UUID
+    - **amount** (default: 1): The amount of URL-Lists you want to receive
+    - **length** (default: 10): The amount of URLs in each list
+    - **tld** (optional): Filter the Response to contain only URLs of this Top-Level-Domain
+    """
+    fqdn_frontier = crud.get_fqdn_frontier(db, request)
+    return fqdn_frontier

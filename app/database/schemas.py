@@ -1,17 +1,18 @@
 from typing import List
 from enum import Enum
+import random
 
 from pydantic import BaseModel, HttpUrl, EmailStr
 from uuid import UUID
 from datetime import datetime
 
 
-# class TLD(str, Enum):
-#     germany = "de"
-#     commercial = "com"
-#     france = "fr"
-#     organisation = "org"
-#     united_kingdom = "co.uk"
+class TLD(str, Enum):
+    germany = "de"
+    commercial = "com"
+    france = "fr"
+    organisation = "org"
+    united_kingdom = "co.uk"
 
 
 class Crawler(BaseModel):
@@ -20,7 +21,7 @@ class Crawler(BaseModel):
     name: str
     reg_date: datetime
     location: str = None
-    tld_preference: str = None
+    tld_preference: TLD = None
 
     class Config:
         orm_mode = True
@@ -30,7 +31,7 @@ class CreateCrawler(BaseModel):
     contact: EmailStr
     name: str
     location: str = None
-    tld_preference: str = None
+    tld_preference: TLD = None
 
     class Config:
         orm_mode = True

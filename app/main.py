@@ -43,8 +43,6 @@ def get_db():
 def read_crawler(db: Session = Depends(get_db)):
     """
     List all Crawler
-
-    - **crawler_uuid**
     """
     all_crawler = crud.get_all_crawler(db)
     return all_crawler
@@ -65,6 +63,7 @@ def register_crawler(crawler: schemas.CreateCrawler, db: Session = Depends(get_d
 
     - **contact**: The e-mail address of the crawlers owner
     - **name**: A unique Name per Owner
+    - **name**: A unique name for the crawler per contact
     - **location** (optional): The location where the crawler resides
     - **pref_tld** (optional): The Top-Level-Domain, which the crawler prefers to crawl
     """

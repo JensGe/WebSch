@@ -30,7 +30,8 @@ def create_crawler(db: Session, crawler: schemas.CreateCrawler):
     ):
         raise HTTPException(
             status_code=409,
-            detail="Combination of Crawler Contact ({}) and Crawler Name ({}) already exists, please choose another name for your crawler".format(
+            detail="Combination of Crawler Contact ({}) and Crawler Name ({}) already "
+            "exists, please choose another name for your crawler".format(
                 crawler.contact, crawler.name
             ),
         )

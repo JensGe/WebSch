@@ -1,11 +1,8 @@
 from typing import List
 
-from app.common import example_generator as ex
-
-# from app.common import models
-
-from app.database import crud, db_models, pyd_models
+from app.database import crud, db_models, pyd_models, sample_generator
 from app.database.database import SessionLocal, engine
+
 
 from fastapi import FastAPI, Body, Depends, HTTPException
 from fastapi.routing import Response
@@ -153,3 +150,20 @@ def get_frontier(request: pyd_models.CrawlRequest, db: Session = Depends(get_db)
     """
     fqdn_frontier = crud.get_fqdn_frontier(db, request)
     return fqdn_frontier
+
+
+@app.post("/database/", tags=["Development Tools"], summary="Generate Example Database")
+def generate_example_db(db: Session = Depends(get_db)):
+    """
+    Cleans the Database and generates a new example Database for testing purposes
+    """
+    crud.reset(db)
+    sample_data = {}
+
+    sample_crawler = sample_generator.create_sample_crawler(db)
+    sample_data["crawler"] = sample_crawler
+
+    sample_frontier = sample_generator.create_sample_frontier(db)
+    sample_data["frontier"] = sample_frontier["frontier"]
+    sample_data["url_list"] = sample_frontier["url_list"]
+    return sample_data

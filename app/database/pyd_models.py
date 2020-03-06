@@ -78,7 +78,7 @@ class FqdnFrontier(BaseModel):
         orm_mode = True
 
 
-class UrlFrontier(BaseModel):
+class Url(BaseModel):
     url: HttpUrl
     fqdn: FqdnFrontier
 

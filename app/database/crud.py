@@ -14,6 +14,13 @@ def uuid_exists(db: Session, uuid):
         return False
 
 
+def reset(db: Session):
+    db.query(db_models.Crawler).delete()
+    db.query(db_models.FqdnFrontier).delete()
+    db.query(db_models.Url).delete()
+    return True
+
+
 # Crawler
 def create_crawler(db: Session, crawler: pyd_models.CreateCrawler):
     if (
@@ -125,7 +132,7 @@ def get_fqdn_frontier(db: Session, request: pyd_models.CrawlRequest):
         fqdn_frontier = db_models.FqdnFrontier(
             fqdn="hard-coded.domain.de",
             tld="de",
-            urls=get_urls(db=db, fqdn="hard-coded.domain.de", skip=0, limit=0),
+            # urls=get_urls(db=db, fqdn="hard-coded.domain.de", skip=0, limit=0),
             fqdn_last_ipv4="192.0.2.0",
             fqdn_last_ipv6="2001:DB8::",
             fqdn_pagerank="0.00001",
@@ -142,8 +149,8 @@ def get_fqdn_frontier(db: Session, request: pyd_models.CrawlRequest):
 
 def get_urls(db: Session, fqdn: str, skip: int = 0, limit: int = 10):
     return (
-        db.query(db_models.UrlFrontier)
-        .filter(db_models.UrlFrontier.fqdn_uri == fqdn)
+        db.query(db_models.Url)
+        .filter(db_models.Url.fqdn_uri == fqdn)
         .offset(skip)
         .limit(limit)
         .all()

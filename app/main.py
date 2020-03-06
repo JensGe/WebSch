@@ -17,7 +17,7 @@ db_models.Base.metadata.create_all(bind=engine)
 app = FastAPI(
     title="WebSch",
     description="A Scheduler for a distributed Web Fetcher System",
-    version="0.0.4",
+    version="0.1.0",
     redoc_url=None,
 )
 
@@ -134,7 +134,8 @@ def delete_crawler(crawler: pyd_models.DeleteCrawler, db: Session = Depends(get_
 
 @app.post(
     "/frontiers/",
-    response_model=pyd_models.FqdnFrontier,
+    status_code=status.HTTP_200_OK,
+    response_model=pyd_models.FrontierResponse,
     tags=["Frontier"],
     summary="Get URL-Lists",
     response_description="The received URL-Lists",
@@ -154,7 +155,7 @@ def get_frontier(request: pyd_models.CrawlRequest, db: Session = Depends(get_db)
 
 @app.post(
     "/database/",
-    response_model=pyd_models.FqdnFrontier,
+    response_model=pyd_models.GenerateResponse,
     tags=["Development Tools"],
     summary="Generate Example Database",
 )

@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 
 from . import db_models, pyd_models
-from uuid import UUID, uuid4
+from uuid import uuid4
 from datetime import datetime
 
 from fastapi import HTTPException
@@ -77,6 +77,7 @@ def update_crawler(db: Session, crawler: pyd_models.UpdateCrawler):
         )
     return db_crawler
 
+
 def patch_crawler(db: Session, crawler: pyd_models.UpdateCrawler):
     if uuid_exists(db, str(crawler.uuid)):
         db_crawler = (
@@ -106,6 +107,7 @@ def patch_crawler(db: Session, crawler: pyd_models.UpdateCrawler):
         )
     return db_crawler
 
+
 def delete_crawler(db: Session, crawler: pyd_models.DeleteCrawler):
     if uuid_exists(db, str(crawler.uuid)):
         db.query(db_models.Crawler).filter(
@@ -129,28 +131,45 @@ def delete_crawlers(db: Session):
 # Frontier
 def get_fqdn_frontier(db: Session, request: pyd_models.CrawlRequest):
     if uuid_exists(db, str(request.crawler_uuid)):
-        fqdn_frontier = db_models.FqdnFrontier(
-            fqdn="hard-coded.domain.de",
-            tld="de",
-            # urls=get_urls(db=db, fqdn="hard-coded.domain.de", skip=0, limit=0),
-            fqdn_last_ipv4="192.0.2.0",
-            fqdn_last_ipv6="2001:DB8::",
-            fqdn_pagerank="0.00001",
-            fqdn_crawl_delay=10,
-            fqdn_url_count=55,
+        fqdn_list = (
+            db.query(db_models.FqdnFrontier)
+            .filter(db_models.FqdnFrontier.tld == request.tld)
+            .order_by(db_models.FqdnFrontier.fqdn_pagerank.desc())
+            .limit(request.amount)
         )
+
+        frontier_response = pyd_models.FrontierResponse(
+            uuid=str(request.crawler_uuid),
+            url_frontiers=[]
+        )
+
+        for i in range(request.amount):
+            url_frontier = pyd_models.UrlFrontier(fqdn=fqdn_list[i].fqdn, url_list=[])
+            url_list = (
+                db.query(db_models.Url)
+                .filter(db_models.Url.fqdn == fqdn_list[i].fqdn)
+                .order_by(db_models.Url.url_last_visited.asc())
+                .limit(request.length)
+            )
+
+            for j in range(request.length):
+                url_frontier.url_list.append(url_list[j].url)
+
+            frontier_response.url_frontiers.append(url_frontier)
+
     else:
         raise HTTPException(
             status_code=404,
             detail="Crawler with UUID: {} was not found".format(request.crawler_uuid),
         )
-    return fqdn_frontier
+
+    return frontier_response
 
 
 def get_urls(db: Session, fqdn: str, skip: int = 0, limit: int = 10):
     return (
         db.query(db_models.Url)
-        .filter(db_models.Url.fqdn_uri == fqdn)
+        .filter(db_models.Url.fqdn == fqdn)
         .offset(skip)
         .limit(limit)
         .all()

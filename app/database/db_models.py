@@ -36,11 +36,10 @@ class Url(Base):
 
     url = Column(String, primary_key=True, index=True)
 
-    fqdn_uri = Column(String, ForeignKey('fqdn_frontiers.fqdn'))
+    fqdn = Column(String, ForeignKey('fqdn_frontiers.fqdn'))
     # fqdn = relationship("FqdnFrontier", back_populates="urls")
 
     url_last_visited = Column(DateTime)
     url_blacklisted = Column(Boolean)
     url_bot_excluded = Column(Boolean)
-
 

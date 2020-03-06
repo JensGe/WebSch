@@ -4,8 +4,7 @@ from datetime import datetime, timedelta
 
 from sqlalchemy.orm import Session
 from app.database import pyd_models, db_models, crud
-
-from fastapi import HTTPException
+from uuid import uuid4
 
 
 def get_random_datetime():
@@ -116,44 +115,30 @@ def get_random_url(fqdn):
 
 
 def create_sample_crawler(db: Session, amount: int = 3):
-    crawler_1 = db_models.Crawler(
-        uuid="12345678-90ab-cdef-0000-000000000001",
-        contact="admin@german-crawler.de",
-        reg_date=datetime.now(),
-        name="German Crawler Eins",
-        location="Germany",
-        tld_preference="de",
-    )
 
-    crawler_2 = db_models.Crawler(
-        uuid="12345678-90ab-cdef-0000-000000000002",
-        contact="admin@german-crawler.de",
-        reg_date=datetime.now(),
-        name="German Crawler Zwei",
-        location="Germany",
-        tld_preference="de",
-    )
+    crawlers = []
 
-    crawler_3 = db_models.Crawler(
-        uuid="12345678-90ab-cdef-0000-000000000003",
-        contact="admin@us-crawler.com",
-        reg_date=datetime.now(),
-        name="US Crawler One",
-        location="USA",
-        tld_preference="com",
-    )
+    for i in range(amount):
+        crawlers.append(
+            db_models.Crawler(
+                uuid=str(uuid4()),
+                contact="admin@owi-crawler.com",
+                reg_date=datetime.now(),
+                name="OWI Crawler {}".format(get_random_sld()),
+                location="Germany",
+                tld_preference=get_random_tld(),
+            )
+        )
 
-    db.add(crawler_1)
-    db.add(crawler_2)
-    db.add(crawler_3)
+    for crawler in crawlers:
+        db.add(crawler)
 
     db.commit()
 
-    db.refresh(crawler_1)
-    db.refresh(crawler_2)
-    db.refresh(crawler_3)
+    for crawler in crawlers:
+        db.refresh(crawler)
 
-    return [crawler_1, crawler_2, crawler_3]
+    return crawlers
 
 
 def create_sample_frontier(
@@ -184,7 +169,7 @@ def create_sample_frontier(
             global_url_list.append(
                 db_models.Url(
                     url=get_random_url(item.fqdn),
-                    fqdn_uri=item.fqdn,
+                    fqdn=item.fqdn,
                     url_last_visited=get_random_datetime(),
                     url_blacklisted=False,
                     url_bot_excluded=False,

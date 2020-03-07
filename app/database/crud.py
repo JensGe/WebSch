@@ -143,18 +143,17 @@ def get_fqdn_frontier(db: Session, request: pyd_models.CrawlRequest):
             url_frontiers=[]
         )
 
-        for i in range(request.amount):
-            url_frontier = pyd_models.UrlFrontier(fqdn=fqdn_list[i].fqdn, url_list=[])
+        for fqdn in fqdn_list:
+            url_frontier = pyd_models.UrlFrontier(fqdn=fqdn.fqdn, url_list=[])
             url_list = (
                 db.query(db_models.Url)
-                .filter(db_models.Url.fqdn == fqdn_list[i].fqdn)
+                .filter(db_models.Url.fqdn == fqdn.fqdn)
                 .order_by(db_models.Url.url_last_visited.asc())
                 .limit(request.length)
             )
 
-            for j in range(request.length):
-                url_frontier.url_list.append(url_list[j].url)
-
+            for url in url_list:
+                url_frontier.url_list.append(url.url)
             frontier_response.url_frontiers.append(url_frontier)
 
     else:

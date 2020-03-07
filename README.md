@@ -48,6 +48,17 @@ sudo docker logs --follow $(sudo docker ps -q)
 ```
 
 
+# Linux Server Admin Commands
+
+```shell script
+# disk free (human-readable)
+df -h
+# list all docker container (inactive, too)
+sudo docker ps -a
+```
+
+
+
 
 
 

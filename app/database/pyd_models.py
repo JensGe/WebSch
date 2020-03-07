@@ -67,9 +67,30 @@ class CrawlRequest(BaseModel):
         orm_mode = True
 
 
+class Url(BaseModel):
+    url: str
+    fqdn: str
+
+    url_last_visited: datetime = None
+    url_blacklisted: bool = None
+    url_bot_excluded: bool = None
+
+    class Config:
+        orm_mode = True
+
+
 class UrlFrontier(BaseModel):
     fqdn: str
-    url_list: List[str] = []
+    tld: TLD = None
+
+    fqdn_last_ipv4: str = None
+    fqdn_last_ipv6: str = None
+
+    fqdn_pagerank: str = None
+    fqdn_crawl_delay: int = None
+    fqdn_url_count: int = None
+
+    url_list: List[Url] = []
 
     class Config:
         orm_mode = True
@@ -94,10 +115,9 @@ class GenerateRequest(BaseModel):
         orm_mode = True
 
 
-class FqdnFrontier(BaseModel):
+class ResponseFqdnFrontier(BaseModel):
     fqdn: str
     tld: str
-    # urls: List[HttpUrl] = []
 
     fqdn_last_ipv4: str = None
     fqdn_last_ipv6: str = None
@@ -110,7 +130,7 @@ class FqdnFrontier(BaseModel):
         orm_mode = True
 
 
-class Url(BaseModel):
+class ResponseUrl(BaseModel):
     url: str
     fqdn: str
 
@@ -124,22 +144,10 @@ class Url(BaseModel):
 
 class GenerateResponse(BaseModel):
     crawler: List[Crawler]
-    frontier: List[FqdnFrontier]
-    url_list: List[Url]
+    frontier: List[ResponseFqdnFrontier]
+    url_list: List[ResponseUrl]
 
     class Config:
         orm_mode = True
-
-
-
-# ToDo Include following
-
-
-
-
-
-
-
-
 
 

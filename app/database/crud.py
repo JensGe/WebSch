@@ -139,21 +139,31 @@ def get_fqdn_frontier(db: Session, request: pyd_models.CrawlRequest):
         )
 
         frontier_response = pyd_models.FrontierResponse(
-            uuid=str(request.crawler_uuid),
-            url_frontiers=[]
+            uuid=str(request.crawler_uuid), url_frontiers=[]
         )
 
         for fqdn in fqdn_list:
-            url_frontier = pyd_models.UrlFrontier(fqdn=fqdn.fqdn, url_list=[])
-            url_list = (
+            db_url_list = (
                 db.query(db_models.Url)
                 .filter(db_models.Url.fqdn == fqdn.fqdn)
                 .order_by(db_models.Url.url_last_visited.asc())
                 .limit(request.length)
             )
+            url_list = [url for url in db_url_list]
+            url_frontier = pyd_models.UrlFrontier(
+                fqdn=fqdn.fqdn,
+                tld=fqdn.tld,
+                url_list=url_list,
+                fqdn_last_ipv4=fqdn.fqdn_last_ipv4,
+                fqdn_last_ipv6=fqdn.fqdn_last_ipv6,
+                fqdn_pagerank=fqdn.fqdn_pagerank,
+                fqdn_crawl_delay=fqdn.fqdn_crawl_delay,
+                fqdn_url_count=len(url_list)
+            )
+            #
+            # for url in url_list:
+            #     url_frontier.url_list.append(url)
 
-            for url in url_list:
-                url_frontier.url_list.append(url.url)
             frontier_response.url_frontiers.append(url_frontier)
 
     else:

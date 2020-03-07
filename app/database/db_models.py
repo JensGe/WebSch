@@ -21,8 +21,6 @@ class FqdnFrontier(Base):
     fqdn = Column(String, primary_key=True, index=True)
     tld = Column(String, index=True)
 
-    # urls = relationship("UrlFrontier", back_populates="fqdn")
-
     fqdn_last_ipv4 = Column(String)
     fqdn_last_ipv6 = Column(String)
 
@@ -37,7 +35,6 @@ class Url(Base):
     url = Column(String, primary_key=True, index=True)
 
     fqdn = Column(String, ForeignKey('fqdn_frontiers.fqdn'))
-    # fqdn = relationship("FqdnFrontier", back_populates="urls")
 
     url_last_visited = Column(DateTime)
     url_blacklisted = Column(Boolean)

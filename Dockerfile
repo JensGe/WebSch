@@ -4,5 +4,6 @@ RUN pip install pydantic[email]
 RUN pip install requests
 RUN pip install pytest
 RUN pip install sqlalchemy
+RUN pip install psycopg2
 
 COPY ./app app

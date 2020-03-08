@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, NVARCHAR, Float
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, Float
 from sqlalchemy.orm import relationship
 
 from .database import Base
@@ -7,12 +7,12 @@ from .database import Base
 class Crawler(Base):
     __tablename__ = "crawler"
 
-    uuid = Column(NVARCHAR, primary_key=True, index=True)
-    contact = Column(NVARCHAR)
-    name = Column(NVARCHAR)
+    uuid = Column(String, primary_key=True, index=True)
+    contact = Column(String)
+    name = Column(String)
     reg_date = Column(DateTime)
-    location = Column(NVARCHAR)
-    tld_preference = Column(NVARCHAR)
+    location = Column(String)
+    tld_preference = Column(String)
 
 
 class FqdnFrontier(Base):

@@ -7,7 +7,7 @@ from uuid import UUID
 from datetime import datetime
 
 
-# Common
+# Common Datatyes
 class TLD(str, Enum):
     Germany = "de"
     Commercial = "com"

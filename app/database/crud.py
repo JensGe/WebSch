@@ -16,8 +16,9 @@ def uuid_exists(db: Session, uuid):
 
 def reset(db: Session):
     db.query(db_models.Crawler).delete()
-    db.query(db_models.FqdnFrontier).delete()
     db.query(db_models.Url).delete()
+    db.query(db_models.FqdnFrontier).delete()
+
     return True
 
 
@@ -131,12 +132,19 @@ def delete_crawlers(db: Session):
 # Frontier
 def get_fqdn_frontier(db: Session, request: pyd_models.CrawlRequest):
     if uuid_exists(db, str(request.crawler_uuid)):
-        fqdn_list = (
-            db.query(db_models.FqdnFrontier)
-            .filter(db_models.FqdnFrontier.tld == request.tld)
-            .order_by(db_models.FqdnFrontier.fqdn_pagerank.desc())
-            .limit(request.amount)
-        )
+        if request.tld is None:
+            fqdn_list = (
+                db.query(db_models.FqdnFrontier)
+                .order_by(db_models.FqdnFrontier.fqdn_pagerank.desc())
+                .limit(request.amount)
+            )
+        else:
+            fqdn_list = (
+                db.query(db_models.FqdnFrontier)
+                .filter(db_models.FqdnFrontier.tld == request.tld)
+                .order_by(db_models.FqdnFrontier.fqdn_pagerank.desc())
+                .limit(request.amount)
+            )
 
         frontier_response = pyd_models.FrontierResponse(
             uuid=str(request.crawler_uuid), url_frontiers=[]
@@ -158,7 +166,7 @@ def get_fqdn_frontier(db: Session, request: pyd_models.CrawlRequest):
                 fqdn_last_ipv6=fqdn.fqdn_last_ipv6,
                 fqdn_pagerank=fqdn.fqdn_pagerank,
                 fqdn_crawl_delay=fqdn.fqdn_crawl_delay,
-                fqdn_url_count=len(url_list)
+                fqdn_url_count=len(url_list),
             )
             #
             # for url in url_list:

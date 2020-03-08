@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, NVARCHAR
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, NVARCHAR, Float
 from sqlalchemy.orm import relationship
 
 from .database import Base
@@ -24,7 +24,7 @@ class FqdnFrontier(Base):
     fqdn_last_ipv4 = Column(String)
     fqdn_last_ipv6 = Column(String)
 
-    fqdn_pagerank = Column(String)
+    fqdn_pagerank = Column(Float)
     fqdn_crawl_delay = Column(Integer)
     fqdn_url_count = Column(Integer)
 

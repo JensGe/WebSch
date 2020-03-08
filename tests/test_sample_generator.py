@@ -28,6 +28,12 @@ def test_get_random_hex():
 
 def test_get_random_ipv6():
     rand_ipv6 = sample_generator.get_random_ipv6()
+    print(rand_ipv6)
     assert len(rand_ipv6) == 14
 
 
+def test_get_german_text():
+    text_length = 20
+    random_text = sample_generator.get_random_german_text(text_length)
+    print(random_text)
+    assert len(random_text) == text_length

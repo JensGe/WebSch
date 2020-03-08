@@ -6,6 +6,7 @@ from pydantic import BaseModel, HttpUrl, EmailStr
 from uuid import UUID
 from datetime import datetime
 
+
 # Common
 class TLD(str, Enum):
     germany = "de"
@@ -68,7 +69,7 @@ class CrawlRequest(BaseModel):
 
 
 class Url(BaseModel):
-    url: str
+    url: HttpUrl
     fqdn: str
 
     url_last_visited: datetime = None
@@ -86,7 +87,7 @@ class UrlFrontier(BaseModel):
     fqdn_last_ipv4: str = None
     fqdn_last_ipv6: str = None
 
-    fqdn_pagerank: str = None
+    fqdn_pagerank: float = None
     fqdn_crawl_delay: int = None
     fqdn_url_count: int = None
 
@@ -122,7 +123,7 @@ class ResponseFqdnFrontier(BaseModel):
     fqdn_last_ipv4: str = None
     fqdn_last_ipv6: str = None
 
-    fqdn_pagerank: str = None
+    fqdn_pagerank: float = None
     fqdn_crawl_delay: int = None
     fqdn_url_count: int = None
 

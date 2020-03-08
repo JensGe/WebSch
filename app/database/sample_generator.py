@@ -23,11 +23,80 @@ def get_random_tld():
 def get_random_sld():
     first_char = random.choice(string.ascii_lowercase)
     random_allowed_characters = string.ascii_lowercase + "0123456789-"
-    sld = first_char + "".join(
-        random.choice(random_allowed_characters)
-        for i in range(random.randint(4, 12) - 1)
+    last_char = random.choice(random_allowed_characters[:-1])
+    sld = (
+        first_char
+        + "".join(
+            random.choice(random_allowed_characters)
+            for _ in range(random.randint(4, 12) - 1)
+        )
+        + last_char
     )
     return sld
+
+
+def get_random_german_text(length: int = None):
+    chars = [
+        "e",
+        "n",
+        "i",
+        "s",
+        "r",
+        "a",
+        "t",
+        "d",
+        "h",
+        "u",
+        "l",
+        "c",
+        "g",
+        "m",
+        "o",
+        "b",
+        "w",
+        "f",
+        "k",
+        "z",
+        "p",
+        "v",
+        "j",
+        "y",
+        "x",
+        "q",
+    ]
+    distribution = [
+        0.1740,
+        0.0978,
+        0.0755,
+        0.0758,
+        0.0700,
+        0.0651,
+        0.0615,
+        0.0508,
+        0.0476,
+        0.0435,
+        0.0344,
+        0.0306,
+        0.0301,
+        0.0253,
+        0.0251,
+        0.0189,
+        0.0189,
+        0.0166,
+        0.0121,
+        0.0113,
+        0.0079,
+        0.0067,
+        0.0027,
+        0.0004,
+        0.0003,
+        0.0002,
+    ]
+
+    if length is None:
+        length = random.randint(3, 10)
+
+    return "".join(random.choices(population=chars, weights=distribution, k=length))
 
 
 def get_random_fqdn():
@@ -44,17 +113,17 @@ def get_random_ipv4():
 
 
 def get_random_hex():
-    return random.choice(string.digits + "abcdef")
+    return random.choice(string.digits + "ABCDEF")
 
 
 def get_random_ipv6():
-    return "2001:DB8::{}".format(
+    return "2001:DB8::{}{}{}{}".format(
         get_random_hex(), get_random_hex(), get_random_hex(), get_random_hex()
     )
 
 
 def get_random_pagerank():
-    return str(random.uniform(0, 0.0003))
+    return random.uniform(0, 0.0003)
 
 
 def get_random_web_filename():
@@ -64,54 +133,9 @@ def get_random_web_filename():
 
 
 def get_random_url(fqdn):
-    return "{}/{}{}".format(fqdn, get_random_sld(), get_random_web_filename())
-
-
-#
-# def generate_tld_url_list(tld, length):
-#     url_list = {
-#         "length": length,
-#         "tld": tld,
-#         "fqdn": "http://www.example.com",
-#         "ipv4": "127.0.0.1",
-#         "urls": [],
-#     }
-#
-#     if tld is None:
-#         for i in range(length):
-#             url = (
-#                 "http://www."
-#                 + get_random_sld()
-#                 + "."
-#                 + random.choice([e.value for e in pyd_models.TLD])
-#             )
-#             url_list["urls"].append(url)
-#     else:
-#         for i in range(length):
-#             url = "http://www." + get_random_sld() + "." + tld
-#             url_list["urls"].append(url)
-#
-#     return url_list
-#
-#
-# def generate_frontier(crawler_uuid, amount, length, tld):
-#     if str(crawler_uuid) != "12345678-90ab-cdef-0000-000000000000":
-#         raise HTTPException(
-#             status_code=404,
-#             detail="Crawler UUID {} not Found, please register at /crawler/".format(
-#                 crawler_uuid
-#             ),
-#         )
-#
-#     frontier = {
-#         "amount": amount,
-#         "deliver_url": "http://www.example.com/submit",
-#         "url_lists": [],
-#     }
-#
-#     for i in range(amount):
-#         frontier["url_lists"].append(generate_tld_url_list(tld, length))
-#     return frontier
+    return "http://{}/{}{}".format(
+        fqdn, get_random_german_text(), get_random_web_filename()
+    )
 
 
 def create_sample_crawler(db: Session, amount: int = 3):
@@ -124,7 +148,7 @@ def create_sample_crawler(db: Session, amount: int = 3):
                 uuid=str(uuid4()),
                 contact="admin@owi-crawler.com",
                 reg_date=datetime.now(),
-                name="OWI Crawler {}".format(get_random_sld()),
+                name="OWI Crawler {}".format(get_random_german_text().title()),
                 location="Germany",
                 tld_preference=get_random_tld(),
             )

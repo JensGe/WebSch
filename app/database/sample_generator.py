@@ -170,6 +170,23 @@ def create_sample_frontier(
 ):
     fqdn_basis = [get_random_fqdn() for _ in range(fqdns)]
 
+    global_url_list = []
+
+    for fqdn in fqdn_basis:
+        for i in range(random.randrange(min_url_amount, max_url_amount)):
+            global_url_list.append(
+                db_models.Url(
+                    url=get_random_url(fqdn),
+                    fqdn=fqdn,
+                    url_last_visited=get_random_datetime(),
+                    url_blacklisted=False,
+                    url_bot_excluded=False,
+                )
+            )
+
+    for item in global_url_list:
+        db.add(item)
+
     fqdn_frontier = []
     for i in range(fqdns):
         fqdn_frontier.append(
@@ -184,23 +201,7 @@ def create_sample_frontier(
             )
         )
 
-    global_url_list = []
-
     for item in fqdn_frontier:
-        db.add(item)
-
-        for i in range(random.randrange(min_url_amount, max_url_amount)):
-            global_url_list.append(
-                db_models.Url(
-                    url=get_random_url(item.fqdn),
-                    fqdn=item.fqdn,
-                    url_last_visited=get_random_datetime(),
-                    url_blacklisted=False,
-                    url_bot_excluded=False,
-                )
-            )
-
-    for item in global_url_list:
         db.add(item)
 
     db.commit()

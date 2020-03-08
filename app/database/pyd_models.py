@@ -9,11 +9,11 @@ from datetime import datetime
 
 # Common
 class TLD(str, Enum):
-    germany = "de"
-    commercial = "com"
-    france = "fr"
-    organisation = "org"
-    united_kingdom = "co.uk"
+    Germany = "de"
+    Commercial = "com"
+    France = "fr"
+    Organisation = "org"
+    Sweden = "se"
 
 
 # Crawler
@@ -116,37 +116,10 @@ class GenerateRequest(BaseModel):
         orm_mode = True
 
 
-class ResponseFqdnFrontier(BaseModel):
-    fqdn: str
-    tld: str
-
-    fqdn_last_ipv4: str = None
-    fqdn_last_ipv6: str = None
-
-    fqdn_pagerank: float = None
-    fqdn_crawl_delay: int = None
-    fqdn_url_count: int = None
-
-    class Config:
-        orm_mode = True
-
-
-class ResponseUrl(BaseModel):
-    url: str
-    fqdn: str
-
-    url_last_visited: datetime = None
-    url_blacklisted: bool = None
-    url_bot_excluded: bool = None
-
-    class Config:
-        orm_mode = True
-
-
 class GenerateResponse(BaseModel):
     crawler: List[Crawler]
-    frontier: List[ResponseFqdnFrontier]
-    url_list: List[ResponseUrl]
+    frontier: List[UrlFrontier]
+    url_list: List[Url]
 
     class Config:
         orm_mode = True

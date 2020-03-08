@@ -4,20 +4,20 @@ from sqlalchemy.orm import sessionmaker
 
 from app.common import credentials as cred
 
-from configparser import ConfigParser
-import platform
-
-
-config = ConfigParser()
-
-if platform.system() == "Linux":
-    config.read("/etc/credentials.ini")
-elif platform.system() == "Windows":
-    config.read("C:\\Dev\\credentials.ini")
-
-user = config.get("postgres", "user")
-pw = config.get("postgres", "password")
-uri = config.get("postgres", "endpoint")
+# from configparser import ConfigParser
+# import platform
+#
+#
+# config = ConfigParser()
+#
+# if platform.system() == "Linux":
+#     config.read("/etc/credentials.ini")
+# elif platform.system() == "Windows":
+#     config.read("C:\\Dev\\credentials.ini")
+#
+# user = config.get("postgres", "user")
+# pw = config.get("postgres", "password")
+# uri = config.get("postgres", "endpoint")
 
 
 # SQLite

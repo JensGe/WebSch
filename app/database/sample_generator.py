@@ -42,8 +42,6 @@ def create_sample_frontier(
 
     global_url_list = []
 
-
-
     fqdn_frontier = []
     for i in range(fqdns):
         fqdn_frontier.append(
@@ -60,6 +58,8 @@ def create_sample_frontier(
 
     for item in fqdn_frontier:
         db.add(item)
+
+    db.commit()
 
     for fqdn in fqdn_basis:
         for i in range(random.randint(min_url_amount, max_url_amount)):

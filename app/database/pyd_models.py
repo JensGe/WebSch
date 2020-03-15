@@ -7,7 +7,7 @@ from uuid import UUID
 from datetime import datetime
 
 
-# Common Datatyes
+# Enum Datatypes
 class TLD(str, Enum):
     Germany = "de"
     Commercial = "com"
@@ -15,6 +15,26 @@ class TLD(str, Enum):
     Organisation = "org"
     Sweden = "se"
 
+
+class PRIO(str, Enum):
+    breath_first_search = "bfs"
+    indegree = "ind"
+    batch_page_rank = "bpr"
+    large_sites_first = "lsf"
+    old_sites_first = "osf"
+    random = "rand"
+    change_rate = "chr"
+    opic = "opic"
+    webfountain = "webf"
+
+
+class PART(str, Enum):
+    top_level_domain = "tld"
+    fqdn_hashing = "fqdn"
+    consistent_hashing = "ch"
+    geo_distance = "geo"
+    round_trip_time = "rtt"
+    graph_partitioning = "gp"
 
 # Crawler
 class Crawler(BaseModel):
@@ -63,6 +83,8 @@ class CrawlRequest(BaseModel):
     amount: int = 1
     length: int = 10
     tld: TLD = None
+    priorisation_mode: PRIO = None
+    partitioning_mode: PART = None
 
     class Config:
         orm_mode = True

@@ -1,40 +1,10 @@
 from typing import List
-from enum import Enum
-import random
+from app.common import enum
 
 from pydantic import BaseModel, HttpUrl, EmailStr
 from uuid import UUID
 from datetime import datetime
 
-
-# Enum Datatypes
-class TLD(str, Enum):
-    Germany = "de"
-    Commercial = "com"
-    France = "fr"
-    Organisation = "org"
-    Sweden = "se"
-
-
-class PRIO(str, Enum):
-    breath_first_search = "bfs"
-    indegree = "ind"
-    batch_page_rank = "bpr"
-    large_sites_first = "lsf"
-    old_sites_first = "osf"
-    random = "rand"
-    change_rate = "chr"
-    opic = "opic"
-    webfountain = "webf"
-
-
-class PART(str, Enum):
-    top_level_domain = "tld"
-    fqdn_hashing = "fqdn"
-    consistent_hashing = "ch"
-    geo_distance = "geo"
-    round_trip_time = "rtt"
-    graph_partitioning = "gp"
 
 # Crawler
 class Crawler(BaseModel):
@@ -43,7 +13,7 @@ class Crawler(BaseModel):
     name: str
     reg_date: datetime
     location: str = None
-    tld_preference: TLD = None
+    tld_preference: enum.TLD = None
 
     class Config:
         orm_mode = True
@@ -53,7 +23,7 @@ class CreateCrawler(BaseModel):
     contact: EmailStr
     name: str
     location: str = None
-    tld_preference: TLD = None
+    tld_preference: enum.TLD = None
 
     class Config:
         orm_mode = True
@@ -82,9 +52,9 @@ class CrawlRequest(BaseModel):
     crawler_uuid: UUID
     amount: int = 1
     length: int = 10
-    tld: TLD = None
-    priorisation_mode: PRIO = None
-    partitioning_mode: PART = None
+    tld: enum.TLD = None
+    priorisation_mode: enum.PRIO = None
+    partitioning_mode: enum.PART = None
 
     class Config:
         orm_mode = True
@@ -104,7 +74,7 @@ class Url(BaseModel):
 
 class UrlFrontier(BaseModel):
     fqdn: str
-    tld: TLD = None
+    tld: enum.TLD = None
 
     fqdn_last_ipv4: str = None
     fqdn_last_ipv6: str = None

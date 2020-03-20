@@ -6,13 +6,12 @@ from app.database.database import SessionLocal, engine
 
 from fastapi import FastAPI, Body, Depends, HTTPException
 from fastapi.routing import Response
+from fastapi.middleware.gzip import GZipMiddleware
 
 from sqlalchemy.orm import Session
 from starlette import status
 
-
 db_models.Base.metadata.create_all(bind=engine)
-
 
 app = FastAPI(
     title="WebSch",
@@ -20,6 +19,8 @@ app = FastAPI(
     version="0.1.3",
     redoc_url=None,
 )
+
+app.add_middleware(GZipMiddleware, minimum_size=500)
 
 
 # Dependency

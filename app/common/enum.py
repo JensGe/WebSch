@@ -28,3 +28,32 @@ class PART(str, Enum):
     geo_distance = "geo"
     round_trip_time = "rtt"
     graph_partitioning = "gp"
+
+
+class ACADEMICS(str, Enum):
+    ampere = "Ampere"
+    avogadro = "Avogadro"
+    bacon = "Bacon"
+    bernoulli = "Bernoulli"
+    copernicus = "Copernicus"
+    curie = "Curie"
+    darwin = "Darwin"
+    drake = "Drake"
+    einstein = "Einstein"
+    euler = "Euler"
+    fibonacci = "Fibonacci"
+    fermat = "Fermat"
+    gauss = "Gauss"
+    gibbs = "Gibbs"
+    hilbert = "Hilbert"
+    hopper = "Hopper"
+    hawking = "Hawking"
+    kepler = "Kepler"
+    lovelace = "Lovelace"
+    mendel = "Mendel"
+    maxwell = "Maxwell"
+    newton = "Newton"
+    planck = "Planck"
+
+
+

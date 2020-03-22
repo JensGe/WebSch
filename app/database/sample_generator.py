@@ -18,7 +18,7 @@ def create_sample_crawler(db: Session, amount: int = 3):
                 uuid=str(uuid4()),
                 contact="admin@owi-crawler.com",
                 reg_date=datetime.now(),
-                name="OWI Crawler {}".format(rand_gen.get_random_german_text().title()),
+                name="OWI Crawler {}".format(rand_gen.get_random_academic_name()),
                 location="Germany",
                 tld_preference=rand_gen.get_random_tld(),
             )
@@ -56,8 +56,9 @@ def create_sample_frontier(
             )
         )
 
-    for item in fqdn_frontier:
-        db.add(item)
+    db.bulk_save_objects(fqdn_frontier)
+    # for item in fqdn_frontier:
+    #     db.add(item)
 
     db.commit()
 
@@ -73,8 +74,9 @@ def create_sample_frontier(
                 )
             )
 
-    for item in global_url_list:
-        db.add(item)
+    db.bulk_save_objects(global_url_list)
+    # for item in global_url_list:
+    #     db.add(item)
 
     db.commit()
     return {"frontier": fqdn_frontier, "url_list": global_url_list}

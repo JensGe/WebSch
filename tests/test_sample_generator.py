@@ -1,4 +1,6 @@
 from app.common import random_data_generator as rand_gen
+from app.common import enum
+import string
 
 
 def test_get_random_hex():
@@ -27,4 +29,22 @@ def test_get_german_text():
     assert len(random_text) == text_length
 
 
+def test_get_random_academic_name():
+    academic_name = rand_gen.get_random_academic_name()
+    print(academic_name)
+    name, number = academic_name.split(" ")
+    assert name in enum.ACADEMICS.__members__.values()
+    assert name.istitle()
+    non_roman_chars = (
+        string.ascii_uppercase
+        .replace("C", "")
+        .replace("D", "")
+        .replace("I", "")
+        .replace("L", "")
+        .replace("M", "")
+        .replace("V", "")
+        .replace("X", "")
+    )
+    for char in non_roman_chars:
+        assert char not in number
 

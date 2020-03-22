@@ -2,7 +2,7 @@ import random
 import string
 from datetime import datetime, timedelta
 
-from app.database import pyd_models
+from app.common import enum
 
 
 def get_random_datetime():
@@ -15,7 +15,7 @@ def get_random_datetime():
 
 
 def get_random_tld():
-    return random.choice([e.value for e in pyd_models.TLD])
+    return random.choice([e.value for e in enum.TLD])
 
 
 def get_random_sld():
@@ -75,6 +75,14 @@ def get_random_german_text(length: int = None):
     return "".join(random.choices(population=chars, weights=distribution, k=length))
 
 
+def get_random_academic_name():
+    return (
+        str(random.choice([e.value for e in enum.ACADEMICS]))
+        + " "
+        + int_to_roman(random.randint(0, 1000))
+    )
+
+
 def get_random_fqdn():
     return "www." + get_random_sld() + "." + get_random_tld()
 
@@ -112,3 +120,17 @@ def get_random_url(fqdn):
     return "http://{}/{}{}".format(
         fqdn, get_random_german_text(), get_random_web_filename()
     )
+
+
+def int_to_roman(num):
+    # Source: https://www.w3resource.com/python-exercises/class-exercises/python-class-exercise-1.php
+    val = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1]
+    syb = ["M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I"]
+    roman_num = ''
+    i = 0
+    while num > 0:
+        for _ in range(num // val[i]):
+            roman_num += syb[i]
+            num -= val[i]
+        i += 1
+    return roman_num

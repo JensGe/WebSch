@@ -1,4 +1,13 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, Float
+from sqlalchemy import (
+    Boolean,
+    Column,
+    ForeignKey,
+    Integer,
+    String,
+    DateTime,
+    Float,
+    Index,
+)
 
 from .database import Base
 
@@ -49,3 +58,5 @@ class URLRef(Base):
     url_in = Column(
         String, ForeignKey("url_frontiers.url"), primary_key=True, index=True
     )
+
+    Index("url_ref_index", url_out, url_in)

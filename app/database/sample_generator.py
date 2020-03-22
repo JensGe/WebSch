@@ -39,6 +39,9 @@ def create_sample_frontier(
     db: Session, fqdns: int = 20, min_url_amount: int = 50, max_url_amount: int = 100
 ):
     fqdn_basis = [rand_gen.get_random_fqdn() for _ in range(fqdns)]
+    fqdn_url_amounts = [
+        random.randint(min_url_amount, max_url_amount) for _ in range(fqdns)
+    ]
 
     global_url_list = []
 
@@ -52,7 +55,7 @@ def create_sample_frontier(
                 fqdn_last_ipv6=rand_gen.get_random_ipv6(),
                 fqdn_pagerank=rand_gen.get_random_pagerank(),
                 fqdn_crawl_delay=5,
-                fqdn_url_count=0,
+                fqdn_url_count=fqdn_url_amounts[i],
             )
         )
 
@@ -63,7 +66,7 @@ def create_sample_frontier(
     db.commit()
 
     for fqdn in fqdn_basis:
-        for i in range(random.randint(min_url_amount, max_url_amount)):
+        for i in range(fqdn_url_amounts[fqdn_basis.index(fqdn)]):
             global_url_list.append(
                 db_models.Url(
                     url=rand_gen.get_random_url(fqdn),

@@ -1,5 +1,4 @@
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, Float
-from sqlalchemy.orm import relationship
 
 from .database import Base
 
@@ -34,9 +33,19 @@ class Url(Base):
 
     url = Column(String, primary_key=True, index=True)
 
-    fqdn = Column(String, ForeignKey('fqdn_frontiers.fqdn'))
+    fqdn = Column(String, ForeignKey("fqdn_frontiers.fqdn"))
 
     url_last_visited = Column(DateTime)
     url_blacklisted = Column(Boolean)
     url_bot_excluded = Column(Boolean)
 
+
+class URLRef(Base):
+    __tablename__ = "url_references"
+
+    url_out = Column(
+        String, ForeignKey("url_frontiers.url"), primary_key=True, index=True
+    )
+    url_in = Column(
+        String, ForeignKey("url_frontiers.url"), primary_key=True, index=True
+    )

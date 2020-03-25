@@ -41,20 +41,20 @@ def create_sample_crawler(db: Session, amount: int = 3):
 def create_sample_frontier(
     db: Session, fqdns: int = 20, min_url_amount: int = 50, max_url_amount: int = 100
 ):
-    fqdn_basis = [rand_gen.get_random_fqdn() for _ in range(fqdns)]
     if min_url_amount > max_url_amount:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Maximum URL Amount must be greater than Minimum URL Amount",
         )
 
+    fqdn_basis = [rand_gen.get_random_fqdn() for _ in range(fqdns)]
     fqdn_url_amounts = [
         random.randint(min_url_amount, max_url_amount) for _ in range(fqdns)
     ]
 
     global_url_list = []
-    # ToDo maybe: commit after single fqdn and attached urls
     fqdn_frontier = []
+
     for i in range(fqdns):
         fqdn_frontier.append(
             db_models.FqdnFrontier(

@@ -33,7 +33,7 @@ def create_crawler(db: Session, crawler: pyd_models.CreateCrawler):
         != 0
     ):
         raise HTTPException(
-            status_code=409,
+            status_code=status.HTTP_409_CONFLICT,
             detail="Combination of Crawler Contact ({}) and Crawler Name ({}) already "
             "exists, please choose another name for your crawler".format(
                 crawler.contact, crawler.name
@@ -74,7 +74,7 @@ def update_crawler(db: Session, crawler: pyd_models.UpdateCrawler):
         db.refresh(db_crawler)
     else:
         raise HTTPException(
-            status_code=404,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail="Crawler with UUID: {} was not found".format(crawler.uuid),
         )
     return db_crawler
@@ -104,7 +104,7 @@ def patch_crawler(db: Session, crawler: pyd_models.UpdateCrawler):
         db.refresh(db_crawler)
     else:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, # ToDO Statuscodes
+            status_code=status.HTTP_404_NOT_FOUND,  # ToDO Statuscodes
             detail="Crawler with UUID: {} was not found".format(crawler.uuid),
         )
     return db_crawler
@@ -119,7 +119,7 @@ def delete_crawler(db: Session, crawler: pyd_models.DeleteCrawler):
 
     else:
         raise HTTPException(
-            status_code=404,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail="Crawler with UUID: {} was not found".format(crawler.uuid),
         )
     return True
@@ -186,7 +186,7 @@ def get_fqdn_frontier(db: Session, request: pyd_models.CrawlRequest):
 
     else:
         raise HTTPException(
-            status_code=404,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail="Crawler with UUID: {} was not found".format(request.crawler_uuid),
         )
 

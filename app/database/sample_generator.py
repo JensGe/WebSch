@@ -53,7 +53,7 @@ def create_sample_frontier(
     ]
 
     global_url_list = []
-
+    # ToDo maybe: commit after single fqdn and attached urls
     fqdn_frontier = []
     for i in range(fqdns):
         fqdn_frontier.append(

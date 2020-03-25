@@ -205,8 +205,8 @@ def get_urls(db: Session, fqdn: str, skip: int = 0, limit: int = 10):
 
 def get_db_stats(db: Session):
     response = {
-        "crawler_amount": len(db.query(db_models.Crawler).all()),
-        "frontier_amount": len(db.query(db_models.FqdnFrontier).all()),
-        "url_amount": len(db.query(db_models.Url).all())
+        "crawler_amount": db.query(db_models.Crawler).count(),
+        "frontier_amount": db.query(db_models.FqdnFrontier).count(),
+        "url_amount": db.query(db_models.Url).count()
     }
     return response

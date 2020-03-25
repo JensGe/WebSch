@@ -5,6 +5,7 @@ from uuid import uuid4
 from datetime import datetime
 
 from fastapi import HTTPException
+from starlette import status
 
 
 def uuid_exists(db: Session, uuid):
@@ -103,7 +104,7 @@ def patch_crawler(db: Session, crawler: pyd_models.UpdateCrawler):
         db.refresh(db_crawler)
     else:
         raise HTTPException(
-            status_code=404,
+            status_code=status.HTTP_404_NOT_FOUND, # ToDO Statuscodes
             detail="Crawler with UUID: {} was not found".format(crawler.uuid),
         )
     return db_crawler
@@ -134,20 +135,23 @@ def get_fqdn_frontier(db: Session, request: pyd_models.CrawlRequest):
     if uuid_exists(db, str(request.crawler_uuid)):
         if request.tld is None:
             fqdn_list = (
-                db.query(db_models.FqdnFrontier)
-                .order_by(db_models.FqdnFrontier.fqdn_pagerank.desc())
-                .limit(request.amount)
+                db.query(db_models.FqdnFrontier).order_by(
+                    db_models.FqdnFrontier.fqdn_pagerank.desc()
+                )
+                # .limit(request.amount)
             )
         else:
             fqdn_list = (
                 db.query(db_models.FqdnFrontier)
                 .filter(db_models.FqdnFrontier.tld == request.tld)
                 .order_by(db_models.FqdnFrontier.fqdn_pagerank.desc())
-                .limit(request.amount)
+                # .limit(request.amount)
             )
 
+        fqdn_list = fqdn_list[: request.amount] if request.amount > 0 else fqdn_list
+
         frontier_response = pyd_models.FrontierResponse(
-            uuid=str(request.crawler_uuid), url_frontiers=[]
+            uuid=str(request.crawler_uuid), url_frontiers=[], urls_count=0
         )
 
         for fqdn in fqdn_list:
@@ -155,9 +159,16 @@ def get_fqdn_frontier(db: Session, request: pyd_models.CrawlRequest):
                 db.query(db_models.Url)
                 .filter(db_models.Url.fqdn == fqdn.fqdn)
                 .order_by(db_models.Url.url_last_visited.asc())
-                .limit(request.length)
+                # .limit(request.length)
             )
+
+            db_url_list = (
+                db_url_list[: request.length] if request.length > 0 else db_url_list
+            )
+
             url_list = [url for url in db_url_list]
+            frontier_response.urls_count += len(url_list)
+
             url_frontier = pyd_models.UrlFrontier(
                 fqdn=fqdn.fqdn,
                 tld=fqdn.tld,
@@ -168,11 +179,10 @@ def get_fqdn_frontier(db: Session, request: pyd_models.CrawlRequest):
                 fqdn_crawl_delay=fqdn.fqdn_crawl_delay,
                 fqdn_url_count=len(url_list),
             )
-            #
-            # for url in url_list:
-            #     url_frontier.url_list.append(url)
 
             frontier_response.url_frontiers.append(url_frontier)
+
+        frontier_response.url_frontiers_count = len(frontier_response.url_frontiers)
 
     else:
         raise HTTPException(
@@ -191,3 +201,12 @@ def get_urls(db: Session, fqdn: str, skip: int = 0, limit: int = 10):
         .limit(limit)
         .all()
     )
+
+
+def get_db_stats(db: Session):
+    response = {
+        "crawler_amount": len(db.query(db_models.Crawler).all()),
+        "frontier_amount": len(db.query(db_models.FqdnFrontier).all()),
+        "url_amount": len(db.query(db_models.Url).all())
+    }
+    return response

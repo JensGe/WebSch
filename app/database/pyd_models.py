@@ -50,11 +50,11 @@ class DeleteCrawler(BaseModel):
 # Frontier
 class CrawlRequest(BaseModel):
     crawler_uuid: UUID
-    amount: int = 1
-    length: int = 10
+    amount: int = 0
+    length: int = 0
     tld: enum.TLD = None
-    priorisation_mode: enum.PRIO = None
-    partitioning_mode: enum.PART = None
+    prio_mode: enum.PRIO = None
+    part_mode: enum.PART = None
 
     class Config:
         orm_mode = True
@@ -91,6 +91,8 @@ class UrlFrontier(BaseModel):
 
 class FrontierResponse(BaseModel):
     uuid: str
+    url_frontiers_count: int = None
+    urls_count: int = None
     url_frontiers: List[UrlFrontier]
 
     class Config:
@@ -99,9 +101,10 @@ class FrontierResponse(BaseModel):
 
 # Developer Tools
 class GenerateRequest(BaseModel):
+    reset: bool = True
     crawler_amount: int = 3
     fqdn_amount: int = 20
-    min_url_amount: int = 50
+    min_url_amount: int = 10
     max_url_amount: int = 100
 
     class Config:
@@ -117,3 +120,10 @@ class GenerateResponse(BaseModel):
         orm_mode = True
 
 
+class StatsResponse(BaseModel):
+    crawler_amount: int
+    frontier_amount: int
+    url_amount: int
+
+    class Config:
+        orm_mode = True

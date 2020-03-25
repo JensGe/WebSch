@@ -100,7 +100,7 @@ def get_random_hex():
     return random.choice(string.digits + "ABCDEF")
 
 
-def get_random_ipv6():
+def get_random_example_ipv6():
     return "2001:DB8::{}{}{}{}".format(
         get_random_hex(), get_random_hex(), get_random_hex(), get_random_hex()
     )

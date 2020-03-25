@@ -146,14 +146,17 @@ def get_frontier(request: pyd_models.CrawlRequest, db: Session = Depends(get_db)
     Get a Sub List of the global Frontier
 
     - **crawler_uuid**: Your crawlers UUID
-    - **amount** (default: 1): The amount of URL-Lists you want to receive
-    - **length** (default: 10): The amount of URLs in each list
+    - **amount** (default: 0): The amount of URL-Lists you want to receive
+    - **length** (default: 0): The amount of URLs in each list
     - **tld** (optional): Filter the Response to contain only URLs of this Top-Level-Domain
+    - **prio_mode** (default: None): tbd.
+    - **part_mode** (default: None): tbd.
     """
     fqdn_frontier = crud.get_fqdn_frontier(db, request)
     return fqdn_frontier
 
 
+# Development Tools
 @app.post(
     "/database/",
     response_model=pyd_models.GenerateResponse,
@@ -164,9 +167,18 @@ def generate_example_db(
     request: pyd_models.GenerateRequest, db: Session = Depends(get_db)
 ):
     """
-    Cleans the Database and generates a new example Database for testing purposes
+    Creates and uploads Example-Data to the Database for testing purposes.
+    Includes Crawler, FQDNs and URLs.
+
+    - **reset** (default: true): deletes the database in front
+    - **crawler_amount** (default: 3): Number of Crawler to generate
+    - **fqdn_amount** (default: 20): Number of Web Sites to generate
+    - **min_url_amount** (default: 10): Minimum Pages per Web Site
+    - **max_url_amount** (default: 100): Maximum Pages per Web Site
     """
-    crud.reset(db)
+    if request.reset:
+        crud.reset(db)
+
     sample_data = {}
 
     sample_crawler = sample_generator.create_sample_crawler(
@@ -183,3 +195,17 @@ def generate_example_db(
     sample_data["frontier"] = sample_frontier["frontier"]
     sample_data["url_list"] = sample_frontier["url_list"]
     return sample_data
+
+
+@app.get(
+    "/stats/",
+    response_model=pyd_models.StatsResponse,
+    tags=["Development Tools"],
+    summary="Get Statistics for Database",
+)
+def generate_example_db(db: Session = Depends(get_db)):
+    """
+    Returns Statistic from current Database Status
+    """
+
+    return crud.get_db_stats(db)

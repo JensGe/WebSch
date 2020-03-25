@@ -16,8 +16,8 @@ def test_get_random_hex():
     assert error is True
 
 
-def test_get_random_ipv6():
-    rand_ipv6 = rand_gen.get_random_ipv6()
+def test_get_random_example_ipv6():
+    rand_ipv6 = rand_gen.get_random_example_ipv6()
     print(rand_ipv6)
     assert len(rand_ipv6) == 14
 
@@ -35,16 +35,7 @@ def test_get_random_academic_name():
     name, number = academic_name.split(" ")
     assert name in enum.ACADEMICS.__members__.values()
     assert name.istitle()
-    non_roman_chars = (
-        string.ascii_uppercase
-        .replace("C", "")
-        .replace("D", "")
-        .replace("I", "")
-        .replace("L", "")
-        .replace("M", "")
-        .replace("V", "")
-        .replace("X", "")
-    )
+    non_roman_chars = ''.join(c for c in string.ascii_uppercase if c not in 'CDILMVX')
     for char in non_roman_chars:
         assert char not in number
 

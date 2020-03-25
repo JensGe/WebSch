@@ -113,20 +113,29 @@ def get_random_pagerank():
 def get_random_web_filename():
     file = random.choice(["/index", "/home", "/impressum", "/contact"])
     extension = random.choice([".php", ".html", ".aspx", "", "/"])
-    return file + extension
+    return file  # + extension
 
 
-def get_random_url(fqdn):
+def get_random_url(fqdn: str):
     return "http://{}/{}{}".format(
         fqdn, get_random_german_text(), get_random_web_filename()
     )
 
 
+def get_random_urls(fqdn: str, amount: int):
+    url_set = set()
+    while len(url_set) < amount:
+        url_set.add(get_random_url(fqdn))
+    return list(url_set)
+
+
 def int_to_roman(num):
-    # Source: https://www.w3resource.com/python-exercises/class-exercises/python-class-exercise-1.php
+    # Source:
+    # https://www.w3resource.com/python-exercises/class-exercises/python-class-exercise-1.php
+
     val = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1]
     syb = ["M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I"]
-    roman_num = ''
+    roman_num = ""
     i = 0
     while num > 0:
         for _ in range(num // val[i]):

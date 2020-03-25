@@ -39,3 +39,8 @@ def test_get_random_academic_name():
     for char in non_roman_chars:
         assert char not in number
 
+
+def test_get_random_urls():
+    random_url_list = rand_gen.get_random_urls("www.xyz.com", 100000)
+    assert type(random_url_list) == list
+    assert len(random_url_list) == 100000

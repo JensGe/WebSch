@@ -4,8 +4,7 @@ from . import db_models, pyd_models
 from uuid import uuid4
 from datetime import datetime
 
-from fastapi import HTTPException
-from starlette import status
+from fastapi import HTTPException, status
 
 
 def uuid_exists(db: Session, uuid):

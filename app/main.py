@@ -8,8 +8,9 @@ from fastapi import FastAPI, Body, Depends, HTTPException
 from fastapi.routing import Response
 from fastapi.middleware.gzip import GZipMiddleware
 
-from sqlalchemy.orm import Session
 from starlette import status
+from sqlalchemy.orm import Session
+
 
 db_models.Base.metadata.create_all(bind=engine)
 
@@ -175,16 +176,16 @@ def generate_example_db(
     - **fqdn_amount** (default: 20): Number of Web Sites to generate
     - **min_url_amount** (default: 10): Minimum Pages per Web Site
     - **max_url_amount** (default: 100): Maximum Pages per Web Site
-    """
-    if request.reset:
-        crud.reset(db)
+    - **blacklisted_ratio** (default: 0): Percentage of blacklisted Pages
+    - **bot_excluded_ratio** (default. 0): Percentage of bot-excluded Pages
 
-    sample_data = {}
+    """
+    if request.reset is True:
+        crud.reset(db)
 
     sample_crawler = sample_generator.create_sample_crawler(
         db, amount=request.crawler_amount
     )
-    sample_data["crawler"] = sample_crawler
 
     sample_frontier = sample_generator.create_sample_frontier(
         db,
@@ -192,9 +193,12 @@ def generate_example_db(
         min_url_amount=request.min_url_amount,
         max_url_amount=request.max_url_amount,
     )
-    sample_data["frontier"] = sample_frontier["frontier"]
-    sample_data["url_list"] = sample_frontier["url_list"]
-    return sample_data
+
+    return {
+        "crawler": sample_crawler,
+        "frontier": sample_frontier["frontier"],
+        "url_list": sample_frontier["url_list"],
+    }
 
 
 @app.get(

@@ -70,7 +70,7 @@ def get_random_german_text(length: int = None):
     ]
 
     if length is None:
-        length = random.randint(3, 10)
+        length = random.randint(10, 16)
 
     return "".join(random.choices(population=chars, weights=distribution, k=length))
 

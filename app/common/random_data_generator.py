@@ -26,7 +26,7 @@ def get_random_sld():
         first_char
         + "".join(
             random.choice(random_allowed_characters)
-            for _ in range(random.randint(4, 12) - 1)
+            for _ in range(random.randint(8, 15) - 1)
         )
         + last_char
     )

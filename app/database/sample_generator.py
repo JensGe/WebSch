@@ -73,9 +73,9 @@ def create_sample_frontier(
 
     for fqdn in fqdn_basis:
         urls = rand_gen.get_random_urls(fqdn, fqdn_url_amounts[fqdn_basis.index(fqdn)])
-
+        fqdn_url_list = []
         for i in range(fqdn_url_amounts[fqdn_basis.index(fqdn)]):
-            global_url_list.append(
+            fqdn_url_list.append(
                 db_models.Url(
                     url=urls[i],
                     fqdn=fqdn,
@@ -84,8 +84,8 @@ def create_sample_frontier(
                     url_bot_excluded=False,
                 )
             )
-
-    db.bulk_save_objects(global_url_list)
-    db.commit()
+        db.bulk_save_objects(fqdn_url_list)
+        db.commit()
+        global_url_list.extend(fqdn_url_list)
 
     return {"frontier": fqdn_frontier, "url_list": global_url_list}

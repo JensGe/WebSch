@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from . import db_models, pyd_models
+from app.database import db_models, pyd_models, frontier
 from uuid import uuid4
 from datetime import datetime
 
@@ -130,67 +130,18 @@ def delete_crawlers(db: Session):
 
 
 # Frontier
-def get_fqdn_list(db, request):
-    if request.tld is None:
-        fqdn_list = db.query(db_models.FqdnFrontier).order_by(
-            db_models.FqdnFrontier.fqdn_pagerank.desc()
-        )
-    else:
-        fqdn_list = (
-            db.query(db_models.FqdnFrontier)
-            .filter(db_models.FqdnFrontier.tld == request.tld)
-            .order_by(db_models.FqdnFrontier.fqdn_pagerank.desc())
-        )
-
-    fqdn_list = fqdn_list[: request.amount] if request.amount > 0 else fqdn_list
-
-    return fqdn_list
-
-
-def create_new_empty_frontier_response(crawler_uuid):
-    return pyd_models.FrontierResponse(
-        uuid=str(crawler_uuid), url_frontiers=[]
-    )
-
-
-def get_db_url_list(db, request, fqdn):
-    db_url_list = (
-        db.query(db_models.Url)
-            .filter(db_models.Url.fqdn == fqdn.fqdn)
-            .order_by(db_models.Url.url_last_visited.asc())
-    )
-
-    db_url_list = (
-        db_url_list[: request.length] if request.length > 0 else db_url_list
-    )
-
-    return db_url_list
-
-
-def create_url_frontier(fqdn, url_list):
-    return pyd_models.UrlFrontier(
-                fqdn=fqdn.fqdn,
-                tld=fqdn.tld,
-                url_list=url_list,
-                fqdn_last_ipv4=fqdn.fqdn_last_ipv4,
-                fqdn_last_ipv6=fqdn.fqdn_last_ipv6,
-                fqdn_pagerank=fqdn.fqdn_pagerank,
-                fqdn_crawl_delay=fqdn.fqdn_crawl_delay,
-                fqdn_url_count=len(url_list),
-            )
-
-
-def get_fqdn_frontier(db: Session, request: pyd_models.CrawlRequest):
+def get_fqdn_frontier(db: Session, request: pyd_models.FrontierRequest):
     if uuid_exists(db, str(request.crawler_uuid)):
 
-        frontier_response = create_new_empty_frontier_response(request.crawler_uuid)
+        frontier_response = pyd_models.FrontierResponse(uuid=str(request.crawler_uuid))
 
-        for fqdn in get_fqdn_list(db, request):
-            db_url_list = get_db_url_list(db, request, fqdn)
-            url_list = [url for url in db_url_list]
+        for fqdn in frontier.get_fqdn_list(db, request):
+            url_list = list(frontier.get_db_url_list(db, request, fqdn))
 
             frontier_response.urls_count += len(url_list)
-            frontier_response.url_frontiers.append(create_url_frontier(fqdn, url_list))
+            frontier_response.url_frontiers.append(
+                frontier.create_url_frontier(fqdn, url_list)
+            )
 
         frontier_response.url_frontiers_count = len(frontier_response.url_frontiers)
 
@@ -217,6 +168,6 @@ def get_db_stats(db: Session):
     response = {
         "crawler_amount": db.query(db_models.Crawler).count(),
         "frontier_amount": db.query(db_models.FqdnFrontier).count(),
-        "url_amount": db.query(db_models.Url).count()
+        "url_amount": db.query(db_models.Url).count(),
     }
     return response

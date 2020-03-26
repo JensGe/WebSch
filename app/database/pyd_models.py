@@ -48,7 +48,7 @@ class DeleteCrawler(BaseModel):
 
 
 # Frontier
-class CrawlRequest(BaseModel):
+class FrontierRequest(BaseModel):
     crawler_uuid: UUID
     amount: int = 0
     length: int = 0
@@ -93,7 +93,7 @@ class FrontierResponse(BaseModel):
     uuid: str
     url_frontiers_count: int = 0
     urls_count: int = 0
-    url_frontiers: List[UrlFrontier]
+    url_frontiers: List[UrlFrontier] = []
 
     class Config:
         orm_mode = True
@@ -109,15 +109,6 @@ class GenerateRequest(BaseModel):
 
     class Config:
         orm_mode = True
-
-
-# class GenerateResponse(BaseModel):
-#     crawler: List[Crawler]
-#     frontier: List[UrlFrontier]
-#     url_list: List[Url]
-#
-#     class Config:
-#         orm_mode = True
 
 
 class StatsResponse(BaseModel):

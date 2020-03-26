@@ -16,7 +16,7 @@ db_models.Base.metadata.create_all(bind=engine)
 app = FastAPI(
     title="WebSch",
     description="A Scheduler for a distributed Web Fetcher System",
-    version="0.1.6",
+    version="0.1.7",
     redoc_url=None,
 )
 
@@ -141,7 +141,7 @@ def delete_crawler(crawler: pyd_models.DeleteCrawler, db: Session = Depends(get_
     summary="Get URL-Lists",
     response_description="The received URL-Lists",
 )
-def get_frontier(request: pyd_models.CrawlRequest, db: Session = Depends(get_db)):
+def get_frontier(request: pyd_models.FrontierRequest, db: Session = Depends(get_db)):
     """
     Get a Sub List of the global Frontier
 
@@ -199,36 +199,6 @@ async def generate_example_db(
     )
 
     return Response(status_code=status.HTTP_202_ACCEPTED)
-
-    # sample_generator.create_sample_crawler(
-    #     db, amount=request.crawler_amount
-    # )
-    #
-    # sample_generator.create_sample_frontier(
-    #     db,
-    #     fqdns=request.fqdn_amount,
-    #     min_url_amount=request.min_url_amount,
-    #     max_url_amount=request.max_url_amount,
-    # )
-    #
-    # return Response(status_code=status.HTTP_202_ACCEPTED)
-
-    # sample_crawler = sample_generator.create_sample_crawler(
-    #     db, amount=request.crawler_amount
-    # )
-    #
-    # sample_frontier = sample_generator.create_sample_frontier(
-    #     db,
-    #     fqdns=request.fqdn_amount,
-    #     min_url_amount=request.min_url_amount,
-    #     max_url_amount=request.max_url_amount,
-    # )
-    #
-    # return {
-    #     "crawler": sample_crawler,
-    #     "frontier": sample_frontier["frontier"],
-    #     "url_list": sample_frontier["url_list"],
-    # }
 
 
 @app.get(

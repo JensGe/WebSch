@@ -34,7 +34,6 @@ class FqdnFrontier(Base):
 
     fqdn_pagerank = Column(Float)
     fqdn_crawl_delay = Column(Integer)
-    fqdn_url_count = Column(Integer)
 
 
 class Url(Base):

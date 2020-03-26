@@ -28,8 +28,8 @@ def get_fqdn_list(db, request):
 def get_db_url_list(db, request, fqdn):
     db_url_list = (
         db.query(db_models.Url)
-            .filter(db_models.Url.fqdn == fqdn.fqdn)
-            .order_by(db_models.Url.url_last_visited.asc())
+        .filter(db_models.Url.fqdn == fqdn.fqdn)
+        .order_by(db_models.Url.url_last_visited.asc())
     )
 
     db_url_list = db_url_list[: request.length] if request.length > 0 else db_url_list

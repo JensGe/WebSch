@@ -41,20 +41,20 @@ def create_sample_crawler(db: Session, amount: int = 3):
 def create_sample_frontier(
     db: Session, fqdns: int = 20, min_url_amount: int = 50, max_url_amount: int = 100
 ):
-    fqdn_basis = [rand_gen.get_random_fqdn() for _ in range(fqdns)]
     if min_url_amount > max_url_amount:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Maximum URL Amount must be greater than Minimum URL Amount",
         )
 
+    fqdn_basis = [rand_gen.get_random_fqdn() for _ in range(fqdns)]
     fqdn_url_amounts = [
         random.randint(min_url_amount, max_url_amount) for _ in range(fqdns)
     ]
 
     global_url_list = []
-
     fqdn_frontier = []
+
     for i in range(fqdns):
         fqdn_frontier.append(
             db_models.FqdnFrontier(
@@ -69,26 +69,23 @@ def create_sample_frontier(
         )
 
     db.bulk_save_objects(fqdn_frontier)
-    # for item in fqdn_frontier:
-    #     db.add(item)
-
     db.commit()
 
     for fqdn in fqdn_basis:
+        urls = rand_gen.get_random_urls(fqdn, fqdn_url_amounts[fqdn_basis.index(fqdn)])
+        fqdn_url_list = []
         for i in range(fqdn_url_amounts[fqdn_basis.index(fqdn)]):
-            global_url_list.append(
+            fqdn_url_list.append(
                 db_models.Url(
-                    url=rand_gen.get_random_url(fqdn),
+                    url=urls[i],
                     fqdn=fqdn,
                     url_last_visited=rand_gen.get_random_datetime(),
                     url_blacklisted=False,
                     url_bot_excluded=False,
                 )
             )
+        db.bulk_save_objects(fqdn_url_list)
+        db.commit()
+        global_url_list.extend(fqdn_url_list)
 
-    db.bulk_save_objects(global_url_list)
-    # for item in global_url_list:
-    #     db.add(item)
-
-    db.commit()
     return {"frontier": fqdn_frontier, "url_list": global_url_list}

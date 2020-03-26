@@ -111,13 +111,13 @@ class GenerateRequest(BaseModel):
         orm_mode = True
 
 
-class GenerateResponse(BaseModel):
-    crawler: List[Crawler]
-    frontier: List[UrlFrontier]
-    url_list: List[Url]
-
-    class Config:
-        orm_mode = True
+# class GenerateResponse(BaseModel):
+#     crawler: List[Crawler]
+#     frontier: List[UrlFrontier]
+#     url_list: List[Url]
+#
+#     class Config:
+#         orm_mode = True
 
 
 class StatsResponse(BaseModel):

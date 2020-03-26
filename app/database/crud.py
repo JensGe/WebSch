@@ -4,8 +4,7 @@ from . import db_models, pyd_models
 from uuid import uuid4
 from datetime import datetime
 
-from fastapi import HTTPException
-from starlette import status
+from fastapi import HTTPException, status
 
 
 def uuid_exists(db: Session, uuid):
@@ -216,8 +215,8 @@ def get_fqdn_frontier(db: Session, request: pyd_models.CrawlRequest):
 
 def get_db_stats(db: Session):
     response = {
-        "crawler_amount": len(db.query(db_models.Crawler).all()),
-        "frontier_amount": len(db.query(db_models.FqdnFrontier).all()),
-        "url_amount": len(db.query(db_models.Url).all()),
+        "crawler_amount": db.query(db_models.Crawler).count(),
+        "frontier_amount": db.query(db_models.FqdnFrontier).count(),
+        "url_amount": db.query(db_models.Url).count()
     }
     return response

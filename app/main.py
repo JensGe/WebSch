@@ -4,11 +4,10 @@ from app.database import crud, db_models, pyd_models, sample_generator
 from app.database.database import SessionLocal, engine
 
 
-from fastapi import FastAPI, Body, Depends, HTTPException
+from fastapi import FastAPI, Body, Depends, HTTPException, status, BackgroundTasks
 from fastapi.routing import Response
 from fastapi.middleware.gzip import GZipMiddleware
 
-from starlette import status
 from sqlalchemy.orm import Session
 
 
@@ -17,7 +16,7 @@ db_models.Base.metadata.create_all(bind=engine)
 app = FastAPI(
     title="WebSch",
     description="A Scheduler for a distributed Web Fetcher System",
-    version="0.1.5",
+    version="0.1.6",
     redoc_url=None,
 )
 
@@ -160,12 +159,14 @@ def get_frontier(request: pyd_models.CrawlRequest, db: Session = Depends(get_db)
 # Development Tools
 @app.post(
     "/database/",
-    response_model=pyd_models.GenerateResponse,
+    # response_model=pyd_models.GenerateResponse,
     tags=["Development Tools"],
-    summary="Generate Example Database",
+    summary="Generate Example Database"
 )
-def generate_example_db(
-    request: pyd_models.GenerateRequest, db: Session = Depends(get_db)
+async def generate_example_db(
+        request: pyd_models.GenerateRequest,
+        background_tasks: BackgroundTasks,
+        db: Session = Depends(get_db),
 ):
     """
     Creates and uploads Example-Data to the Database for testing purposes.
@@ -183,22 +184,51 @@ def generate_example_db(
     if request.reset is True:
         crud.reset(db)
 
-    sample_crawler = sample_generator.create_sample_crawler(
-        db, amount=request.crawler_amount
+    background_tasks.add_task(
+        sample_generator.create_sample_crawler,
+        db,
+        amount=request.crawler_amount,
     )
 
-    sample_frontier = sample_generator.create_sample_frontier(
+    background_tasks.add_task(
+        sample_generator.create_sample_frontier,
         db,
         fqdns=request.fqdn_amount,
         min_url_amount=request.min_url_amount,
         max_url_amount=request.max_url_amount,
     )
 
-    return {
-        "crawler": sample_crawler,
-        "frontier": sample_frontier["frontier"],
-        "url_list": sample_frontier["url_list"],
-    }
+    return Response(status_code=status.HTTP_202_ACCEPTED)
+
+    # sample_generator.create_sample_crawler(
+    #     db, amount=request.crawler_amount
+    # )
+    #
+    # sample_generator.create_sample_frontier(
+    #     db,
+    #     fqdns=request.fqdn_amount,
+    #     min_url_amount=request.min_url_amount,
+    #     max_url_amount=request.max_url_amount,
+    # )
+    #
+    # return Response(status_code=status.HTTP_202_ACCEPTED)
+
+    # sample_crawler = sample_generator.create_sample_crawler(
+    #     db, amount=request.crawler_amount
+    # )
+    #
+    # sample_frontier = sample_generator.create_sample_frontier(
+    #     db,
+    #     fqdns=request.fqdn_amount,
+    #     min_url_amount=request.min_url_amount,
+    #     max_url_amount=request.max_url_amount,
+    # )
+    #
+    # return {
+    #     "crawler": sample_crawler,
+    #     "frontier": sample_frontier["frontier"],
+    #     "url_list": sample_frontier["url_list"],
+    # }
 
 
 @app.get(

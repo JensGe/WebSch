@@ -104,7 +104,7 @@ def patch_crawler(db: Session, crawler: pyd_models.UpdateCrawler):
         db.refresh(db_crawler)
     else:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,  # ToDO Statuscodes
+            status_code=status.HTTP_404_NOT_FOUND,
             detail="Crawler with UUID: {} was not found".format(crawler.uuid),
         )
     return db_crawler
@@ -131,45 +131,45 @@ def delete_crawlers(db: Session):
 
 
 # Frontier
-def get_fqdn_frontier(db: Session, request: pyd_models.CrawlRequest):
-    if uuid_exists(db, str(request.crawler_uuid)):
-        if request.tld is None:
-            fqdn_list = (
-                db.query(db_models.FqdnFrontier).order_by(
-                    db_models.FqdnFrontier.fqdn_pagerank.desc()
-                )
-                # .limit(request.amount)
-            )
-        else:
-            fqdn_list = (
-                db.query(db_models.FqdnFrontier)
-                .filter(db_models.FqdnFrontier.tld == request.tld)
-                .order_by(db_models.FqdnFrontier.fqdn_pagerank.desc())
-                # .limit(request.amount)
-            )
-
-        fqdn_list = fqdn_list[: request.amount] if request.amount > 0 else fqdn_list
-
-        frontier_response = pyd_models.FrontierResponse(
-            uuid=str(request.crawler_uuid), url_frontiers=[], urls_count=0
+def get_fqdn_list(db, request):
+    if request.tld is None:
+        fqdn_list = db.query(db_models.FqdnFrontier).order_by(
+            db_models.FqdnFrontier.fqdn_pagerank.desc()
+        )
+    else:
+        fqdn_list = (
+            db.query(db_models.FqdnFrontier)
+            .filter(db_models.FqdnFrontier.tld == request.tld)
+            .order_by(db_models.FqdnFrontier.fqdn_pagerank.desc())
         )
 
-        for fqdn in fqdn_list:
-            db_url_list = (
-                db.query(db_models.Url)
-                .filter(db_models.Url.fqdn == fqdn.fqdn)
-                .order_by(db_models.Url.url_last_visited.asc())
-                # .limit(request.length)
-            )
+    fqdn_list = fqdn_list[: request.amount] if request.amount > 0 else fqdn_list
 
-            db_url_list = (
-                db_url_list[: request.length] if request.length > 0 else db_url_list
-            )
+    return fqdn_list
 
-            url_list = [url for url in db_url_list]
-            frontier_response.urls_count += len(url_list)
 
-            url_frontier = pyd_models.UrlFrontier(
+def create_new_empty_frontier_response(crawler_uuid):
+    return pyd_models.FrontierResponse(
+        uuid=str(crawler_uuid), url_frontiers=[]
+    )
+
+
+def get_db_url_list(db, request, fqdn):
+    db_url_list = (
+        db.query(db_models.Url)
+            .filter(db_models.Url.fqdn == fqdn.fqdn)
+            .order_by(db_models.Url.url_last_visited.asc())
+    )
+
+    db_url_list = (
+        db_url_list[: request.length] if request.length > 0 else db_url_list
+    )
+
+    return db_url_list
+
+
+def create_url_frontier(fqdn, url_list):
+    return pyd_models.UrlFrontier(
                 fqdn=fqdn.fqdn,
                 tld=fqdn.tld,
                 url_list=url_list,
@@ -180,7 +180,18 @@ def get_fqdn_frontier(db: Session, request: pyd_models.CrawlRequest):
                 fqdn_url_count=len(url_list),
             )
 
-            frontier_response.url_frontiers.append(url_frontier)
+
+def get_fqdn_frontier(db: Session, request: pyd_models.CrawlRequest):
+    if uuid_exists(db, str(request.crawler_uuid)):
+
+        frontier_response = create_new_empty_frontier_response(request.crawler_uuid)
+
+        for fqdn in get_fqdn_list(db, request):
+            db_url_list = get_db_url_list(db, request, fqdn)
+            url_list = [url for url in db_url_list]
+
+            frontier_response.urls_count += len(url_list)
+            frontier_response.url_frontiers.append(create_url_frontier(fqdn, url_list))
 
         frontier_response.url_frontiers_count = len(frontier_response.url_frontiers)
 
@@ -193,20 +204,20 @@ def get_fqdn_frontier(db: Session, request: pyd_models.CrawlRequest):
     return frontier_response
 
 
-def get_urls(db: Session, fqdn: str, skip: int = 0, limit: int = 10):
-    return (
-        db.query(db_models.Url)
-        .filter(db_models.Url.fqdn == fqdn)
-        .offset(skip)
-        .limit(limit)
-        .all()
-    )
+# def get_urls(db: Session, fqdn: str, skip: int = 0, limit: int = 10):
+#     return (
+#         db.query(db_models.Url)
+#         .filter(db_models.Url.fqdn == fqdn)
+#         .offset(skip)
+#         .limit(limit)
+#         .all()
+#     )
 
 
 def get_db_stats(db: Session):
     response = {
         "crawler_amount": len(db.query(db_models.Crawler).all()),
         "frontier_amount": len(db.query(db_models.FqdnFrontier).all()),
-        "url_amount": len(db.query(db_models.Url).all())
+        "url_amount": len(db.query(db_models.Url).all()),
     }
     return response

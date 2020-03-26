@@ -91,8 +91,8 @@ class UrlFrontier(BaseModel):
 
 class FrontierResponse(BaseModel):
     uuid: str
-    url_frontiers_count: int = None
-    urls_count: int = None
+    url_frontiers_count: int = 0
+    urls_count: int = 0
     url_frontiers: List[UrlFrontier]
 
     class Config:

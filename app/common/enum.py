@@ -10,14 +10,14 @@ class TLD(str, Enum):
 
 
 class PRIO(str, Enum):
+    random = "rand"
     breath_first_search = "bfs"
     indegree = "ind"
     batch_page_rank = "bpr"
-    large_sites_first = "lsf"
     old_sites_first = "osf"
-    random = "rand"
-    change_rate = "chr"
+    large_sites_first = "lsf"
     opic = "opic"
+    change_rate = "chr"
     webfountain = "webf"
 
 

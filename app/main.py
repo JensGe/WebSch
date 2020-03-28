@@ -193,6 +193,7 @@ async def generate_example_db(
     - **fqdn_amount** (default: 20): Number of Web Sites to generate
     - **min_url_amount** (default: 10): Minimum Pages per Web Site
     - **max_url_amount** (default: 100): Maximum Pages per Web Site
+    - **visited_ratio** (default: 1.0): Pages which have been visited
     - **connection_amount** (default: 0): Amount of incoming Connections per Page
     - ~~**blacklisted_ratio** (default: 0): Percentage of blacklisted Pages~~
     - ~~**bot_excluded_ratio** (default. 0): Percentage of bot-excluded Pages~~
@@ -209,6 +210,7 @@ async def generate_example_db(
         fqdns=request.fqdn_amount,
         min_url_amount=request.min_url_amount,
         max_url_amount=request.max_url_amount,
+        visited_ratio=request.visited_ratio,
         connection_amount=request.connection_amount,
     )
 

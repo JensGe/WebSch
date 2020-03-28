@@ -92,6 +92,7 @@ class GenerateRequest(BasisModel):
     fqdn_amount: int = 20
     min_url_amount: int = 10
     max_url_amount: int = 100
+    visited_ratio: float = 1.0
     connection_amount: int = 0
 
 

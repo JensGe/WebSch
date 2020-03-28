@@ -38,11 +38,45 @@ def create_sample_crawler(db: Session, amount: int = 3):
     return crawlers
 
 
+def new_fqdn(fqdn_basis, fqdn_url_amount):
+    return db_models.FqdnFrontier(
+        fqdn=fqdn_basis,
+        tld=fqdn_basis.split(".")[-1],
+        fqdn_last_ipv4=rand_gen.get_random_ipv4(),
+        fqdn_last_ipv6=rand_gen.get_random_example_ipv6(),
+        fqdn_pagerank=rand_gen.get_random_pagerank(),
+        fqdn_crawl_delay=5,
+        fqdn_url_count=fqdn_url_amount,
+    )
+
+
+def new_url(url, fqdn, visited_ratio):
+    if random.random() < visited_ratio:
+        random_date_time = rand_gen.get_random_datetime()
+    else:
+        random_date_time = None
+
+    return db_models.Url(
+        url=url,
+        fqdn=fqdn,
+        url_last_visited=random_date_time,
+        url_blacklisted=False,
+        url_bot_excluded=False,
+    )
+
+
+def new_ref(url_out, url_in):
+    return db_models.URLRef(
+        url_out=url_out, url_in=url_in, date=rand_gen.get_random_datetime(),
+    )
+
+
 def create_sample_frontier(
     db: Session,
     fqdns: int = 20,
     min_url_amount: int = 50,
     max_url_amount: int = 100,
+    visited_ratio: float = 1.0,
     connection_amount: int = 0,
 ):
     if min_url_amount > max_url_amount:
@@ -51,57 +85,33 @@ def create_sample_frontier(
             detail="Maximum URL Amount must be greater than Minimum URL Amount",
         )
 
-    fqdn_basis = [rand_gen.get_random_fqdn() for _ in range(fqdns)]
+    fqdn_bases = [rand_gen.get_random_fqdn() for _ in range(fqdns)]
     fqdn_url_amounts = [
         random.randint(min_url_amount, max_url_amount) for _ in range(fqdns)
     ]
 
     global_url_list = []
-    fqdn_frontier = []
-
-    for i in range(fqdns):
-        fqdn_frontier.append(
-            db_models.FqdnFrontier(
-                fqdn=fqdn_basis[i],
-                tld=fqdn_basis[i].split(".")[-1],
-                fqdn_last_ipv4=rand_gen.get_random_ipv4(),
-                fqdn_last_ipv6=rand_gen.get_random_example_ipv6(),
-                fqdn_pagerank=rand_gen.get_random_pagerank(),
-                fqdn_crawl_delay=5,
-                fqdn_url_count=fqdn_url_amounts[i],
-            )
-        )
+    fqdn_frontier = [new_fqdn(fqdn_bases[i], fqdn_url_amounts[i]) for i in range(fqdns)]
 
     db.bulk_save_objects(fqdn_frontier)
     db.commit()
 
-    for fqdn in fqdn_basis:
-        urls = rand_gen.get_random_urls(fqdn, fqdn_url_amounts[fqdn_basis.index(fqdn)])
-        fqdn_url_list = []
-        for i in range(fqdn_url_amounts[fqdn_basis.index(fqdn)]):
-            fqdn_url_list.append(
-                db_models.Url(
-                    url=urls[i],
-                    fqdn=fqdn,
-                    url_last_visited=rand_gen.get_random_datetime(),
-                    url_blacklisted=False,
-                    url_bot_excluded=False,
-                )
-            )
+    for fqdn in fqdn_bases:
+        urls = rand_gen.get_random_urls(fqdn, fqdn_url_amounts[fqdn_bases.index(fqdn)])
+
+        fqdn_url_list = [
+            new_url(urls[i], fqdn, visited_ratio)
+            for i in range(fqdn_url_amounts[fqdn_bases.index(fqdn)])
+        ]
+
         db.bulk_save_objects(fqdn_url_list)
         db.commit()
 
         db_url_ref_list = []
+
         for url in fqdn_url_list:
             ref_urls = frontier.get_referencing_urls(db, url, connection_amount)
-            ref_rows = [
-                db_models.URLRef(
-                    url_out=ref_url.url,
-                    url_in=url.url,
-                    date=rand_gen.get_random_datetime(),
-                )
-                for ref_url in ref_urls
-            ]
+            ref_rows = [new_ref(ref_url.url, url.url) for ref_url in ref_urls]
             db_url_ref_list.extend(ref_rows)
 
         db.bulk_save_objects(db_url_ref_list)

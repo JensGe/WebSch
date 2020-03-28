@@ -5,9 +5,13 @@ from pydantic import BaseModel, HttpUrl, EmailStr
 from uuid import UUID
 from datetime import datetime
 
+class BasisModel(BaseModel):
+    class Config:
+        orm_mode = True
+
 
 # Crawler
-class Crawler(BaseModel):
+class Crawler(BasisModel):
     uuid: UUID
     contact: EmailStr
     name: str
@@ -15,40 +19,28 @@ class Crawler(BaseModel):
     location: str = None
     tld_preference: enum.TLD = None
 
-    class Config:
-        orm_mode = True
 
-
-class CreateCrawler(BaseModel):
+class CreateCrawler(BasisModel):
     contact: EmailStr
     name: str
     location: str = None
     tld_preference: enum.TLD = None
 
-    class Config:
-        orm_mode = True
 
-
-class UpdateCrawler(BaseModel):
+class UpdateCrawler(BasisModel):
     uuid: UUID
     contact: EmailStr = None
     name: str = None
     location: str = None
     tld_preference: str = None
 
-    class Config:
-        orm_mode = True
 
-
-class DeleteCrawler(BaseModel):
+class DeleteCrawler(BasisModel):
     uuid: UUID
-
-    class Config:
-        orm_mode = True
 
 
 # Frontier
-class FrontierRequest(BaseModel):
+class FrontierRequest(BasisModel):
     crawler_uuid: UUID
     amount: int = 0
     length: int = 0
@@ -56,11 +48,8 @@ class FrontierRequest(BaseModel):
     prio_mode: enum.PRIO = None
     part_mode: enum.PART = None
 
-    class Config:
-        orm_mode = True
 
-
-class Url(BaseModel):
+class Url(BasisModel):
     url: HttpUrl
     fqdn: str
 
@@ -68,11 +57,8 @@ class Url(BaseModel):
     url_blacklisted: bool = None
     url_bot_excluded: bool = None
 
-    class Config:
-        orm_mode = True
 
-
-class UrlFrontier(BaseModel):
+class UrlFrontier(BasisModel):
     fqdn: str
     tld: enum.TLD = None
 
@@ -85,36 +71,31 @@ class UrlFrontier(BaseModel):
 
     url_list: List[Url] = []
 
-    class Config:
-        orm_mode = True
+
+class URLReference(BasisModel):
+    url_out: str
+    url_in: str
+    date: datetime
 
 
-class FrontierResponse(BaseModel):
+class FrontierResponse(BasisModel):
     uuid: str
     url_frontiers_count: int = 0
     urls_count: int = 0
     url_frontiers: List[UrlFrontier] = []
 
-    class Config:
-        orm_mode = True
-
 
 # Developer Tools
-class GenerateRequest(BaseModel):
+class GenerateRequest(BasisModel):
     reset: bool = True
     crawler_amount: int = 3
     fqdn_amount: int = 20
     min_url_amount: int = 10
     max_url_amount: int = 100
-
-    class Config:
-        orm_mode = True
+    connection_amount: int = 0
 
 
-class StatsResponse(BaseModel):
+class StatsResponse(BasisModel):
     crawler_amount: int
     frontier_amount: int
     url_amount: int
-
-    class Config:
-        orm_mode = True

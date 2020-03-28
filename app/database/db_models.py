@@ -32,6 +32,7 @@ class FqdnFrontier(Base):
     fqdn_last_ipv4 = Column(String)
     fqdn_last_ipv6 = Column(String)
 
+    fqdn_url_count= Column(Integer)
     fqdn_pagerank = Column(Float)
     fqdn_crawl_delay = Column(Integer)
 
@@ -57,5 +58,5 @@ class URLRef(Base):
     url_in = Column(
         String, ForeignKey("url_frontiers.url"), primary_key=True, index=True
     )
-
+    date = Column(DateTime)
     Index("url_ref_index", url_out, url_in)

@@ -39,7 +39,11 @@ def create_sample_crawler(db: Session, amount: int = 3):
 
 
 def create_sample_frontier(
-    db: Session, fqdns: int = 20, min_url_amount: int = 50, max_url_amount: int = 100
+    db: Session,
+    fqdns: int = 20,
+    min_url_amount: int = 50,
+    max_url_amount: int = 100,
+    connection_amount: int = 0,
 ):
     if min_url_amount > max_url_amount:
         raise HTTPException(
@@ -86,6 +90,13 @@ def create_sample_frontier(
             )
         db.bulk_save_objects(fqdn_url_list)
         db.commit()
+
+        # url_ref_list = []
+        # for url in fqdn_url_list:
+        #     [rand_gen.get_referencing_urls(url) for _ in range(connection_amount)]
+
+
+
         global_url_list.extend(fqdn_url_list)
 
     return {"frontier": fqdn_frontier, "url_list": global_url_list}

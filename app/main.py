@@ -177,8 +177,9 @@ async def generate_example_db(
     - **fqdn_amount** (default: 20): Number of Web Sites to generate
     - **min_url_amount** (default: 10): Minimum Pages per Web Site
     - **max_url_amount** (default: 100): Maximum Pages per Web Site
-    - **blacklisted_ratio** (default: 0): Percentage of blacklisted Pages
-    - **bot_excluded_ratio** (default. 0): Percentage of bot-excluded Pages
+    - **connection_amount** (default: 0): Amount of incoming Connections per Page
+    - ~~**blacklisted_ratio** (default: 0): Percentage of blacklisted Pages~~
+    - ~~**bot_excluded_ratio** (default. 0): Percentage of bot-excluded Pages~~
 
     """
     if request.reset is True:
@@ -196,6 +197,7 @@ async def generate_example_db(
         fqdns=request.fqdn_amount,
         min_url_amount=request.min_url_amount,
         max_url_amount=request.max_url_amount,
+        connection_amount=request.connection_amount,
     )
 
     return Response(status_code=status.HTTP_202_ACCEPTED)

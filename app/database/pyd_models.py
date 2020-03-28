@@ -99,3 +99,11 @@ class StatsResponse(BasisModel):
     crawler_amount: int
     frontier_amount: int
     url_amount: int
+    url_ref_amount: int
+
+
+class DeleteDatabase(BasisModel):
+    delete_url_refs: bool = False
+    delete_crawlers: bool = False
+    delete_urls: bool = False
+    delete_fqdns: bool = False

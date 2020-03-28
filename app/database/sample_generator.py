@@ -4,7 +4,7 @@ from uuid import uuid4
 
 from sqlalchemy.orm import Session
 
-from app.database import db_models
+from app.database import db_models, frontier
 from app.common import random_data_generator as rand_gen
 
 from fastapi import HTTPException
@@ -91,11 +91,21 @@ def create_sample_frontier(
         db.bulk_save_objects(fqdn_url_list)
         db.commit()
 
-        # url_ref_list = []
-        # for url in fqdn_url_list:
-        #     [rand_gen.get_referencing_urls(url) for _ in range(connection_amount)]
+        db_url_ref_list = []
+        for url in fqdn_url_list:
+            ref_urls = frontier.get_referencing_urls(db, url, connection_amount)
+            ref_rows = [
+                db_models.URLRef(
+                    url_out=ref_url.url,
+                    url_in=url.url,
+                    date=rand_gen.get_random_datetime(),
+                )
+                for ref_url in ref_urls
+            ]
+            db_url_ref_list.extend(ref_rows)
 
-
+        db.bulk_save_objects(db_url_ref_list)
+        db.commit()
 
         global_url_list.extend(fqdn_url_list)
 

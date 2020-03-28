@@ -14,10 +14,22 @@ def uuid_exists(db: Session, uuid):
         return False
 
 
-def reset(db: Session):
-    db.query(db_models.Crawler).delete()
-    db.query(db_models.Url).delete()
-    db.query(db_models.FqdnFrontier).delete()
+def reset(db: Session, request: pyd_models.DeleteDatabase):
+    if request.delete_url_refs:
+        db.query(db_models.URLRef).delete()
+        db.commit()
+
+    if request.delete_crawlers:
+        db.query(db_models.Crawler).delete()
+        db.commit()
+
+    if request.delete_urls:
+        db.query(db_models.Url).delete()
+        db.commit()
+
+    if request.delete_fqdns:
+        db.query(db_models.FqdnFrontier).delete()
+        db.commit()
 
     return True
 
@@ -169,5 +181,6 @@ def get_db_stats(db: Session):
         "crawler_amount": db.query(db_models.Crawler).count(),
         "frontier_amount": db.query(db_models.FqdnFrontier).count(),
         "url_amount": db.query(db_models.Url).count(),
+        "url_ref_amount": db.query(db_models.URLRef).count(),
     }
     return response

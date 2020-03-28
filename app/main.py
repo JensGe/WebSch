@@ -157,22 +157,38 @@ def get_frontier(request: pyd_models.FrontierRequest, db: Session = Depends(get_
 
 
 # Development Tools
-@app.post(
-    "/database/",
-    # response_model=pyd_models.GenerateResponse,
-    tags=["Development Tools"],
-    summary="Generate Example Database"
+@app.delete(
+    "/database/", tags=["Development Tools"], summary="Delete Example Database",
 )
+async def delete_example_db(
+    request: pyd_models.DeleteDatabase,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+):
+    """
+    Deletes the complete Example Database
+
+    - **delete_url_refs** (default: false): Deletes all URL References
+    - **delete_crawlers (default: false): Deletes all Crawler Records
+    - **delete_urls (default: false): Deletes all URL Records
+    - **delete_fqdns (default: false): Deletes all FQDN Records
+    """
+
+    background_tasks.add_task(crud.reset, db, request)
+
+    return Response(status_code=status.HTTP_202_ACCEPTED)
+
+
+@app.post("/database/", tags=["Development Tools"], summary="Generate Example Database")
 async def generate_example_db(
-        request: pyd_models.GenerateRequest,
-        background_tasks: BackgroundTasks,
-        db: Session = Depends(get_db),
+    request: pyd_models.GenerateRequest,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
 ):
     """
     Creates and uploads Example-Data to the Database for testing purposes.
     Includes Crawler, FQDNs and URLs.
 
-    - **reset** (default: true): deletes the database in front
     - **crawler_amount** (default: 3): Number of Crawler to generate
     - **fqdn_amount** (default: 20): Number of Web Sites to generate
     - **min_url_amount** (default: 10): Minimum Pages per Web Site
@@ -182,13 +198,9 @@ async def generate_example_db(
     - ~~**bot_excluded_ratio** (default. 0): Percentage of bot-excluded Pages~~
 
     """
-    if request.reset is True:
-        crud.reset(db)
 
     background_tasks.add_task(
-        sample_generator.create_sample_crawler,
-        db,
-        amount=request.crawler_amount,
+        sample_generator.create_sample_crawler, db, amount=request.crawler_amount,
     )
 
     background_tasks.add_task(

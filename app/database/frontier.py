@@ -48,3 +48,12 @@ def create_url_frontier(fqdn, url_list):
         fqdn_crawl_delay=fqdn.fqdn_crawl_delay,
         fqdn_url_count=len(url_list),
     )
+
+
+def get_referencing_urls(db, url, amount):
+    return (
+        db.query(db_models.Url)
+        .filter(db_models.Url.url_last_visited < url.url_last_visited)
+        .order_by(func.random())
+        .limit(amount)
+    )

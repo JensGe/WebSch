@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from app.common import enum
 
 
-def get_random_datetime():
+def get_random_datetime():  # ToDo also create None Dates
     start = datetime(year=2019, month=1, day=1, hour=0, minute=0, second=0)
     end = datetime(year=2020, month=3, day=3, hour=0, minute=0, second=0)
     delta = end - start

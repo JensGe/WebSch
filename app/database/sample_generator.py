@@ -56,7 +56,7 @@ def new_url(url, fqdn, visited_ratio):
     else:
         random_date_time = None
 
-    return db_models.Url(
+    return db_models.UrlFrontier(
         url=url,
         fqdn=fqdn,
         url_last_visited=random_date_time,

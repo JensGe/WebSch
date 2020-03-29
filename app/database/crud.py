@@ -24,7 +24,7 @@ def reset(db: Session, request: pyd_models.DeleteDatabase):
         db.commit()
 
     if request.delete_urls:
-        db.query(db_models.Url).delete()
+        db.query(db_models.UrlFrontier).delete()
         db.commit()
 
     if request.delete_fqdns:
@@ -180,7 +180,7 @@ def get_db_stats(db: Session):
     response = {
         "crawler_amount": db.query(db_models.Crawler).count(),
         "frontier_amount": db.query(db_models.FqdnFrontier).count(),
-        "url_amount": db.query(db_models.Url).count(),
+        "url_amount": db.query(db_models.UrlFrontier).count(),
         "url_ref_amount": db.query(db_models.URLRef).count(),
     }
     return response

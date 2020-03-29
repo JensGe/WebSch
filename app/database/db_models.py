@@ -26,6 +26,7 @@ class Crawler(Base):
 class FqdnFrontier(Base):
     __tablename__ = "fqdn_frontiers"
 
+    fqdn_hash = Column(String)
     fqdn = Column(String, primary_key=True, index=True)
     tld = Column(String, index=True)
 
@@ -37,13 +38,13 @@ class FqdnFrontier(Base):
     fqdn_crawl_delay = Column(Integer)
 
 
-class Url(Base):
+class UrlFrontier(Base):
     __tablename__ = "url_frontiers"
 
+    fqdn = Column(String, ForeignKey("fqdn_frontiers.fqdn"))
     url = Column(String, primary_key=True, index=True)
 
-    fqdn = Column(String, ForeignKey("fqdn_frontiers.fqdn"))
-
+    url_discovery_date = Column(DateTime)
     url_last_visited = Column(DateTime)
     url_blacklisted = Column(Boolean)
     url_bot_excluded = Column(Boolean)

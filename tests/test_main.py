@@ -1,5 +1,5 @@
-from starlette.testclient import TestClient
-from starlette import status
+from fastapi.testclient import TestClient
+from fastapi import status
 
 from app.main import app
 from app.database import crud

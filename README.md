@@ -1,5 +1,8 @@
 [![Build Status](https://travis-ci.org/JensGe/WebSch.svg?branch=master)](https://travis-ci.org/JensGe/WebSch)
 
+[![codecov](https://codecov.io/gh/JensGe/WebSch/branch/master/graph/badge.svg)](https://codecov.io/gh/JensGe/WebSch)
+
+
 # WebSch Overview
 
 A distributed Web Crawling Schedulercomponent to distribute URLs from Frontier to multiple Fetcher. 

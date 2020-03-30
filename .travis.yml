@@ -9,7 +9,9 @@ install:
   - pip install sqlalchemy
   - pip install psycopg2
   - pip install -U fastapi
+  - pip install codecov
 
 # command to run tests
 script:
   - pytest tests
+  - codecov

@@ -107,15 +107,16 @@ def create_sample_frontier(
         db.bulk_save_objects(fqdn_url_list)
         db.commit()
 
-        db_url_ref_list = []
+        if connection_amount > 0:
+            db_url_ref_list = []
 
-        for url in fqdn_url_list:
-            ref_urls = frontier.get_referencing_urls(db, url, connection_amount)
-            ref_rows = [new_ref(ref_url.url, url.url) for ref_url in ref_urls]
-            db_url_ref_list.extend(ref_rows)
+            for url in fqdn_url_list:
+                ref_urls = frontier.get_referencing_urls(db, url, connection_amount)
+                ref_rows = [new_ref(ref_url.url, url.url) for ref_url in ref_urls]
+                db_url_ref_list.extend(ref_rows)
 
-        db.bulk_save_objects(db_url_ref_list)
-        db.commit()
+            db.bulk_save_objects(db_url_ref_list)
+            db.commit()
 
         global_url_list.extend(fqdn_url_list)
 

@@ -7,10 +7,11 @@ from app.database.database import SessionLocal
 
 
 client = TestClient(app)
+db = SessionLocal()
 
 
 def test_get_all_crawler():
-    crud.delete_crawlers(SessionLocal())
+    crud.delete_crawlers(db)
     client.post("/crawlers/", json={"contact": "jens@honzont.de", "name": "IsaacV"})
     client.post("/crawlers/", json={"contact": "jens@honzont.de", "name": "IsaacVI"})
     json_response = client.get("/crawlers/").json()
@@ -18,7 +19,7 @@ def test_get_all_crawler():
 
 
 def test_create_crawler():
-    crud.delete_crawlers(SessionLocal())
+    crud.delete_crawlers(db)
     response = client.post(
         "/crawlers/",
         json={
@@ -32,7 +33,7 @@ def test_create_crawler():
 
 
 def test_create_crawler_duplicate():
-    crud.delete_crawlers(SessionLocal())
+    crud.delete_crawlers(db)
     client.post("/crawlers/", json={"contact": "jens@honzont.de", "name": "IsaacIV"})
     response2 = client.post(
         "/crawlers/", json={"contact": "jens@honzont.de", "name": "IsaacIV"}
@@ -41,7 +42,7 @@ def test_create_crawler_duplicate():
 
 
 def test_update_crawler():
-    crud.delete_crawlers(SessionLocal())
+    crud.delete_crawlers(db)
     create_response = client.post(
         "/crawlers/",
         json={"contact": "jens@honzont.de", "name": "IsaacIV", "location": "Germany"},
@@ -57,7 +58,7 @@ def test_update_crawler():
 
 
 def test_patch_crawler():
-    crud.delete_crawlers(SessionLocal())
+    crud.delete_crawlers(db)
     create_response = client.post(
         "/crawlers/",
         json={
@@ -79,7 +80,7 @@ def test_patch_crawler():
 
 
 def test_delete_crawler():
-    crud.delete_crawlers(SessionLocal())
+    crud.delete_crawlers(db)
     json_response = client.post(
         "/crawlers/", json={"contact": "jens@honzont.de", "name": "IsaacVII"}
     ).json()

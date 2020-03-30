@@ -5,13 +5,11 @@ python:
 install:
   - pip install pydantic[email]
   - pip install requests
-  - pip install pytest
+  - pip install pytest pytest-cov
   - pip install sqlalchemy
   - pip install psycopg2
   - pip install -U fastapi
-  - pip install codecov
 
 # command to run tests
 script:
-  - pytest tests
-  - codecov
+  - pytest --cov=./

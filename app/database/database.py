@@ -6,9 +6,8 @@ from app.common import credentials as cred
 
 
 # PostgreSQL
-
 SQLALCHEMY_DATABASE_URL = "postgresql://{}:{}@{}/{}".format(
-    cred.postgres_user, cred.postgres_pw, cred.postgres_uri, cred.postgres_prod_db
+    cred.postgres_user, cred.postgres_pw, cred.postgres_uri, cred.postgres_db
 )
 engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=True, pool_pre_ping=True)
 

@@ -2,12 +2,11 @@ from fastapi.testclient import TestClient
 from fastapi import status
 
 from app.main import app
-from app.database import crud
-from app.database.database import SessionLocal
+from app.database import crud, database
 
 
 client = TestClient(app)
-db = SessionLocal()
+db = database.SessionLocal()
 
 
 def test_get_all_crawler():
@@ -99,8 +98,6 @@ def test_generate_example_db():
     sampledata = client.post("/database/").json()
 
     assert sampledata != None
-
-
 
 #
 # def test_delete_crawler_not_found():

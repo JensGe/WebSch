@@ -15,7 +15,7 @@ def create_sample_crawler(db: Session, amount: int = 3):
 
     crawlers = []
 
-    for i in range(amount):
+    for _ in range(amount):
         crawlers.append(
             db_models.Crawler(
                 uuid=str(uuid4()),

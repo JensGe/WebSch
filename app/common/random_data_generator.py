@@ -113,7 +113,7 @@ def get_random_pagerank():
 def get_random_web_filename():
     file = random.choice(["/index", "/home", "/impressum", "/contact"])
     extension = random.choice([".php", ".html", ".aspx", "", "/"])
-    return file  # + extension
+    return file + extension
 
 
 def get_random_url(fqdn: str):

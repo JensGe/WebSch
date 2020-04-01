@@ -8,19 +8,24 @@ from app.database import crud, database
 client = TestClient(app)
 db = database.SessionLocal()
 
+# reusables
+test_email_1 = "jens@honzont.de"
+crawler_endpoint = "/crawlers/"
+database_endpoint = "/database/"
+
 
 def test_get_all_crawler():
     crud.delete_crawlers(db)
-    client.post("/crawlers/", json={"contact": "jens@honzont.de", "name": "IsaacV"})
-    client.post("/crawlers/", json={"contact": "jens@honzont.de", "name": "IsaacVI"})
-    json_response = client.get("/crawlers/").json()
+    client.post(crawler_endpoint, json={"contact": test_email_1, "name": "IsaacV"})
+    client.post(crawler_endpoint, json={"contact": test_email_1, "name": "IsaacVI"})
+    json_response = client.get(crawler_endpoint).json()
     assert len(json_response) == 2
 
 
 def test_create_crawler():
     crud.delete_crawlers(db)
     response = client.post(
-        "/crawlers/",
+        crawler_endpoint,
         json={
             "contact": "jens@honzont.de",
             "name": "IsaacIV",
@@ -33,9 +38,9 @@ def test_create_crawler():
 
 def test_create_crawler_duplicate():
     crud.delete_crawlers(db)
-    client.post("/crawlers/", json={"contact": "jens@honzont.de", "name": "IsaacIV"})
+    client.post(crawler_endpoint, json={"contact": test_email_1, "name": "IsaacIV"})
     response2 = client.post(
-        "/crawlers/", json={"contact": "jens@honzont.de", "name": "IsaacIV"}
+        crawler_endpoint, json={"contact": test_email_1, "name": "IsaacIV"}
     )
     assert response2.status_code == status.HTTP_409_CONFLICT
 
@@ -43,14 +48,14 @@ def test_create_crawler_duplicate():
 def test_update_crawler():
     crud.delete_crawlers(db)
     create_response = client.post(
-        "/crawlers/",
-        json={"contact": "jens@honzont.de", "name": "IsaacIV", "location": "Germany"},
+        crawler_endpoint,
+        json={"contact": test_email_1, "name": "IsaacIV", "location": "Germany"},
     ).json()
     uuid = create_response["uuid"]
     contact = create_response["contact"]
     name = "IsaacXII"
     update_response = client.put(
-        "/crawlers/", json={"uuid": uuid, "contact": contact, "name": name}
+        crawler_endpoint, json={"uuid": uuid, "contact": contact, "name": name}
     )
     assert update_response.status_code == status.HTTP_200_OK
     assert update_response.json()["location"] is None
@@ -59,9 +64,9 @@ def test_update_crawler():
 def test_patch_crawler():
     crud.delete_crawlers(db)
     create_response = client.post(
-        "/crawlers/",
+        crawler_endpoint,
         json={
-            "contact": "jens@honzont.de",
+            "contact": test_email_1,
             "name": "IsaacIV",
             "location": "Germany",
             "tld_preference": "de",
@@ -71,7 +76,7 @@ def test_patch_crawler():
     name = "IsaacIX"
 
     update_response = client.patch(
-        "/crawlers/", json={"uuid": uuid, "name": name}
+        crawler_endpoint, json={"uuid": uuid, "name": name}
     )
     assert update_response.status_code == status.HTTP_200_OK
     assert update_response.json()["location"] == "Germany"
@@ -81,21 +86,21 @@ def test_patch_crawler():
 def test_delete_crawler():
     crud.delete_crawlers(db)
     json_response = client.post(
-        "/crawlers/", json={"contact": "jens@honzont.de", "name": "IsaacVII"}
+        crawler_endpoint, json={"contact": test_email_1, "name": "IsaacVII"}
     ).json()
     created_uuid = json_response["uuid"]
     print("UUID: {}".format(created_uuid))
-    delete_response = client.delete("/crawlers/", json={"uuid": created_uuid})
+    delete_response = client.delete(crawler_endpoint, json={"uuid": created_uuid})
 
     assert delete_response.status_code == status.HTTP_204_NO_CONTENT
     assert delete_response.content == b''
 
-    json_response = client.get("/crawlers/").json()
+    json_response = client.get(crawler_endpoint).json()
     assert len(json_response) == 0
 
 
 def test_generate_example_db():
-    sampledata = client.post("/database/").json()
+    sampledata = client.post(database_endpoint).json()
 
     assert sampledata != None
 

@@ -1,4 +1,14 @@
-[![Build Status](https://travis-ci.org/JensGe/WebSch.svg?branch=master)](https://travis-ci.org/JensGe/WebSch) [![codecov](https://codecov.io/gh/JensGe/WebSch/branch/master/graph/badge.svg)](https://codecov.io/gh/JensGe/WebSch)
+[![Build Status](https://travis-ci.org/JensGe/WebSch.svg?branch=master)](https://travis-ci.org/JensGe/WebSch)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=JensGe_WebSch&metric=alert_status)](https://sonarcloud.io/dashboard?id=JensGe_WebSch)
+[![codecov](https://codecov.io/gh/JensGe/WebSch/branch/master/graph/badge.svg)](https://codecov.io/gh/JensGe/WebSch)
+
+
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=JensGe_WebSch&metric=ncloc)](https://sonarcloud.io/dashboard?id=JensGe_WebSch)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=JensGe_WebSch&metric=bugs)](https://sonarcloud.io/dashboard?id=JensGe_WebSch)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=JensGe_WebSch&metric=code_smells)](https://sonarcloud.io/dashboard?id=JensGe_WebSch)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=JensGe_WebSch&metric=duplicated_lines_density)](https://sonarcloud.io/dashboard?id=JensGe_WebSch)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=JensGe_WebSch&metric=sqale_index)](https://sonarcloud.io/dashboard?id=JensGe_WebSch)
+
 
 # WebSch Overview
 

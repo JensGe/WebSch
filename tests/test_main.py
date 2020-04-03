@@ -12,6 +12,7 @@ db = database.SessionLocal()
 test_email_1 = "jens@honzont.de"
 crawler_endpoint = "/crawlers/"
 database_endpoint = "/database/"
+stats_endpoint = "/stats/"
 
 
 def test_get_all_crawler():
@@ -104,7 +105,13 @@ def test_generate_example_db():
 
     assert sampledata != None
 
-#
+
+def test_get_db_stats():
+    response = client.get(stats_endpoint)
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.json()) == 4
+
+
 # def test_delete_crawler_not_found():
 #     assert 1 == 0
 #     # ToDo test_delete_crawler_not_found()

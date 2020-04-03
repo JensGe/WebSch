@@ -223,7 +223,7 @@ async def generate_example_db(
     tags=["Development Tools"],
     summary="Get Statistics for Database",
 )
-def generate_example_db(db: Session = Depends(get_db)):
+def get_db_stats(db: Session = Depends(get_db)):
     """
     Returns Statistic from current Database Status
     """

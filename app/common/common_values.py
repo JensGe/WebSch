@@ -22,3 +22,7 @@ crawler_endpoint = "/crawlers/"
 database_endpoint = "/database/"
 stats_endpoint = "/stats/"
 frontier_endpoint = "/frontiers/"
+
+
+# db_models
+url_frontier_url_key = "url_frontiers.url"

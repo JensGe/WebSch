@@ -9,7 +9,8 @@ from sqlalchemy import (
     Index,
 )
 
-from .database import Base
+from app.database.database import Base
+from app.common import common_values as c
 
 
 class Crawler(Base):
@@ -54,7 +55,7 @@ class CrawlerUrl(Base):
     __tablename__ = "crawler_urls"
 
     crawler_uuid = Column(String, ForeignKey("crawler.uuid"), primary_key=True)
-    url = Column(String, ForeignKey("url_frontiers.url"), primary_key=True)
+    url = Column(String, ForeignKey(c.url_frontier_url_key), primary_key=True)
     deactivation_date = Column(DateTime)
 
 
@@ -62,10 +63,10 @@ class URLRef(Base):
     __tablename__ = "url_references"
 
     url_out = Column(
-        String, ForeignKey("url_frontiers.url"), primary_key=True, index=True
+        String, ForeignKey(c.url_frontier_url_key), primary_key=True, index=True
     )
     url_in = Column(
-        String, ForeignKey("url_frontiers.url"), primary_key=True, index=True
+        String, ForeignKey(c.url_frontier_url_key), primary_key=True, index=True
     )
     parsing_date = Column(DateTime, primary_key=True)
     Index("url_ref_index", url_out, url_in)

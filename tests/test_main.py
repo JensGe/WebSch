@@ -279,10 +279,3 @@ def test_delete_example_db():
     assert after["url_amount"] == 0
     assert after["url_ref_amount"] == 0
 
-
-
-
-# def test_update_crawler_no_unique_contact_name_combination():
-#     assert 1 == 0
-#     # ToDo test_update_crawler_no_unique_contact_name_combination()
-#

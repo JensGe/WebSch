@@ -2,7 +2,7 @@ from fastapi.testclient import TestClient
 from fastapi import status
 
 from app.main import app
-from app.common import defaults
+from app.common import common_values as c
 from app.database import crud, database
 
 from time import sleep
@@ -10,27 +10,19 @@ from time import sleep
 client = TestClient(app)
 db = database.SessionLocal()
 
-# reusables
-test_email_1 = "jens@honzont.de"
-
-crawler_endpoint = "/crawlers/"
-database_endpoint = "/database/"
-stats_endpoint = "/stats/"
-frontier_endpoint = "/frontiers/"
-
 
 def test_get_all_crawler():
     crud.delete_crawlers(db)
-    client.post(crawler_endpoint, json={"contact": test_email_1, "name": "IsaacV"})
-    client.post(crawler_endpoint, json={"contact": test_email_1, "name": "IsaacVI"})
-    json_response = client.get(crawler_endpoint).json()
+    client.post(c.crawler_endpoint, json={"contact": c.test_email_1, "name": "IsaacV"})
+    client.post(c.crawler_endpoint, json={"contact": c.test_email_1, "name": "IsaacVI"})
+    json_response = client.get(c.crawler_endpoint).json()
     assert len(json_response) == 2
 
 
 def test_create_crawler():
     crud.delete_crawlers(db)
     response = client.post(
-        crawler_endpoint,
+        c.crawler_endpoint,
         json={
             "contact": "jens@honzont.de",
             "name": "IsaacIV",
@@ -43,9 +35,9 @@ def test_create_crawler():
 
 def test_create_crawler_duplicate():
     crud.delete_crawlers(db)
-    client.post(crawler_endpoint, json={"contact": test_email_1, "name": "IsaacIV"})
+    client.post(c.crawler_endpoint, json={"contact": c.test_email_1, "name": "IsaacIV"})
     response2 = client.post(
-        crawler_endpoint, json={"contact": test_email_1, "name": "IsaacIV"}
+        c.crawler_endpoint, json={"contact": c.test_email_1, "name": "IsaacIV"}
     )
     assert response2.status_code == status.HTTP_409_CONFLICT
 
@@ -53,14 +45,14 @@ def test_create_crawler_duplicate():
 def test_update_crawler():
     crud.delete_crawlers(db)
     create_response = client.post(
-        crawler_endpoint,
-        json={"contact": test_email_1, "name": "IsaacIV", "location": "Germany"},
+        c.crawler_endpoint,
+        json={"contact": c.test_email_1, "name": "IsaacIV", "location": "Germany"},
     ).json()
     uuid = create_response["uuid"]
     contact = create_response["contact"]
     name = "IsaacXII"
     update_response = client.put(
-        crawler_endpoint, json={"uuid": uuid, "contact": contact, "name": name}
+        c.crawler_endpoint, json={"uuid": uuid, "contact": contact, "name": name}
     )
     assert update_response.status_code == status.HTTP_200_OK
     assert update_response.json()["location"] is None
@@ -69,9 +61,9 @@ def test_update_crawler():
 def test_patch_crawler():
     crud.delete_crawlers(db)
     create_response = client.post(
-        crawler_endpoint,
+        c.crawler_endpoint,
         json={
-            "contact": test_email_1,
+            "contact": c.test_email_1,
             "name": "IsaacIV",
             "location": "Germany",
             "tld_preference": "de",
@@ -80,7 +72,9 @@ def test_patch_crawler():
     uuid = create_response["uuid"]
     name = "IsaacIX"
 
-    update_response = client.patch(crawler_endpoint, json={"uuid": uuid, "name": name})
+    update_response = client.patch(
+        c.crawler_endpoint, json={"uuid": uuid, "name": name}
+    )
     assert update_response.status_code == status.HTTP_200_OK
     assert update_response.json()["location"] == "Germany"
     assert update_response.json()["name"] == "IsaacIX"
@@ -89,29 +83,38 @@ def test_patch_crawler():
 def test_delete_crawler():
     crud.delete_crawlers(db)
     json_response = client.post(
-        crawler_endpoint, json={"contact": test_email_1, "name": "IsaacVII"}
+        c.crawler_endpoint, json={"contact": c.test_email_1, "name": "IsaacVII"}
     ).json()
     created_uuid = json_response["uuid"]
     print("UUID: {}".format(created_uuid))
-    delete_response = client.delete(crawler_endpoint, json={"uuid": created_uuid})
+    delete_response = client.delete(c.crawler_endpoint, json={"uuid": created_uuid})
 
     assert delete_response.status_code == status.HTTP_204_NO_CONTENT
     assert delete_response.content == b""
 
-    json_response = client.get(crawler_endpoint).json()
+    json_response = client.get(c.crawler_endpoint).json()
     assert len(json_response) == 0
 
 
+def test_delete_unknown_crawler():
+    crud.delete_crawlers(db)
+    delete_response = client.delete(
+        c.crawler_endpoint, json={"uuid": "12345678-90ab-cdef-0000-000000000000"}
+    )
+
+    assert delete_response.status_code == status.HTTP_404_NOT_FOUND
+
+
 def test_get_db_stats():
-    response = client.get(stats_endpoint)
+    response = client.get(c.stats_endpoint)
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()) == 4
 
 
 def test_generate_example_db():
-    before = client.get(stats_endpoint).json()
+    before = client.get(c.stats_endpoint).json()
     response = client.post(
-        database_endpoint,
+        c.database_endpoint,
         json={
             "crawler_amount": 1,
             "fqdn_amount": 1,
@@ -121,7 +124,7 @@ def test_generate_example_db():
         },
     )
     sleep(10)
-    after = client.get(stats_endpoint).json()
+    after = client.get(c.stats_endpoint).json()
     assert response.status_code == status.HTTP_202_ACCEPTED
     assert after["crawler_amount"] == before["crawler_amount"] + 1
     assert after["frontier_amount"] == before["frontier_amount"] + 1
@@ -131,11 +134,11 @@ def test_generate_example_db():
 def test_get_simple_frontier():
 
     new_crawler_uuid = client.post(
-        crawler_endpoint, json={"contact": test_email_1, "name": "IsaacVII"}
+        c.crawler_endpoint, json={"contact": c.test_email_1, "name": "IsaacVII"}
     ).json()["uuid"]
 
     response = client.post(
-        frontier_endpoint,
+        c.frontier_endpoint,
         json={"crawler_uuid": new_crawler_uuid, "amount": 1, "length": 1},
     )
     assert response.status_code == status.HTTP_200_OK
@@ -145,7 +148,7 @@ def test_get_simple_frontier():
 
 def test_delete_example_db():
     response = client.delete(
-        database_endpoint,
+        c.database_endpoint,
         json={
             "delete_url_refs": True,
             "delete_crawlers": True,
@@ -154,7 +157,7 @@ def test_delete_example_db():
         },
     )
     sleep(10)
-    after = client.get(stats_endpoint).json()
+    after = client.get(c.stats_endpoint).json()
     assert response.status_code == status.HTTP_202_ACCEPTED
     assert after["crawler_amount"] == 0
     assert after["frontier_amount"] == 0
@@ -162,11 +165,6 @@ def test_delete_example_db():
     assert after["url_ref_amount"] == 0
 
 
-# def test_delete_crawler_not_found():
-#     assert 1 == 0
-#     # ToDo test_delete_crawler_not_found()
-#
-#
 # def test_update_crawler_bad_uuid():
 #     crud.delete_crawlers(SessionLocal())
 #     client.post("/crawlers/", json={"contact": "jens@honzont.de", "name": "IsaacIV"})

@@ -1,6 +1,7 @@
 from app.common import random_data_generator as rand_gen
 from app.common import enum
 import string
+import datetime
 
 
 def test_get_random_hex():
@@ -40,3 +41,9 @@ def test_get_random_urls():
     random_url_list = rand_gen.get_random_urls("www.xyz.com", 1000)
     assert type(random_url_list) == list
     assert len(random_url_list) == 1000
+
+
+def test_get_random_datetime():
+    gen_datetime = rand_gen.get_random_datetime()
+    assert type(gen_datetime) == datetime.datetime
+

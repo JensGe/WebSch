@@ -1,5 +1,6 @@
 from typing import List
-from app.common import enum, defaults
+from app.common import enum
+from app.common import common_values as c
 
 from pydantic import BaseModel, HttpUrl, EmailStr
 from uuid import UUID
@@ -43,8 +44,8 @@ class DeleteCrawler(BasisModel):
 # Frontier
 class FrontierRequest(BasisModel):
     crawler_uuid: UUID
-    amount: int = defaults.frontier_amount
-    length: int = defaults.frontier_length
+    amount: int = c.frontier_amount
+    length: int = c.frontier_length
     tld: enum.TLD = None
     prio_mode: enum.PRIO = None
     part_mode: enum.PART = None
@@ -81,19 +82,19 @@ class URLReference(BasisModel):
 
 class FrontierResponse(BasisModel):
     uuid: str
-    url_frontiers_count: int = defaults.url_frontier_count
-    urls_count: int = defaults.urls_count
+    url_frontiers_count: int = c.url_frontier_count
+    urls_count: int = c.urls_count
     url_frontiers: List[UrlFrontier] = []
 
 
 # Developer Tools
 class GenerateRequest(BasisModel):
-    crawler_amount: int = defaults.crawler
-    fqdn_amount: int = defaults.fqdn
-    min_url_amount: int = defaults.min_url
-    max_url_amount: int = defaults.max_url
-    visited_ratio: float = defaults.visited_ratio
-    connection_amount: int = defaults.connections
+    crawler_amount: int = c.crawler
+    fqdn_amount: int = c.fqdn
+    min_url_amount: int = c.min_url
+    max_url_amount: int = c.max_url
+    visited_ratio: float = c.visited_ratio
+    connection_amount: int = c.connections
 
 
 class StatsResponse(BasisModel):

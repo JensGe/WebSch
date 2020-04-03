@@ -1,5 +1,7 @@
+from datetime import datetime, timedelta
+
 from app.database import db_models, pyd_models, crawlers
-from app.common import enum, http_exceptions as http_ex
+from app.common import enum, http_exceptions as http_ex, common_values as c
 
 from sqlalchemy.sql.expression import func
 
@@ -59,9 +61,55 @@ def get_referencing_urls(db, url, amount):
     )
 
 
+def get_url_list_from_frontier_response(frontier_response):
+    url_list = []
+    for url_frontier in frontier_response.url_frontiers:
+        url_list.extend([str(url.url) for url in url_frontier.url_list])
+
+    return url_list
+
+
+def get_only_new_list_items(new_list, old_list):
+
+    only_new_list = [item for item in new_list if item not in old_list]
+
+    return only_new_list
+
+
 def save_crawler_urls(db, frontier_response):
-    # ToDO
-    pass
+    uuid = frontier_response.uuid
+
+    frontier_url_only_list = get_url_list_from_frontier_response(frontier_response)
+    print("** frontier_url_only_list: {}".format(str(frontier_url_only_list)))
+
+    db_crawler_url_list = (
+        db.query(db_models.CrawlerUrl)
+        .filter(db_models.CrawlerUrl.crawler_uuid == uuid)
+        .filter(db_models.CrawlerUrl.deactivation_date > datetime.now())
+        .all()
+    )
+    db_crawler_url_only_list = [url.url for url in db_crawler_url_list]
+    print("** db_crawler_url_only_list: {}".format(str(db_crawler_url_only_list)))
+
+    new_crawler_url_only_list = get_only_new_list_items(
+        frontier_url_only_list, db_crawler_url_only_list
+    )
+
+    print("** new_crawler_url_only_list: {}".format(str(new_crawler_url_only_list)))
+
+    new_crawler_url_list = [
+        db_models.CrawlerUrl(
+            crawler_uuid=str(uuid),
+            url=str(url),
+            deactivation_date=datetime.now() + timedelta(hours=c.hours_to_die),
+        )
+        for url in new_crawler_url_only_list
+    ]
+    print("** new_crawler_url_list: {}".format(str(new_crawler_url_list)))
+
+    db.bulk_save_objects(new_crawler_url_list)
+    db.commit()
+    return True
 
 
 def get_fqdn_frontier(db, request: pyd_models.FrontierRequest):
@@ -74,14 +122,14 @@ def get_fqdn_frontier(db, request: pyd_models.FrontierRequest):
         url_list = list(get_db_url_list(db, request, fqdn))
 
         frontier_response.urls_count += len(url_list)
-        frontier_response.url_frontiers.append(
-            create_url_frontier(fqdn, url_list)
-        )
+        frontier_response.url_frontiers.append(create_url_frontier(fqdn, url_list))
 
     frontier_response.url_frontiers_count = len(frontier_response.url_frontiers)
 
     # First check how long sync will take, maybe change to async
     save_crawler_urls(db, frontier_response)
+
+    # ToDo: frontier_response.withdrawal_date
 
     return frontier_response
 

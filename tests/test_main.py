@@ -6,15 +6,17 @@ from app.common import common_values as c, enum
 from app.database import crawlers, database
 
 from time import sleep
+from tests import values as v 
 
 client = TestClient(app)
 db = database.SessionLocal()
 
 
+# Crawler API
 def test_get_all_crawler():
     crawlers.delete_crawlers(db)
-    client.post(c.crawler_endpoint, json={"contact": c.test_email_1, "name": "IsaacV"})
-    client.post(c.crawler_endpoint, json={"contact": c.test_email_1, "name": "IsaacVI"})
+    client.post(c.crawler_endpoint, json={"contact": v.test_email_1, "name": "IsaacV"})
+    client.post(c.crawler_endpoint, json={"contact": v.test_email_1, "name": "IsaacVI"})
     json_response = client.get(c.crawler_endpoint).json()
     assert len(json_response) == 2
 
@@ -35,9 +37,9 @@ def test_create_crawler():
 
 def test_create_crawler_duplicate():
     crawlers.delete_crawlers(db)
-    client.post(c.crawler_endpoint, json={"contact": c.test_email_1, "name": "IsaacIV"})
+    client.post(c.crawler_endpoint, json={"contact": v.test_email_1, "name": "IsaacIV"})
     response2 = client.post(
-        c.crawler_endpoint, json={"contact": c.test_email_1, "name": "IsaacIV"}
+        c.crawler_endpoint, json={"contact": v.test_email_1, "name": "IsaacIV"}
     )
     assert response2.status_code == status.HTTP_409_CONFLICT
 
@@ -46,7 +48,7 @@ def test_update_crawler():
     crawlers.delete_crawlers(db)
     create_response = client.post(
         c.crawler_endpoint,
-        json={"contact": c.test_email_1, "name": "IsaacIV", "location": "Germany"},
+        json={"contact": v.test_email_1, "name": "IsaacIV", "location": "Germany"},
     ).json()
     uuid = create_response["uuid"]
     contact = create_response["contact"]
@@ -59,8 +61,13 @@ def test_update_crawler():
 
 
 def test_update_unknown_crawler():
-    update_response = client.put(c.crawler_endpoint, json={"uuid": c.sample_uuid},)
+    update_response = client.put(c.crawler_endpoint, json={"uuid": v.sample_uuid},)
     assert update_response.status_code == status.HTTP_404_NOT_FOUND
+
+
+def test_update_to_duplicate_crawler():
+    # ToDo
+    assert True
 
 
 def test_patch_crawler_mix():
@@ -68,7 +75,7 @@ def test_patch_crawler_mix():
     create_response = client.post(
         c.crawler_endpoint,
         json={
-            "contact": c.test_email_1,
+            "contact": v.test_email_1,
             "name": "IsaacIV",
             "location": "Germany",
             "tld_preference": "de",
@@ -86,7 +93,7 @@ def test_patch_crawler_mix():
 
 
 def test_patch_unknown_crawler():
-    patch_response = client.patch(c.crawler_endpoint, json={"uuid": c.sample_uuid},)
+    patch_response = client.patch(c.crawler_endpoint, json={"uuid": v.sample_uuid},)
     assert patch_response.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -95,7 +102,7 @@ def test_patch_crawler_empty_patch():
     create_response = client.post(
         c.crawler_endpoint,
         json={
-            "contact": c.test_email_1,
+            "contact": v.test_email_1,
             "name": "IsaacIII",
             "location": "Germany",
             "tld_preference": "de",
@@ -115,7 +122,7 @@ def test_patch_crawler_full_patch():
     create_response = client.post(
         c.crawler_endpoint,
         json={
-            "contact": c.test_email_1,
+            "contact": v.test_email_1,
             "name": "IsaacXXI",
             "location": "Germany",
             "tld_preference": "de",
@@ -138,10 +145,15 @@ def test_patch_crawler_full_patch():
     assert update_response.json()["tld_preference"] == "se"
 
 
+def test_patch_to_duplicate_crawler():
+    # ToDo
+    assert True
+
+
 def test_delete_crawler():
     crawlers.delete_crawlers(db)
     json_response = client.post(
-        c.crawler_endpoint, json={"contact": c.test_email_1, "name": "IsaacVII"}
+        c.crawler_endpoint, json={"contact": v.test_email_1, "name": "IsaacVII"}
     ).json()
     created_uuid = json_response["uuid"]
     print("UUID: {}".format(created_uuid))
@@ -156,11 +168,69 @@ def test_delete_crawler():
 
 def test_delete_unknown_crawler():
     crawlers.delete_crawlers(db)
-    delete_response = client.delete(c.crawler_endpoint, json={"uuid": c.sample_uuid})
+    delete_response = client.delete(c.crawler_endpoint, json={"uuid": v.sample_uuid})
 
     assert delete_response.status_code == status.HTTP_404_NOT_FOUND
 
 
+# Frontier API
+def test_get_simple_frontier():
+    crawlers.delete_crawlers(db)
+    new_crawler_uuid = client.post(
+        c.crawler_endpoint, json={"contact": v.test_email_1, "name": "Isaac"}
+    ).json()["uuid"]
+
+    response = client.post(
+        c.frontier_endpoint,
+        json={"crawler_uuid": new_crawler_uuid, "amount": 1, "length": 1},
+    )
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["url_frontiers_count"] == 1
+    assert response.json()["urls_count"] == 1
+
+
+def test_get_simple_frontier_with_bad_uuid():
+    crawlers.delete_crawlers(db)
+    response = client.post(
+        c.frontier_endpoint,
+        json={"crawler_uuid": v.sample_uuid, "amount": 1, "length": 1},
+    )
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+def test_get_frontiers():
+    crawlers.delete_crawlers(db)
+    new_crawler_uuid = client.post(
+        c.crawler_endpoint, json={"contact": v.test_email_1, "name": "Isaac"}
+    ).json()["uuid"]
+
+    response1 = client.post(
+        c.frontier_endpoint,
+        json={
+            "crawler_uuid": new_crawler_uuid,
+            "amount": 1,
+            "length": 1,
+            "tld": enum.TLD.Commercial,
+            "prio_mode": enum.PRIO.breath_first_search,
+        },
+    )
+    assert response1.status_code == status.HTTP_200_OK
+
+    response2 = client.post(
+        c.frontier_endpoint,
+        json={
+            "crawler_uuid": new_crawler_uuid,
+            "amount": 1,
+            "length": 1,
+            "tld": enum.TLD.Sweden,
+            "prio_mode": enum.PRIO.random,
+        },
+    )
+    assert response2.status_code == status.HTTP_200_OK
+
+
+# Dev API
 def test_get_db_stats():
     response = client.get(c.stats_endpoint)
     assert response.status_code == status.HTTP_200_OK
@@ -202,62 +272,6 @@ def test_generate_example_frontier_wrong_initial_values():
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json()["detail"] == "Value 2 is larger than 1"
-
-
-def test_get_simple_frontier():
-    crawlers.delete_crawlers(db)
-    new_crawler_uuid = client.post(
-        c.crawler_endpoint, json={"contact": c.test_email_1, "name": "Isaac"}
-    ).json()["uuid"]
-
-    response = client.post(
-        c.frontier_endpoint,
-        json={"crawler_uuid": new_crawler_uuid, "amount": 1, "length": 1},
-    )
-    assert response.status_code == status.HTTP_200_OK
-    assert response.json()["url_frontiers_count"] == 1
-    assert response.json()["urls_count"] == 1
-
-
-def test_get_simple_frontier_with_bad_uuid():
-    crawlers.delete_crawlers(db)
-    response = client.post(
-        c.frontier_endpoint,
-        json={"crawler_uuid": c.sample_uuid, "amount": 1, "length": 1},
-    )
-
-    assert response.status_code == status.HTTP_404_NOT_FOUND
-
-
-def test_get_frontiers():
-    crawlers.delete_crawlers(db)
-    new_crawler_uuid = client.post(
-        c.crawler_endpoint, json={"contact": c.test_email_1, "name": "Isaac"}
-    ).json()["uuid"]
-
-    response1 = client.post(
-        c.frontier_endpoint,
-        json={
-            "crawler_uuid": new_crawler_uuid,
-            "amount": 1,
-            "length": 1,
-            "tld": enum.TLD.Commercial,
-            "prio_mode": enum.PRIO.breath_first_search,
-        },
-    )
-    assert response1.status_code == status.HTTP_200_OK
-    response2 = client.post(
-        c.frontier_endpoint,
-        json={
-            "crawler_uuid": new_crawler_uuid,
-            "amount": 1,
-            "length": 1,
-            "tld": enum.TLD.Sweden,
-            "prio_mode": enum.PRIO.random,
-        },
-    )
-
-    assert response2.status_code == status.HTTP_200_OK
 
 
 def test_delete_example_db():

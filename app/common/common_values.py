@@ -1,3 +1,17 @@
+# API Endpoints
+crawler_endpoint = "/crawlers/"
+database_endpoint = "/database/"
+stats_endpoint = "/stats/"
+frontier_endpoint = "/frontiers/"
+
+
+# DB_Models
+url_frontier_url_key = "url_frontiers.url"
+
+
+
+# Pydantic Model Values
+
 frontier_amount = 0
 frontier_length = 0
 
@@ -12,17 +26,6 @@ visited_ratio = 1.0
 connections = 0
 
 
-# reusables for testing
-test_email_1 = "jens@honzont.de"
-sample_uuid = "12345678-90ab-cdef-0000-000000000000"
+# Frontier Settings
 
-
-# API Endpoints
-crawler_endpoint = "/crawlers/"
-database_endpoint = "/database/"
-stats_endpoint = "/stats/"
-frontier_endpoint = "/frontiers/"
-
-
-# db_models
-url_frontier_url_key = "url_frontiers.url"
+hours_to_die = 48

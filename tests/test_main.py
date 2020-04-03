@@ -5,15 +5,18 @@ from app.main import app
 from app.common import defaults
 from app.database import crud, database
 
+from time import sleep
 
 client = TestClient(app)
 db = database.SessionLocal()
 
 # reusables
 test_email_1 = "jens@honzont.de"
+
 crawler_endpoint = "/crawlers/"
 database_endpoint = "/database/"
 stats_endpoint = "/stats/"
+frontier_endpoint = "/frontiers/"
 
 
 def test_get_all_crawler():
@@ -106,13 +109,34 @@ def test_get_db_stats():
 
 
 def test_generate_example_db():
-    before = client.get(stats_endpoint)
-    response = client.post(database_endpoint)
-    after = client.get(stats_endpoint)
+    before = client.get(stats_endpoint).json()
+    response = client.post(
+        database_endpoint,
+        json={
+            "crawler_amount": 1,
+            "fqdn_amount": 1,
+            "min_url_amount": 1,
+            "max_url_amount": 1,
+            "visited_ratio": 0.0,
+        },
+    )
+    sleep(10)
+    after = client.get(stats_endpoint).json()
     assert response.status_code == status.HTTP_202_ACCEPTED
-    assert after["crawler_amount"] == before["crawler_amount"] + defaults.crawler
-    assert after["frontier_amount"] == before["frontier_amount"] + defaults.fqdn
-    assert after["url_amount"] > before["url_amount"]
+    assert after["crawler_amount"] == before["crawler_amount"] + 1
+    assert after["frontier_amount"] == before["frontier_amount"] + 1
+    assert after["url_amount"] == before["url_amount"] + 1
+
+
+def test_get_simple_frontier():
+    first_crawler_uuid = client.get(crawler_endpoint).json()[0]["uuid"]
+    response = client.post(
+        frontier_endpoint,
+        json={"crawler_uuid": first_crawler_uuid, "amount": 1, "length": 1},
+    )
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["url_frontiers_count"] == 1
+    assert response.json()["urls_count"] == 1
 
 
 # def test_delete_crawler_not_found():

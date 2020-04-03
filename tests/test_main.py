@@ -129,14 +129,37 @@ def test_generate_example_db():
 
 
 def test_get_simple_frontier():
-    first_crawler_uuid = client.get(crawler_endpoint).json()[0]["uuid"]
+
+    new_crawler_uuid = client.post(
+        crawler_endpoint, json={"contact": test_email_1, "name": "IsaacVII"}
+    ).json()["uuid"]
+
     response = client.post(
         frontier_endpoint,
-        json={"crawler_uuid": first_crawler_uuid, "amount": 1, "length": 1},
+        json={"crawler_uuid": new_crawler_uuid, "amount": 1, "length": 1},
     )
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["url_frontiers_count"] == 1
     assert response.json()["urls_count"] == 1
+
+
+def test_delete_example_db():
+    response = client.delete(
+        database_endpoint,
+        json={
+            "delete_url_refs": True,
+            "delete_crawlers": True,
+            "delete_urls": True,
+            "delete_fqdns": True,
+        },
+    )
+    sleep(10)
+    after = client.get(stats_endpoint).json()
+    assert response.status_code == status.HTTP_202_ACCEPTED
+    assert after["crawler_amount"] == 0
+    assert after["frontier_amount"] == 0
+    assert after["url_amount"] == 0
+    assert after["url_ref_amount"] == 0
 
 
 # def test_delete_crawler_not_found():

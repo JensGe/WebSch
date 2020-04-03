@@ -1,2 +1,2 @@
-from app.database import crud, frontier, sample_generator
+from app.database import crawlers, frontier, sample_generator
 

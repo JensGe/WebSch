@@ -1,32 +1,9 @@
 from sqlalchemy.orm import Session
 
-from app.database import db_models, pyd_models, frontier
+from app.database import db_models, pyd_models
+from app.common import http_exceptions as http
 from uuid import uuid4
 from datetime import datetime
-
-from fastapi import HTTPException, status
-
-
-def raise_http_404(uuid):
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail="Crawler with UUID: {} was not found".format(uuid),
-    )
-
-
-def raise_http_409(contact, name):
-    raise HTTPException(
-        status_code=status.HTTP_409_CONFLICT,
-        detail="Combination of Crawler Contact ({}) and Crawler Name ({}) already "
-        "exists, please choose another name for your crawler".format(contact, name),
-    )
-
-
-def raise_http_400(value1, value2):
-    raise HTTPException(
-        status_code=status.HTTP_400_BAD_REQUEST,
-        detail="Value {} is larger than {}".format(value1, value2),
-    )
 
 
 def uuid_exists(db: Session, uuid):
@@ -36,27 +13,6 @@ def uuid_exists(db: Session, uuid):
         return False
 
 
-def reset(db: Session, request: pyd_models.DeleteDatabase):
-    if request.delete_url_refs:
-        db.query(db_models.URLRef).delete()
-        db.commit()
-
-    if request.delete_crawlers:
-        db.query(db_models.Crawler).delete()
-        db.commit()
-
-    if request.delete_urls:
-        db.query(db_models.UrlFrontier).delete()
-        db.commit()
-
-    if request.delete_fqdns:
-        db.query(db_models.FqdnFrontier).delete()
-        db.commit()
-
-    return True
-
-
-# Crawler
 def create_crawler(db: Session, crawler: pyd_models.CreateCrawler):
     if (
         db.query(db_models.Crawler)
@@ -65,7 +21,7 @@ def create_crawler(db: Session, crawler: pyd_models.CreateCrawler):
         .count()
         != 0
     ):
-        raise_http_409(crawler.contact, crawler.name)
+        http.raise_http_409(crawler.contact, crawler.name)
 
     db_crawler = db_models.Crawler(
         uuid=str(uuid4()),
@@ -87,7 +43,7 @@ def get_all_crawler(db: Session):
 
 def update_crawler(db: Session, crawler: pyd_models.UpdateCrawler):
     if not uuid_exists(db, str(crawler.uuid)):
-        raise_http_404(crawler.uuid)
+        http.raise_http_404(crawler.uuid)
 
     db_crawler = (
         db.query(db_models.Crawler)
@@ -108,7 +64,7 @@ def update_crawler(db: Session, crawler: pyd_models.UpdateCrawler):
 
 def patch_crawler(db: Session, crawler: pyd_models.UpdateCrawler):
     if not uuid_exists(db, str(crawler.uuid)):
-        raise_http_404(crawler.uuid)
+        http.raise_http_404(crawler.uuid)
 
     db_crawler = (
         db.query(db_models.Crawler)
@@ -136,7 +92,7 @@ def patch_crawler(db: Session, crawler: pyd_models.UpdateCrawler):
 
 def delete_crawler(db: Session, crawler: pyd_models.DeleteCrawler):
     if not uuid_exists(db, str(crawler.uuid)):
-        raise_http_404(crawler.uuid)
+        http.raise_http_404(crawler.uuid)
 
     db.query(db_models.Crawler).filter(
         db_models.Crawler.uuid == str(crawler.uuid)
@@ -148,32 +104,3 @@ def delete_crawler(db: Session, crawler: pyd_models.DeleteCrawler):
 def delete_crawlers(db: Session):
     db.query(db_models.Crawler).delete()
     db.commit()
-
-
-# Frontier
-def get_fqdn_frontier(db: Session, request: pyd_models.FrontierRequest):
-    if not uuid_exists(db, str(request.crawler_uuid)):
-        raise_http_404(request.crawler_uuid)
-
-    frontier_response = pyd_models.FrontierResponse(uuid=str(request.crawler_uuid))
-
-    for fqdn in frontier.get_fqdn_list(db, request):
-        url_list = list(frontier.get_db_url_list(db, request, fqdn))
-
-        frontier_response.urls_count += len(url_list)
-        frontier_response.url_frontiers.append(
-            frontier.create_url_frontier(fqdn, url_list)
-        )
-
-    frontier_response.url_frontiers_count = len(frontier_response.url_frontiers)
-    return frontier_response
-
-
-def get_db_stats(db: Session):
-    response = {
-        "crawler_amount": db.query(db_models.Crawler).count(),
-        "frontier_amount": db.query(db_models.FqdnFrontier).count(),
-        "url_amount": db.query(db_models.UrlFrontier).count(),
-        "url_ref_amount": db.query(db_models.URLRef).count(),
-    }
-    return response

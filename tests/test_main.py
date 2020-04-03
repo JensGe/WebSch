@@ -3,7 +3,7 @@ from fastapi import status
 
 from app.main import app
 from app.common import common_values as c, enum
-from app.database import crud, database
+from app.database import crawlers, database
 
 from time import sleep
 
@@ -12,7 +12,7 @@ db = database.SessionLocal()
 
 
 def test_get_all_crawler():
-    crud.delete_crawlers(db)
+    crawlers.delete_crawlers(db)
     client.post(c.crawler_endpoint, json={"contact": c.test_email_1, "name": "IsaacV"})
     client.post(c.crawler_endpoint, json={"contact": c.test_email_1, "name": "IsaacVI"})
     json_response = client.get(c.crawler_endpoint).json()
@@ -20,7 +20,7 @@ def test_get_all_crawler():
 
 
 def test_create_crawler():
-    crud.delete_crawlers(db)
+    crawlers.delete_crawlers(db)
     response = client.post(
         c.crawler_endpoint,
         json={
@@ -34,7 +34,7 @@ def test_create_crawler():
 
 
 def test_create_crawler_duplicate():
-    crud.delete_crawlers(db)
+    crawlers.delete_crawlers(db)
     client.post(c.crawler_endpoint, json={"contact": c.test_email_1, "name": "IsaacIV"})
     response2 = client.post(
         c.crawler_endpoint, json={"contact": c.test_email_1, "name": "IsaacIV"}
@@ -43,7 +43,7 @@ def test_create_crawler_duplicate():
 
 
 def test_update_crawler():
-    crud.delete_crawlers(db)
+    crawlers.delete_crawlers(db)
     create_response = client.post(
         c.crawler_endpoint,
         json={"contact": c.test_email_1, "name": "IsaacIV", "location": "Germany"},
@@ -64,7 +64,7 @@ def test_update_unknown_crawler():
 
 
 def test_patch_crawler_mix():
-    crud.delete_crawlers(db)
+    crawlers.delete_crawlers(db)
     create_response = client.post(
         c.crawler_endpoint,
         json={
@@ -91,7 +91,7 @@ def test_patch_unknown_crawler():
 
 
 def test_patch_crawler_empty_patch():
-    crud.delete_crawlers(db)
+    crawlers.delete_crawlers(db)
     create_response = client.post(
         c.crawler_endpoint,
         json={
@@ -111,7 +111,7 @@ def test_patch_crawler_empty_patch():
 
 
 def test_patch_crawler_full_patch():
-    crud.delete_crawlers(db)
+    crawlers.delete_crawlers(db)
     create_response = client.post(
         c.crawler_endpoint,
         json={
@@ -139,7 +139,7 @@ def test_patch_crawler_full_patch():
 
 
 def test_delete_crawler():
-    crud.delete_crawlers(db)
+    crawlers.delete_crawlers(db)
     json_response = client.post(
         c.crawler_endpoint, json={"contact": c.test_email_1, "name": "IsaacVII"}
     ).json()
@@ -155,7 +155,7 @@ def test_delete_crawler():
 
 
 def test_delete_unknown_crawler():
-    crud.delete_crawlers(db)
+    crawlers.delete_crawlers(db)
     delete_response = client.delete(c.crawler_endpoint, json={"uuid": c.sample_uuid})
 
     assert delete_response.status_code == status.HTTP_404_NOT_FOUND
@@ -187,7 +187,6 @@ def test_generate_example_db():
     assert after["url_amount"] == before["url_amount"] + 1
 
 
-
 def test_generate_example_frontier_wrong_initial_values():
     response = client.post(
         c.database_endpoint,
@@ -206,7 +205,7 @@ def test_generate_example_frontier_wrong_initial_values():
 
 
 def test_get_simple_frontier():
-    crud.delete_crawlers(db)
+    crawlers.delete_crawlers(db)
     new_crawler_uuid = client.post(
         c.crawler_endpoint, json={"contact": c.test_email_1, "name": "Isaac"}
     ).json()["uuid"]
@@ -221,7 +220,7 @@ def test_get_simple_frontier():
 
 
 def test_get_simple_frontier_with_bad_uuid():
-    crud.delete_crawlers(db)
+    crawlers.delete_crawlers(db)
     response = client.post(
         c.frontier_endpoint,
         json={"crawler_uuid": c.sample_uuid, "amount": 1, "length": 1},
@@ -231,7 +230,7 @@ def test_get_simple_frontier_with_bad_uuid():
 
 
 def test_get_frontiers():
-    crud.delete_crawlers(db)
+    crawlers.delete_crawlers(db)
     new_crawler_uuid = client.post(
         c.crawler_endpoint, json={"contact": c.test_email_1, "name": "Isaac"}
     ).json()["uuid"]
@@ -278,4 +277,3 @@ def test_delete_example_db():
     assert after["frontier_amount"] == 0
     assert after["url_amount"] == 0
     assert after["url_ref_amount"] == 0
-

@@ -1,17 +1,18 @@
 from typing import List
 
-from app.database import crud, db_models, pyd_models, sample_generator
-from app.database.database import SessionLocal, engine
+from app.database import crawlers, db_models, pyd_models, sample_generator, frontier
+from app.database import database
+from app.common import http_exceptions as http_es
 
 
-from fastapi import FastAPI, Body, Depends, HTTPException, status, BackgroundTasks
+from fastapi import FastAPI, Depends, status, BackgroundTasks
 from fastapi.routing import Response
 from fastapi.middleware.gzip import GZipMiddleware
 
 from sqlalchemy.orm import Session
 
 
-db_models.Base.metadata.create_all(bind=engine)
+db_models.Base.metadata.create_all(bind=database.engine)
 
 app = FastAPI(
     title="WebSch",
@@ -26,7 +27,7 @@ app.add_middleware(GZipMiddleware, minimum_size=1000)
 # Dependency
 def get_db():
     try:
-        db = SessionLocal()
+        db = database.SessionLocal()
         yield db
     finally:
         db.close()
@@ -44,7 +45,7 @@ def read_crawler(db: Session = Depends(get_db)):
     """
     List all Crawler
     """
-    all_crawler = crud.get_all_crawler(db)
+    all_crawler = crawlers.get_all_crawler(db)
     return all_crawler
 
 
@@ -67,7 +68,7 @@ def register_crawler(crawler: pyd_models.CreateCrawler, db: Session = Depends(ge
     - **location** (optional): The location where the crawler resides
     - **pref_tld** (optional): The Top-Level-Domain, which the crawler prefers to crawl
     """
-    new_crawler = crud.create_crawler(db, crawler)
+    new_crawler = crawlers.create_crawler(db, crawler)
     return new_crawler
 
 
@@ -89,7 +90,7 @@ def update_crawler(crawler: pyd_models.UpdateCrawler, db: Session = Depends(get_
     - **location** (optional): The location where the crawler resides
     - **pref_tld** (optional): The Top-Level-Domain, which the crawler prefers to crawl
     """
-    updated_crawler = crud.update_crawler(db, crawler)
+    updated_crawler = crawlers.update_crawler(db, crawler)
     return updated_crawler
 
 
@@ -112,7 +113,7 @@ def patch_crawler(crawler: pyd_models.UpdateCrawler, db: Session = Depends(get_d
     - **pref_tld** (optional): The Top-Level-Domain, which the crawler prefers to crawl
     """
 
-    patched_crawler = crud.patch_crawler(db, crawler)
+    patched_crawler = crawlers.patch_crawler(db, crawler)
     return patched_crawler
 
 
@@ -129,7 +130,7 @@ def delete_crawler(crawler: pyd_models.DeleteCrawler, db: Session = Depends(get_
 
     - **uuid**: UUID of the crawler, which has to be deleted
     """
-    crud.delete_crawler(db, crawler)
+    crawlers.delete_crawler(db, crawler)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
@@ -148,11 +149,11 @@ def get_frontier(request: pyd_models.FrontierRequest, db: Session = Depends(get_
     - **crawler_uuid**: Your crawlers UUID
     - **amount** (default: 0): The amount of URL-Lists you want to receive
     - **length** (default: 0): The amount of URLs in each list
-    - **tld** (optional): Filter the Response to contain only URLs of this Top-Level-Domain
+    - **tld** (optional): Filter the Response to contain only URLs of this TLD
     - **prio_mode** (default: None): tbd.
     - **part_mode** (default: None): tbd.
     """
-    fqdn_frontier = crud.get_fqdn_frontier(db, request)
+    fqdn_frontier = frontier.get_fqdn_frontier(db, request)
     return fqdn_frontier
 
 
@@ -174,7 +175,7 @@ async def delete_example_db(
     - **delete_fqdns (default: false): Deletes all FQDN Records
     """
 
-    background_tasks.add_task(crud.reset, db, request)
+    background_tasks.add_task(database.reset, db, request)
 
     return Response(status_code=status.HTTP_202_ACCEPTED)
 
@@ -200,7 +201,7 @@ async def generate_example_db(
 
     """
     if request.min_url_amount > request.max_url_amount:
-        crud.raise_http_400(request.min_url_amount, request.max_url_amount)
+        http_es.raise_http_400(request.min_url_amount, request.max_url_amount)
 
     background_tasks.add_task(
         sample_generator.create_sample_crawler, db, amount=request.crawler_amount,
@@ -230,4 +231,4 @@ def get_db_stats(db: Session = Depends(get_db)):
     Returns Statistic from current Database Status
     """
 
-    return crud.get_db_stats(db)
+    return frontier.get_db_stats(db)

@@ -1,5 +1,5 @@
-from app.database import db_models, pyd_models
-from app.common import enum
+from app.database import db_models, pyd_models, crawlers
+from app.common import enum, http_exceptions as http_ex
 
 from sqlalchemy.sql.expression import func
 
@@ -57,3 +57,40 @@ def get_referencing_urls(db, url, amount):
         .order_by(func.random())
         .limit(amount)
     )
+
+
+def save_crawler_urls(db, frontier_response):
+    # ToDO
+    pass
+
+
+def get_fqdn_frontier(db, request: pyd_models.FrontierRequest):
+    if not crawlers.uuid_exists(db, str(request.crawler_uuid)):
+        http_ex.raise_http_404(request.crawler_uuid)
+
+    frontier_response = pyd_models.FrontierResponse(uuid=str(request.crawler_uuid))
+
+    for fqdn in get_fqdn_list(db, request):
+        url_list = list(get_db_url_list(db, request, fqdn))
+
+        frontier_response.urls_count += len(url_list)
+        frontier_response.url_frontiers.append(
+            create_url_frontier(fqdn, url_list)
+        )
+
+    frontier_response.url_frontiers_count = len(frontier_response.url_frontiers)
+
+    # First check how long sync will take, maybe change to async
+    save_crawler_urls(db, frontier_response)
+
+    return frontier_response
+
+
+def get_db_stats(db):
+    response = {
+        "crawler_amount": db.query(db_models.Crawler).count(),
+        "frontier_amount": db.query(db_models.FqdnFrontier).count(),
+        "url_amount": db.query(db_models.UrlFrontier).count(),
+        "url_ref_amount": db.query(db_models.URLRef).count(),
+    }
+    return response

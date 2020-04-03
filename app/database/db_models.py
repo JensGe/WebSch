@@ -50,6 +50,14 @@ class UrlFrontier(Base):
     url_bot_excluded = Column(Boolean)
 
 
+class CrawlerUrl(Base):
+    __tablename__ = "crawler_urls"
+
+    crawler_uuid = Column(String, ForeignKey("crawler.uuid"), primary_key=True)
+    url = Column(String, ForeignKey("url_frontiers.url"), primary_key=True)
+    deactivation_date = Column(DateTime)
+
+
 class URLRef(Base):
     __tablename__ = "url_references"
 
@@ -59,5 +67,5 @@ class URLRef(Base):
     url_in = Column(
         String, ForeignKey("url_frontiers.url"), primary_key=True, index=True
     )
-    date = Column(DateTime, primary_key=True)
+    parsing_date = Column(DateTime, primary_key=True)
     Index("url_ref_index", url_out, url_in)

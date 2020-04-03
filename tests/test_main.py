@@ -2,6 +2,7 @@ from fastapi.testclient import TestClient
 from fastapi import status
 
 from app.main import app
+from app.common import defaults
 from app.database import crud, database
 
 
@@ -76,9 +77,7 @@ def test_patch_crawler():
     uuid = create_response["uuid"]
     name = "IsaacIX"
 
-    update_response = client.patch(
-        crawler_endpoint, json={"uuid": uuid, "name": name}
-    )
+    update_response = client.patch(crawler_endpoint, json={"uuid": uuid, "name": name})
     assert update_response.status_code == status.HTTP_200_OK
     assert update_response.json()["location"] == "Germany"
     assert update_response.json()["name"] == "IsaacIX"
@@ -94,22 +93,26 @@ def test_delete_crawler():
     delete_response = client.delete(crawler_endpoint, json={"uuid": created_uuid})
 
     assert delete_response.status_code == status.HTTP_204_NO_CONTENT
-    assert delete_response.content == b''
+    assert delete_response.content == b""
 
     json_response = client.get(crawler_endpoint).json()
     assert len(json_response) == 0
-
-
-def test_generate_example_db():
-    sampledata = client.post(database_endpoint).json()
-
-    assert sampledata != None
 
 
 def test_get_db_stats():
     response = client.get(stats_endpoint)
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()) == 4
+
+
+def test_generate_example_db():
+    before = client.get(stats_endpoint)
+    response = client.post(database_endpoint)
+    after = client.get(stats_endpoint)
+    assert response.status_code == status.HTTP_202_ACCEPTED
+    assert after["crawler_amount"] == before["crawler_amount"] + defaults.crawler
+    assert after["frontier_amount"] == before["frontier_amount"] + defaults.fqdn
+    assert after["url_amount"] > before["url_amount"]
 
 
 # def test_delete_crawler_not_found():

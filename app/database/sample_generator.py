@@ -7,9 +7,6 @@ from sqlalchemy.orm import Session
 from app.database import db_models, frontier
 from app.common import random_data_generator as rand_gen
 
-from fastapi import HTTPException
-from starlette import status
-
 
 def create_sample_crawler(db: Session, amount: int = 3):
 

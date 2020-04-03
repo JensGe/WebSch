@@ -46,4 +46,3 @@ def test_get_random_urls():
 def test_get_random_datetime():
     gen_datetime = rand_gen.get_random_datetime()
     assert type(gen_datetime) == datetime.datetime
-

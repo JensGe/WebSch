@@ -54,6 +54,3 @@ class ACADEMICS(str, Enum):
     maxwell = "Maxwell"
     newton = "Newton"
     planck = "Planck"
-
-
-

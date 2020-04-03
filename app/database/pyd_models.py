@@ -82,13 +82,11 @@ class URLReference(BasisModel):
 
 class FrontierResponse(BasisModel):
     uuid: str
-    response_url: HttpUrl
-    withdrawal_date: datetime
+    response_url: HttpUrl = None
+    withdrawal_date: datetime = None
     url_frontiers_count: int = c.url_frontier_count
     urls_count: int = c.urls_count
     url_frontiers: List[UrlFrontier] = []
-
-
 
 
 # Developer Tools

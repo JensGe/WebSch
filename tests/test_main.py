@@ -58,7 +58,12 @@ def test_update_crawler():
     assert update_response.json()["location"] is None
 
 
-def test_patch_crawler():
+def test_update_unknown_crawler():
+    update_response = client.put(c.crawler_endpoint, json={"uuid": c.sample_uuid},)
+    assert update_response.status_code == status.HTTP_404_NOT_FOUND
+
+
+def test_patch_crawler_mix():
     crud.delete_crawlers(db)
     create_response = client.post(
         c.crawler_endpoint,
@@ -76,8 +81,61 @@ def test_patch_crawler():
         c.crawler_endpoint, json={"uuid": uuid, "name": name}
     )
     assert update_response.status_code == status.HTTP_200_OK
-    assert update_response.json()["location"] == "Germany"
     assert update_response.json()["name"] == "IsaacIX"
+    assert update_response.json()["location"] == "Germany"
+
+
+def test_patch_unknown_crawler():
+    patch_response = client.patch(c.crawler_endpoint, json={"uuid": c.sample_uuid},)
+    assert patch_response.status_code == status.HTTP_404_NOT_FOUND
+
+
+def test_patch_crawler_empty_patch():
+    crud.delete_crawlers(db)
+    create_response = client.post(
+        c.crawler_endpoint,
+        json={
+            "contact": c.test_email_1,
+            "name": "IsaacIII",
+            "location": "Germany",
+            "tld_preference": "de",
+        },
+    ).json()
+
+    uuid = create_response["uuid"]
+    update_response = client.patch(c.crawler_endpoint, json={"uuid": uuid})
+    assert update_response.status_code == status.HTTP_200_OK
+    assert update_response.json()["name"] == "IsaacIII"
+    assert update_response.json()["location"] == "Germany"
+    assert update_response.json()["tld_preference"] == "de"
+
+
+def test_patch_crawler_full_patch():
+    crud.delete_crawlers(db)
+    create_response = client.post(
+        c.crawler_endpoint,
+        json={
+            "contact": c.test_email_1,
+            "name": "IsaacXXI",
+            "location": "Germany",
+            "tld_preference": "de",
+        },
+    ).json()
+
+    uuid = create_response["uuid"]
+    update_response = client.patch(
+        c.crawler_endpoint,
+        json={
+            "uuid": uuid,
+            "name": "IsaacXXII",
+            "location": "Sweden",
+            "tld_preference": "se",
+        },
+    )
+    assert update_response.status_code == status.HTTP_200_OK
+    assert update_response.json()["name"] == "IsaacXXII"
+    assert update_response.json()["location"] == "Sweden"
+    assert update_response.json()["tld_preference"] == "se"
 
 
 def test_delete_crawler():
@@ -98,9 +156,7 @@ def test_delete_crawler():
 
 def test_delete_unknown_crawler():
     crud.delete_crawlers(db)
-    delete_response = client.delete(
-        c.crawler_endpoint, json={"uuid": "12345678-90ab-cdef-0000-000000000000"}
-    )
+    delete_response = client.delete(c.crawler_endpoint, json={"uuid": c.sample_uuid})
 
     assert delete_response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -144,6 +200,15 @@ def test_get_simple_frontier():
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["url_frontiers_count"] == 1
     assert response.json()["urls_count"] == 1
+
+
+def test_get_simple_frontier_with_bad_uuid():
+    response = client.post(
+        c.frontier_endpoint,
+        json={"crawler_uuid": c.sample_uuid, "amount": 1, "length": 1},
+    )
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
 def test_delete_example_db():

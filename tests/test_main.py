@@ -2,7 +2,7 @@ from fastapi.testclient import TestClient
 from fastapi import status
 
 from app.main import app
-from app.common import common_values as c
+from app.common import common_values as c, enum
 from app.database import crud, database
 
 from time import sleep
@@ -176,10 +176,10 @@ def test_generate_example_db():
             "fqdn_amount": 1,
             "min_url_amount": 1,
             "max_url_amount": 1,
-            "visited_ratio": 0.0,
+            "connection_amount": 1,
         },
     )
-    sleep(10)
+    sleep(20)
     after = client.get(c.stats_endpoint).json()
     assert response.status_code == status.HTTP_202_ACCEPTED
     assert after["crawler_amount"] == before["crawler_amount"] + 1
@@ -187,10 +187,28 @@ def test_generate_example_db():
     assert after["url_amount"] == before["url_amount"] + 1
 
 
-def test_get_simple_frontier():
 
+def test_generate_example_frontier_wrong_initial_values():
+    response = client.post(
+        c.database_endpoint,
+        json={
+            "crawler_amount": 0,
+            "fqdn_amount": 1,
+            "min_url_amount": 2,
+            "max_url_amount": 1,
+            "connection_amount": 1,
+            "visited_ratio": 0.0,
+        },
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json()["detail"] == "Value 2 is larger than 1"
+
+
+def test_get_simple_frontier():
+    crud.delete_crawlers(db)
     new_crawler_uuid = client.post(
-        c.crawler_endpoint, json={"contact": c.test_email_1, "name": "IsaacVII"}
+        c.crawler_endpoint, json={"contact": c.test_email_1, "name": "Isaac"}
     ).json()["uuid"]
 
     response = client.post(
@@ -203,12 +221,44 @@ def test_get_simple_frontier():
 
 
 def test_get_simple_frontier_with_bad_uuid():
+    crud.delete_crawlers(db)
     response = client.post(
         c.frontier_endpoint,
         json={"crawler_uuid": c.sample_uuid, "amount": 1, "length": 1},
     )
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+def test_get_frontiers():
+    crud.delete_crawlers(db)
+    new_crawler_uuid = client.post(
+        c.crawler_endpoint, json={"contact": c.test_email_1, "name": "Isaac"}
+    ).json()["uuid"]
+
+    response1 = client.post(
+        c.frontier_endpoint,
+        json={
+            "crawler_uuid": new_crawler_uuid,
+            "amount": 1,
+            "length": 1,
+            "tld": enum.TLD.Commercial,
+            "prio_mode": enum.PRIO.breath_first_search,
+        },
+    )
+    assert response1.status_code == status.HTTP_200_OK
+    response2 = client.post(
+        c.frontier_endpoint,
+        json={
+            "crawler_uuid": new_crawler_uuid,
+            "amount": 1,
+            "length": 1,
+            "tld": enum.TLD.Sweden,
+            "prio_mode": enum.PRIO.random,
+        },
+    )
+
+    assert response2.status_code == status.HTTP_200_OK
 
 
 def test_delete_example_db():
@@ -230,61 +280,9 @@ def test_delete_example_db():
     assert after["url_ref_amount"] == 0
 
 
-# def test_update_crawler_bad_uuid():
-#     crud.delete_crawlers(SessionLocal())
-#     client.post("/crawlers/", json={"contact": "jens@honzont.de", "name": "IsaacIV"})
-#     assert 1 == 0
-#     # ToDo test_update_crawler_bad_uuid
-#
-#
+
+
 # def test_update_crawler_no_unique_contact_name_combination():
 #     assert 1 == 0
 #     # ToDo test_update_crawler_no_unique_contact_name_combination()
 #
-#
-# # ToDo Check: This is old stuff
-# def test_get_frontier():
-#     response = client.post(
-#         "/frontiers/",
-#         json={
-#             "crawler_uuid": "12345678-90ab-cdef-0000-000000000000",
-#             "amount": 2,
-#             "length": 0,
-#         },
-#     )
-#     assert response.status_code == 200
-#     assert response.json() == {
-#         "amount": 2,
-#         "response_url": "http://www.example.com/submit",
-#         "url_lists": [
-#             {
-#                 "length": 0,
-#                 "tld": None,
-#                 "fqdn": "http://www.example.com",
-#                 "ipv4": "127.0.0.1",
-#                 "urls": [],
-#             },
-#             {
-#                 "length": 0,
-#                 "tld": None,
-#                 "fqdn": "http://www.example.com",
-#                 "ipv4": "127.0.0.1",
-#                 "urls": [],
-#             },
-#         ],
-#     }
-#
-#
-# def test_get_frontier_bad_uuid():
-#     response = client.post(
-#         "/frontiers/",
-#         json={
-#             "crawler_uuid": "12345678-90ab-cdef-0000-000000000001",
-#             "amount": 2,
-#             "length": 0,
-#         },
-#     )
-#     assert response.status_code == 404
-#     assert response.json() == {
-#         "detail": "Crawler UUID 12345678-90ab-cdef-0000-000000000001 not Found, please register at /crawlers/"
-#     }

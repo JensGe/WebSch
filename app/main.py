@@ -199,6 +199,8 @@ async def generate_example_db(
     - ~~**bot_excluded_ratio** (default. 0): Percentage of bot-excluded Pages~~
 
     """
+    if request.min_url_amount > request.max_url_amount:
+        crud.raise_http_400(request.min_url_amount, request.max_url_amount)
 
     background_tasks.add_task(
         sample_generator.create_sample_crawler, db, amount=request.crawler_amount,

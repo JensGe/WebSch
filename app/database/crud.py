@@ -22,6 +22,13 @@ def raise_http_409(contact, name):
     )
 
 
+def raise_http_400(value1, value2):
+    raise HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail="Value {} is larger than {}".format(value1, value2),
+    )
+
+
 def uuid_exists(db: Session, uuid):
     if db.query(db_models.Crawler).filter(db_models.Crawler.uuid == uuid).count() == 1:
         return True

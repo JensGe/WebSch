@@ -67,7 +67,7 @@ def new_url(url, fqdn, visited_ratio):
 
 def new_ref(url_out, url_in):
     return db_models.URLRef(
-        url_out=url_out, url_in=url_in, date=rand_gen.get_random_datetime(),
+        url_out=url_out, url_in=url_in, parsing_date=rand_gen.get_random_datetime(),
     )
 
 
@@ -79,11 +79,6 @@ def create_sample_frontier(
     visited_ratio: float = 1.0,
     connection_amount: int = 0,
 ):
-    if min_url_amount > max_url_amount:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Maximum URL Amount must be greater than Minimum URL Amount",
-        )
 
     fqdn_bases = [rand_gen.get_random_fqdn() for _ in range(fqdns)]
     fqdn_url_amounts = [

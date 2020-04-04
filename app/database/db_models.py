@@ -58,7 +58,7 @@ class CrawlerUrl(Base):
         String, ForeignKey("crawler.uuid", ondelete="CASCADE"), primary_key=True
     )
     url = Column(String, ForeignKey(c.url_frontier_url_key), primary_key=True)
-    deactivation_date = Column(DateTime)
+    latest_return = Column(DateTime)
 
 
 class URLRef(Base):

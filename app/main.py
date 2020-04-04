@@ -17,7 +17,7 @@ db_models.Base.metadata.create_all(bind=database.engine)
 app = FastAPI(
     title="WebSch",
     description="A Scheduler for a distributed Web Fetcher System",
-    version="0.2.0",
+    version="0.2.2",
     redoc_url=None,
 )
 
@@ -37,7 +37,7 @@ def get_db():
 @app.get(
     "/crawlers/",
     response_model=List[pyd_models.Crawler],
-    tags=["Crawler"],
+    tags=["Crawler", "Development Tools"],
     summary="List all Crawlers",
     response_description="A List of all Crawler in the Database",
 )

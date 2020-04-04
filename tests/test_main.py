@@ -261,15 +261,16 @@ def test_generate_example_db():
             "fqdn_amount": 1,
             "min_url_amount": 1,
             "max_url_amount": 1,
-            "connection_amount": 1,
+            "connection_amount": 2,
         },
     )
-    sleep(20)
+    sleep(10)
     after = client.get(c.stats_endpoint).json()
     assert response.status_code == status.HTTP_202_ACCEPTED
     assert after["crawler_amount"] == before["crawler_amount"] + 1
     assert after["frontier_amount"] == before["frontier_amount"] + 1
     assert after["url_amount"] == before["url_amount"] + 1
+    assert after["url_ref_amount"] == before["url_ref_amount"] + 1
 
 
 def test_generate_example_frontier_wrong_initial_values():

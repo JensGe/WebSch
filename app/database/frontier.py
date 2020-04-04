@@ -77,36 +77,36 @@ def get_only_new_list_items(new_list, old_list):
     return only_new_list
 
 
-def save_crawler_urls(db, frontier_response):
+def save_crawler_urls(db, frontier_response, latest_return):
     uuid = frontier_response.uuid
 
     frontier_url_only_list = get_url_list_from_frontier_response(frontier_response)
-    print("** frontier_url_only_list: {}".format(str(frontier_url_only_list)))
+    # print("** frontier_url_only_list: {}".format(str(frontier_url_only_list)))
 
     db_crawler_url_list = (
         db.query(db_models.CrawlerUrl)
         .filter(db_models.CrawlerUrl.crawler_uuid == uuid)
-        .filter(db_models.CrawlerUrl.deactivation_date > datetime.now())
+        .filter(db_models.CrawlerUrl.latest_return > datetime.now())
         .all()
     )
     db_crawler_url_only_list = [url.url for url in db_crawler_url_list]
-    print("** db_crawler_url_only_list: {}".format(str(db_crawler_url_only_list)))
+    # print("** db_crawler_url_only_list: {}".format(str(db_crawler_url_only_list)))
 
     new_crawler_url_only_list = get_only_new_list_items(
         frontier_url_only_list, db_crawler_url_only_list
     )
 
-    print("** new_crawler_url_only_list: {}".format(str(new_crawler_url_only_list)))
+    # print("** new_crawler_url_only_list: {}".format(str(new_crawler_url_only_list)))
 
     new_crawler_url_list = [
         db_models.CrawlerUrl(
             crawler_uuid=str(uuid),
             url=str(url),
-            deactivation_date=datetime.now() + timedelta(hours=c.hours_to_die),
+            latest_return=latest_return,
         )
         for url in new_crawler_url_only_list
     ]
-    print("** new_crawler_url_list: {}".format(str(new_crawler_url_list)))
+    # print("** new_crawler_url_list: {}".format(str(new_crawler_url_list)))
 
     db.bulk_save_objects(new_crawler_url_list)
     db.commit()
@@ -128,10 +128,12 @@ def get_fqdn_frontier(db, request: pyd_models.FrontierRequest):
 
     frontier_response.url_frontiers_count = len(frontier_response.url_frontiers)
 
-    # First check how long sync will take, maybe change to async
-    save_crawler_urls(db, frontier_response)
+    # sync crawler_url_connection persisting
+    latest_return = datetime.now() + timedelta(hours=c.hours_to_die)
+    save_crawler_urls(db, frontier_response, latest_return)
 
-    # ToDo: frontier_response.withdrawal_date
+    frontier_response.latest_return = latest_return
+    frontier_response.response_url = c.response_url + str(request.crawler_uuid)
 
     return frontier_response
 

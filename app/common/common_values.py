@@ -27,5 +27,5 @@ connections = 0
 
 
 # Frontier Settings
-
+response_url = "https://www.example.com/submit/"
 hours_to_die = 48

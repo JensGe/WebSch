@@ -24,13 +24,13 @@ def test_get_url_from_frontier_response():
         url_list=[
             pyd_models.Url(
                 url=HttpUrl(
-                    url="http://www.example.com/abcefg", scheme="http", host="example"
+                    url="https://www.example.com/abcefg", scheme="http", host="example"
                 ),
                 fqdn=example_domain_com,
             ),
             pyd_models.Url(
                 url=HttpUrl(
-                    url="http://www.example.com/hijklm", scheme="http", host="example"
+                    url="https://www.example.com/hijklm", scheme="http", host="example"
                 ),
                 fqdn=example_domain_com,
             ),
@@ -43,13 +43,13 @@ def test_get_url_from_frontier_response():
         url_list=[
             pyd_models.Url(
                 url=HttpUrl(
-                    url="http://www.example.de/abcefg", scheme="http", host="example"
+                    url="https://www.example.de/abcefg", scheme="http", host="example"
                 ),
                 fqdn=example_domain_de,
             ),
             pyd_models.Url(
                 url=HttpUrl(
-                    url="http://www.example.de/hijklm", scheme="http", host="example"
+                    url="https://www.example.de/hijklm", scheme="http", host="example"
                 ),
                 fqdn=example_domain_de,
             ),
@@ -58,7 +58,7 @@ def test_get_url_from_frontier_response():
 
     frontier_response = pyd_models.FrontierResponse(
         uuid=v.sample_uuid,
-        response_url="http://www.example.com/submit?code=1234567890",
+        response_url="https://www.example.com/submit?code=1234567890",
         withdrawal_date=rand_gen.get_random_datetime(),
         url_frontiers=[frontier_one, frontier_two],
     )
@@ -75,10 +75,10 @@ def test_get_url_from_frontier_response():
     assert frontier_response.url_frontiers_count == 2
     assert frontier_response.urls_count == 4
     assert url_list == [
-        HttpUrl(url="http://www.example.com/abcefg", scheme="http", host="example"),
-        HttpUrl(url="http://www.example.com/hijklm", scheme="http", host="example"),
-        HttpUrl(url="http://www.example.de/abcefg", scheme="http", host="example"),
-        HttpUrl(url="http://www.example.de/hijklm", scheme="http", host="example"),
+        HttpUrl(url="https://www.example.com/abcefg", scheme="http", host="example"),
+        HttpUrl(url="https://www.example.com/hijklm", scheme="http", host="example"),
+        HttpUrl(url="https://www.example.de/abcefg", scheme="http", host="example"),
+        HttpUrl(url="https://www.example.de/hijklm", scheme="http", host="example"),
     ]
 
 

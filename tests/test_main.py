@@ -270,7 +270,7 @@ def test_generate_example_db():
     assert after["crawler_amount"] == before["crawler_amount"] + 1
     assert after["frontier_amount"] == before["frontier_amount"] + 1
     assert after["url_amount"] == before["url_amount"] + 1
-    assert after["url_ref_amount"] == before["url_ref_amount"] + 1
+    assert after["url_ref_amount"] == before["url_ref_amount"] + 2
 
 
 def test_generate_example_frontier_wrong_initial_values():

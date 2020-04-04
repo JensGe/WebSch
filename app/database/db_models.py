@@ -54,7 +54,9 @@ class UrlFrontier(Base):
 class CrawlerUrl(Base):
     __tablename__ = "crawler_urls"
 
-    crawler_uuid = Column(String, ForeignKey("crawler.uuid"), primary_key=True)
+    crawler_uuid = Column(
+        String, ForeignKey("crawler.uuid", ondelete="CASCADE"), primary_key=True
+    )
     url = Column(String, ForeignKey(c.url_frontier_url_key), primary_key=True)
     deactivation_date = Column(DateTime)
 

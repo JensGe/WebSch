@@ -176,18 +176,32 @@ def test_delete_unknown_crawler():
 # Frontier API
 def test_get_simple_frontier():
     crawlers.delete_crawlers(db)
+
     new_crawler_uuid = client.post(
         c.crawler_endpoint, json={"contact": v.test_email_1, "name": "Isaac"}
     ).json()["uuid"]
+
+    client.post(
+        c.database_endpoint,
+        json={
+            "crawler_amount": 0,
+            "fqdn_amount": 5,
+            "min_url_amount": 2,
+            "max_url_amount": 2,
+            "connection_amount": 0,
+        },
+    )
+    sleep(5)
 
     response = client.post(
         c.frontier_endpoint,
         json={"crawler_uuid": new_crawler_uuid, "amount": 2, "length": 2},
     )
+    print(response)
+
     assert response.status_code == status.HTTP_200_OK
-    # ToDo Check
-    # assert response.json()["url_frontiers_count"] == 1
-    # assert response.json()["urls_count"] == 1
+    assert response.json()["url_frontiers_count"] == 2
+    assert response.json()["urls_count"] == 4
 
 
 def test_get_simple_frontier_with_bad_uuid():

@@ -24,7 +24,8 @@ def get_fqdn_list(db, request):
     if request.amount > 0:
         fqdn_list = fqdn_list.limit(request.amount)
 
-    return fqdn_list
+    rv = [item for item in fqdn_list]
+    return rv
 
 
 def get_db_url_list(db, request, fqdn):
@@ -117,8 +118,9 @@ def get_fqdn_frontier(db, request: pyd_models.FrontierRequest):
         http_ex.raise_http_404(request.crawler_uuid)
 
     frontier_response = pyd_models.FrontierResponse(uuid=str(request.crawler_uuid))
+    fqdn_list = get_fqdn_list(db, request)
 
-    for fqdn in get_fqdn_list(db, request):
+    for fqdn in fqdn_list:
         url_list = list(get_db_url_list(db, request, fqdn))
 
         frontier_response.urls_count += len(url_list)

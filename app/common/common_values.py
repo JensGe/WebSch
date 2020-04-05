@@ -6,7 +6,8 @@ frontier_endpoint = "/frontiers/"
 
 
 # DB_Models
-url_frontier_url_key = "url_frontiers.url"
+url_frontier_pk = "url_frontiers.url"
+fqdn_frontier_pk = "fqdn_frontiers.fqdn"
 
 
 

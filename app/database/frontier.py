@@ -7,7 +7,14 @@ from sqlalchemy.sql.expression import func
 
 
 def get_fqdn_list(db, request):
-    fqdn_list = db.query(db_models.FqdnFrontier)
+
+    fqdn_block_list = db.query(db_models.CrawlerFqdnBlock).filter(
+        db_models.CrawlerFqdnBlock.latest_return > datetime.now()
+    )
+
+    fqdn_list = db.query(db_models.FqdnFrontier).filter(
+        db_models.FqdnFrontier.fqdn.notin_(fqdn_block_list)
+    )
 
     # Filter
     if request.tld is not None:
@@ -70,6 +77,10 @@ def get_url_list_from_frontier_response(frontier_response):
     return url_list
 
 
+def get_fqdn_list_from_frontier_response(frontier_response):
+    return [url_frontier.fqdn for url_frontier in frontier_response.url_frontiers]
+
+
 def get_only_new_list_items(new_list, old_list):
 
     only_new_list = [item for item in new_list if item not in old_list]
@@ -77,38 +88,29 @@ def get_only_new_list_items(new_list, old_list):
     return only_new_list
 
 
-def save_crawler_urls(db, frontier_response, latest_return):
+def save_crawler_fqdns(db, frontier_response, latest_return):
     uuid = frontier_response.uuid
+    fqdn_only_list = get_fqdn_list_from_frontier_response(frontier_response)
 
-    frontier_url_only_list = get_url_list_from_frontier_response(frontier_response)
-    # print("** frontier_url_only_list: {}".format(str(frontier_url_only_list)))
-
-    db_crawler_url_list = (
-        db.query(db_models.CrawlerUrl)
-        .filter(db_models.CrawlerUrl.crawler_uuid == uuid)
-        .filter(db_models.CrawlerUrl.latest_return > datetime.now())
-        .all()
+    current_db_block_list = (
+        db.query(db_models.CrawlerFqdnBlock)
+        .filter(db_models.CrawlerFqdnBlock.crawler_uuid == uuid)
+        .filter(db_models.CrawlerFqdnBlock.latest_return > datetime.now())
     )
-    db_crawler_url_only_list = [url.url for url in db_crawler_url_list]
-    # print("** db_crawler_url_only_list: {}".format(str(db_crawler_url_only_list)))
+    current_block_list = [fqdn.fqdn for fqdn in current_db_block_list]
 
-    new_crawler_url_only_list = get_only_new_list_items(
-        frontier_url_only_list, db_crawler_url_only_list
+    fqdn_new_block_list = get_only_new_list_items(
+        new_list=fqdn_only_list, old_list=current_block_list
     )
 
-    # print("** new_crawler_url_only_list: {}".format(str(new_crawler_url_only_list)))
-
-    new_crawler_url_list = [
-        db_models.CrawlerUrl(
-            crawler_uuid=str(uuid),
-            url=str(url),
-            latest_return=latest_return,
+    new_db_block_list = [
+        db_models.CrawlerFqdnBlock(
+            crawler_uuid=str(uuid), fqdn=fqdn, latest_return=latest_return
         )
-        for url in new_crawler_url_only_list
+        for fqdn in fqdn_new_block_list
     ]
-    # print("** new_crawler_url_list: {}".format(str(new_crawler_url_list)))
 
-    db.bulk_save_objects(new_crawler_url_list)
+    db.bulk_save_objects(new_db_block_list)
     db.commit()
     return True
 
@@ -130,7 +132,7 @@ def get_fqdn_frontier(db, request: pyd_models.FrontierRequest):
 
     # sync crawler_url_connection persisting
     latest_return = datetime.now() + timedelta(hours=c.hours_to_die)
-    save_crawler_urls(db, frontier_response, latest_return)
+    save_crawler_fqdns(db, frontier_response, latest_return)
 
     frontier_response.latest_return = latest_return
     frontier_response.response_url = c.response_url + str(request.crawler_uuid)

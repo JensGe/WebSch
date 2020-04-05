@@ -42,7 +42,7 @@ class FqdnFrontier(Base):
 class UrlFrontier(Base):
     __tablename__ = "url_frontiers"
 
-    fqdn = Column(String, ForeignKey("fqdn_frontiers.fqdn"))
+    fqdn = Column(String, ForeignKey(c.fqdn_frontier_pk))
     url = Column(String, primary_key=True, index=True)
 
     url_discovery_date = Column(DateTime)
@@ -51,13 +51,13 @@ class UrlFrontier(Base):
     url_bot_excluded = Column(Boolean)
 
 
-class CrawlerUrl(Base):
-    __tablename__ = "crawler_urls"
+class CrawlerFqdnBlock(Base):
+    __tablename__ = "crawler_fqdn_block"
 
     crawler_uuid = Column(
         String, ForeignKey("crawler.uuid", ondelete="CASCADE"), primary_key=True
     )
-    url = Column(String, ForeignKey(c.url_frontier_url_key), primary_key=True)
+    fqdn = Column(String, ForeignKey(c.fqdn_frontier_pk), primary_key=True)
     latest_return = Column(DateTime)
 
 
@@ -65,10 +65,10 @@ class URLRef(Base):
     __tablename__ = "url_references"
 
     url_out = Column(
-        String, ForeignKey(c.url_frontier_url_key), primary_key=True, index=True
+        String, ForeignKey(c.url_frontier_pk), primary_key=True, index=True
     )
     url_in = Column(
-        String, ForeignKey(c.url_frontier_url_key), primary_key=True, index=True
+        String, ForeignKey(c.url_frontier_pk), primary_key=True, index=True
     )
     parsing_date = Column(DateTime, primary_key=True)
     Index("url_ref_index", url_out, url_in)

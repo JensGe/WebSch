@@ -8,7 +8,7 @@ from sqlalchemy.sql.expression import func
 
 def get_fqdn_list(db, request):
 
-    fqdn_block_list = db.query(db_models.CrawlerFqdnBlock).filter(
+    fqdn_block_list = db.query(db_models.CrawlerFqdnBlock.fqdn).filter(
         db_models.CrawlerFqdnBlock.latest_return > datetime.now()
     )
 

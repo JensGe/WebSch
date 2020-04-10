@@ -173,6 +173,7 @@ async def delete_example_db(
     - **delete_crawlers (default: false): Deletes all Crawler Records
     - **delete_urls (default: false): Deletes all URL Records
     - **delete_fqdns (default: false): Deletes all FQDN Records
+    - **delete_reserved_fqdns (default: false): Deletes all Reservations
     """
 
     background_tasks.add_task(database.reset, db, request)

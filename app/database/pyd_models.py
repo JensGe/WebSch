@@ -104,6 +104,7 @@ class StatsResponse(BasisModel):
     frontier_amount: int
     url_amount: int
     url_ref_amount: int
+    reserved_fqdn_amount: int
 
 
 class DeleteDatabase(BasisModel):
@@ -111,3 +112,4 @@ class DeleteDatabase(BasisModel):
     delete_crawlers: bool = False
     delete_urls: bool = False
     delete_fqdns: bool = False
+    delete_reserved_fqdns: bool = False

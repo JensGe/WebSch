@@ -4,8 +4,11 @@ from app.main import app
 from app.database import frontier, pyd_models, database
 from app.common import random_data_generator as rand_gen, common_values as c
 
+from app.database import db_models
+
 from tests import values as v
 from time import sleep
+from datetime import datetime, timedelta
 
 from pydantic import HttpUrl
 
@@ -17,7 +20,7 @@ client = TestClient(app)
 db = database.SessionLocal()
 
 
-def test_get_url_from_frontier_response():
+def create_example_frontier_response(uuid=v.sample_uuid):
     frontier_one = pyd_models.UrlFrontier(
         fqdn=example_domain_com,
         tld="com",
@@ -57,7 +60,7 @@ def test_get_url_from_frontier_response():
     )
 
     frontier_response = pyd_models.FrontierResponse(
-        uuid=v.sample_uuid,
+        uuid=uuid,
         response_url="https://www.example.com/submit?code=1234567890",
         withdrawal_date=rand_gen.get_random_datetime(),
         url_frontiers=[frontier_one, frontier_two],
@@ -69,6 +72,13 @@ def test_get_url_from_frontier_response():
         urls_count += len(url_frontier.url_list)
 
     frontier_response.urls_count = urls_count
+
+    return frontier_response
+
+
+def test_get_url_from_frontier_response():
+
+    frontier_response = create_example_frontier_response()
 
     url_list = frontier.get_url_list_from_frontier_response(frontier_response)
 
@@ -103,12 +113,64 @@ def test_get_fqdn_list():
             "connection_amount": 0,
         },
     )
-    sleep(10)
+    sleep(3)
 
     frontier_request = pyd_models.FrontierRequest(
         crawler_uuid=v.sample_uuid, amount=2, length=2
     )
 
     fqdn_list = frontier.get_fqdn_list(db, frontier_request)
-    print(fqdn_list)
     assert len(fqdn_list) == 2
+
+
+def test_save_reservations_with_old_entries():
+    client.post(
+        c.database_endpoint,
+        json={
+            "crawler_amount": 1,
+            "fqdn_amount": 5,
+            "min_url_amount": 2,
+            "max_url_amount": 2,
+            "connection_amount": 0,
+        },
+    )
+    sleep(3)
+
+    crawler_uuid = client.get(c.crawler_endpoint).json()[0]["uuid"]
+
+    response = client.post(
+        c.frontier_endpoint,
+        json={"crawler_uuid": crawler_uuid, "amount": 2, "length": 10, "tld": "de"},
+    ).json()
+
+    fqdn = response["url_frontiers"][0]["fqdn"]
+
+    frontier_response = pyd_models.FrontierResponse(
+        uuid=crawler_uuid,
+        response_url=response["response_url"],
+        latest_return=response["latest_return"],
+        url_frontiers_count=response["url_frontiers_count"],
+        urls_count=response["urls_count"],
+        url_frontiers=response["url_frontiers"]
+    )
+
+    reservation_item = (
+        db.query(db_models.ReservationList)
+        .filter(db_models.ReservationList.crawler_uuid == crawler_uuid)
+        .filter(db_models.ReservationList.fqdn == fqdn).first()
+    )
+    reservation_item.latest_return = datetime.now() - timedelta(days=2)
+    db.commit()
+    db.refresh(reservation_item)
+
+    assert frontier.save_reservations(db, frontier_response, datetime.now())
+
+
+def test_delete_reservation_list():
+    # check if deleted List is empty
+    pass
+
+
+def test_clean_old_items_from_reservation_list():
+    # check if deleted list ist empty when filtering for only old items
+    pass

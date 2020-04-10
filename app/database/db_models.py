@@ -51,7 +51,7 @@ class UrlFrontier(Base):
     url_bot_excluded = Column(Boolean)
 
 
-class CrawlerFqdnBlock(Base):
+class ReservationList(Base):
     __tablename__ = "crawler_fqdn_block"
 
     crawler_uuid = Column(

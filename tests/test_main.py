@@ -249,7 +249,7 @@ def test_get_frontiers():
 def test_get_db_stats():
     response = client.get(c.stats_endpoint)
     assert response.status_code == status.HTTP_200_OK
-    assert len(response.json()) == 4
+    assert len(response.json()) == 5
 
 
 def test_generate_example_db():

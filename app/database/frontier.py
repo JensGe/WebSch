@@ -8,8 +8,8 @@ from sqlalchemy.sql.expression import func
 
 def get_fqdn_list(db, request):
 
-    fqdn_block_list = db.query(db_models.CrawlerFqdnBlock.fqdn).filter(
-        db_models.CrawlerFqdnBlock.latest_return > datetime.now()
+    fqdn_block_list = db.query(db_models.ReservationList.fqdn).filter(
+        db_models.ReservationList.latest_return > datetime.now()
     )
 
     fqdn_list = db.query(db_models.FqdnFrontier).filter(
@@ -88,14 +88,25 @@ def get_only_new_list_items(new_list, old_list):
     return only_new_list
 
 
-def save_crawler_fqdns(db, frontier_response, latest_return):
+def clean_reservation_list(db):
+    db.query(db_models.ReservationList).filter(
+        db_models.ReservationList.latest_return < datetime.now()
+    ).delete()
+
+    db.commit()
+    return True
+
+
+def save_reservations(db, frontier_response, latest_return):
     uuid = frontier_response.uuid
     fqdn_only_list = get_fqdn_list_from_frontier_response(frontier_response)
 
+    clean_reservation_list(db)
+
     current_db_block_list = (
-        db.query(db_models.CrawlerFqdnBlock)
-        .filter(db_models.CrawlerFqdnBlock.crawler_uuid == uuid)
-        .filter(db_models.CrawlerFqdnBlock.latest_return > datetime.now())
+        db.query(db_models.ReservationList)
+        .filter(db_models.ReservationList.crawler_uuid == uuid)
+        .filter(db_models.ReservationList.latest_return > datetime.now())
     )
     current_block_list = [fqdn.fqdn for fqdn in current_db_block_list]
 
@@ -104,7 +115,7 @@ def save_crawler_fqdns(db, frontier_response, latest_return):
     )
 
     new_db_block_list = [
-        db_models.CrawlerFqdnBlock(
+        db_models.ReservationList(
             crawler_uuid=str(uuid), fqdn=fqdn, latest_return=latest_return
         )
         for fqdn in fqdn_new_block_list
@@ -132,7 +143,7 @@ def get_fqdn_frontier(db, request: pyd_models.FrontierRequest):
 
     # sync crawler_url_connection persisting
     latest_return = datetime.now() + timedelta(hours=c.hours_to_die)
-    save_crawler_fqdns(db, frontier_response, latest_return)
+    save_reservations(db, frontier_response, latest_return)
 
     frontier_response.latest_return = latest_return
     frontier_response.response_url = c.response_url + str(request.crawler_uuid)
@@ -146,5 +157,8 @@ def get_db_stats(db):
         "frontier_amount": db.query(db_models.FqdnFrontier).count(),
         "url_amount": db.query(db_models.UrlFrontier).count(),
         "url_ref_amount": db.query(db_models.URLRef).count(),
+        "reserved_fqdn_amount": db.query(db_models.ReservationList)
+        .filter(db_models.ReservationList.latest_return > datetime.now())
+        .count(),
     }
     return response

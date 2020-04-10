@@ -17,7 +17,7 @@ db_models.Base.metadata.create_all(bind=database.engine)
 app = FastAPI(
     title="WebSch",
     description="A Scheduler for a distributed Web Fetcher System",
-    version="0.2.5",
+    version="0.2.6",
     redoc_url=None,
 )
 
@@ -147,11 +147,10 @@ def get_frontier(request: pyd_models.FrontierRequest, db: Session = Depends(get_
     Get a Sub List of the global Frontier
 
     - **crawler_uuid**: Your crawlers UUID
-    - **amount** (default: 0): The amount of URL-Lists you want to receive
-    - **length** (default: 0): The amount of URLs in each list
-    - **tld** (optional): Filter the Response to contain only URLs of this TLD
-    - **prio_mode** (default: None): tbd.
-    - **part_mode** (default: None): tbd.
+    - **amount** (default: 0 = No Limit): The amount of URL-Lists you want to receive
+    - **length** (default: 0 = No Limit): The amount of URLs in each list
+    - **long_term_mode** (default: random): The modus in which the FQDN Frontier is partitioned or prioritized
+    - **short_term_mode** (default: random): The modus in which the URL Frontier is prioritized
     """
     fqdn_frontier = frontier.get_fqdn_frontier(db, request)
     return fqdn_frontier

@@ -226,8 +226,7 @@ def test_get_frontiers():
             "crawler_uuid": new_crawler_uuid,
             "amount": 1,
             "length": 1,
-            "tld": enum.TLD.Commercial,
-            "prio_mode": enum.PRIO.breath_first_search,
+            "prio_mode": enum.STF.old_pages_first,
         },
     )
     assert response1.status_code == status.HTTP_200_OK
@@ -238,8 +237,7 @@ def test_get_frontiers():
             "crawler_uuid": new_crawler_uuid,
             "amount": 1,
             "length": 1,
-            "tld": enum.TLD.Sweden,
-            "prio_mode": enum.PRIO.random,
+            "prio_mode": enum.STF.change_rate,
         },
     )
     assert response2.status_code == status.HTTP_200_OK

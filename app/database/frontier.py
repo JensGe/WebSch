@@ -17,15 +17,18 @@ def get_fqdn_list(db, request):
     )
 
     # Filter
-    if request.tld is not None:
-        fqdn_list = fqdn_list.filter(db_models.FqdnFrontier.tld == request.tld)
+    if request.long_term_mode == enum.LTF.top_level_domain:
+        crawler_pref_tld = (
+            db.query(db_models.Crawler)
+            .filter(db_models.Crawler.uuid == str(request.crawler_uuid))
+            .first()
+        ).tld_preference
+
+        fqdn_list = fqdn_list.filter(db_models.FqdnFrontier.tld == crawler_pref_tld)
 
     # Order
-    if request.prio_mode == enum.PRIO.random:
+    if request.long_term_mode == enum.LTF.random:
         fqdn_list = fqdn_list.order_by(func.random())
-
-    if request.prio_mode == enum.PRIO.batch_page_rank:
-        fqdn_list = fqdn_list.order_by(db_models.FqdnFrontier.fqdn_pagerank.desc())
 
     # Limit
     if request.amount > 0:

@@ -9,25 +9,20 @@ class TLD(str, Enum):
     Sweden = "se"
 
 
-class PRIO(str, Enum):
-    random = "rand"
-    breath_first_search = "bfs"
-    indegree = "ind"
-    batch_page_rank = "bpr"
-    old_sites_first = "osf"
-    large_sites_first = "lsf"
-    opic = "opic"
-    change_rate = "chr"
-    webfountain = "webf"
+class STF(str, Enum):
+    random = "random"
+    old_pages_first = "old_pages_first"
+    change_rate = "change_rate"
 
 
-class PART(str, Enum):
-    top_level_domain = "tld"
-    fqdn_hashing = "fqdn"
-    consistent_hashing = "ch"
-    geo_distance = "geo"
-    round_trip_time = "rtt"
-    graph_partitioning = "gp"
+class LTF(str, Enum):
+    random = "random"
+    top_level_domain = "top_level_domain"
+    large_sites_first = "large_sites_first"
+    old_sites_first = "old_sites_first"
+    geo_distance = "geo_distance"
+    average_change_rate = "average_change_rate"
+    consistent_hashing = "consistent_hashing"
 
 
 class ACADEMICS(str, Enum):

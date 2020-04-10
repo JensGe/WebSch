@@ -46,9 +46,9 @@ class FrontierRequest(BasisModel):
     crawler_uuid: UUID
     amount: int = c.frontier_amount
     length: int = c.frontier_length
-    tld: enum.TLD = None
-    prio_mode: enum.PRIO = None
-    part_mode: enum.PART = None
+    # tld: enum.TLD = None
+    short_term_mode: enum.STF = enum.STF.random
+    long_term_mode: enum.LTF = enum.LTF.random
 
 
 class Url(BasisModel):

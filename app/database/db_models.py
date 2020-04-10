@@ -51,8 +51,8 @@ class UrlFrontier(Base):
     url_bot_excluded = Column(Boolean)
 
 
-class ReservationList(Base):
-    __tablename__ = "crawler_fqdn_block"
+class CrawlerReservation(Base):
+    __tablename__ = "crawler_reservations"
 
     crawler_uuid = Column(
         String, ForeignKey("crawler.uuid", ondelete="CASCADE"), primary_key=True

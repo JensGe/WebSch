@@ -8,8 +8,8 @@ from sqlalchemy.sql.expression import func
 
 def get_fqdn_list(db, request):
 
-    fqdn_block_list = db.query(db_models.ReservationList.fqdn).filter(
-        db_models.ReservationList.latest_return > datetime.now()
+    fqdn_block_list = db.query(db_models.CrawlerReservation.fqdn).filter(
+        db_models.CrawlerReservation.latest_return > datetime.now()
     )
 
     fqdn_list = db.query(db_models.FqdnFrontier).filter(
@@ -89,8 +89,8 @@ def get_only_new_list_items(new_list, old_list):
 
 
 def clean_reservation_list(db):
-    db.query(db_models.ReservationList).filter(
-        db_models.ReservationList.latest_return < datetime.now()
+    db.query(db_models.CrawlerReservation).filter(
+        db_models.CrawlerReservation.latest_return < datetime.now()
     ).delete()
 
     db.commit()
@@ -104,9 +104,9 @@ def save_reservations(db, frontier_response, latest_return):
     clean_reservation_list(db)
 
     current_db_block_list = (
-        db.query(db_models.ReservationList)
-        .filter(db_models.ReservationList.crawler_uuid == uuid)
-        .filter(db_models.ReservationList.latest_return > datetime.now())
+        db.query(db_models.CrawlerReservation)
+        .filter(db_models.CrawlerReservation.crawler_uuid == uuid)
+        .filter(db_models.CrawlerReservation.latest_return > datetime.now())
     )
     current_block_list = [fqdn.fqdn for fqdn in current_db_block_list]
 
@@ -115,7 +115,7 @@ def save_reservations(db, frontier_response, latest_return):
     )
 
     new_db_block_list = [
-        db_models.ReservationList(
+        db_models.CrawlerReservation(
             crawler_uuid=str(uuid), fqdn=fqdn, latest_return=latest_return
         )
         for fqdn in fqdn_new_block_list
@@ -157,8 +157,8 @@ def get_db_stats(db):
         "frontier_amount": db.query(db_models.FqdnFrontier).count(),
         "url_amount": db.query(db_models.UrlFrontier).count(),
         "url_ref_amount": db.query(db_models.URLRef).count(),
-        "reserved_fqdn_amount": db.query(db_models.ReservationList)
-        .filter(db_models.ReservationList.latest_return > datetime.now())
+        "reserved_fqdn_amount": db.query(db_models.CrawlerReservation)
+        .filter(db_models.CrawlerReservation.latest_return > datetime.now())
         .count(),
     }
     return response

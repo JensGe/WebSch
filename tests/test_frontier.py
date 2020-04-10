@@ -155,9 +155,9 @@ def test_save_reservations_with_old_entries():
     )
 
     reservation_item = (
-        db.query(db_models.ReservationList)
-        .filter(db_models.ReservationList.crawler_uuid == crawler_uuid)
-        .filter(db_models.ReservationList.fqdn == fqdn).first()
+        db.query(db_models.CrawlerReservation)
+        .filter(db_models.CrawlerReservation.crawler_uuid == crawler_uuid)
+        .filter(db_models.CrawlerReservation.fqdn == fqdn).first()
     )
     reservation_item.latest_return = datetime.now() - timedelta(days=2)
     db.commit()

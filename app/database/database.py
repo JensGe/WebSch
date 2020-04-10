@@ -35,7 +35,7 @@ def reset(db, request: pyd_models.DeleteDatabase):
         db.commit()
 
     if request.delete_reserved_fqdns:
-        db.query(db_models.ReservationList).delete()
+        db.query(db_models.CrawlerReservation).delete()
         db.commit()
 
     return True

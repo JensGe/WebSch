@@ -106,12 +106,12 @@ def save_reservations(db, frontier_response, latest_return):
 
     clean_reservation_list(db)
 
-    current_db_block_list = (
+    current_db_reservation_list = (
         db.query(db_models.CrawlerReservation)
         .filter(db_models.CrawlerReservation.crawler_uuid == uuid)
         .filter(db_models.CrawlerReservation.latest_return > datetime.now())
     )
-    current_block_list = [fqdn.fqdn for fqdn in current_db_block_list]
+    current_block_list = [fqdn.fqdn for fqdn in current_db_reservation_list]
 
     fqdn_new_block_list = get_only_new_list_items(
         new_list=fqdn_only_list, old_list=current_block_list

@@ -4,6 +4,7 @@ from app.database import db_models, pyd_models, crawlers
 from app.common import enum, http_exceptions as http_ex, common_values as c
 
 from sqlalchemy.sql.expression import func
+from sqlalchemy.orm import aliased
 
 
 def get_fqdn_list(db, request):
@@ -66,7 +67,10 @@ def create_url_frontier(fqdn, url_list):
 def get_referencing_urls(db, url, amount):
     return (
         db.query(db_models.UrlFrontier)
-        .filter(db_models.UrlFrontier.url_last_visited < url.url_last_visited)
+        .filter(
+            db_models.UrlFrontier.url_last_visited is not None
+            # db_models.UrlFrontier.url_last_visited < url.url_last_visited,
+        )
         .order_by(func.random())
         .limit(amount)
     )

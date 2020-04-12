@@ -166,6 +166,43 @@ def test_save_reservations_with_old_entries():
     assert frontier.save_reservations(db, frontier_response, datetime.now())
 
 
+def test_get_referencing_urls():
+
+
+    client.post(
+        c.database_endpoint,
+        json={
+            "crawler_amount": 0,
+            "fqdn_amount": 1,
+            "min_url_amount": 1,
+            "max_url_amount": 1,
+            "visited_ratio": 0.0,
+            "connection_amount": 0,
+        },
+    )
+
+    sleep(3)
+
+    stats_before = client.get(c.stats_endpoint).json()
+
+    client.post(
+        c.database_endpoint,
+        json={
+            "crawler_amount": 0,
+            "fqdn_amount": 1,
+            "min_url_amount": 1,
+            "max_url_amount": 1,
+            "visited_ratio": 0.0,
+            "connection_amount": 1,
+        },
+    )
+
+    sleep(3)
+
+    stats_after = client.get(c.stats_endpoint).json()
+    assert stats_after["url_amount"] == stats_before["url_amount"] + 1
+    assert stats_after["url_ref_amount"] == stats_before["url_ref_amount"] + 1
+
 def test_delete_reservation_list():
     # check if deleted List is empty
     pass

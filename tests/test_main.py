@@ -292,6 +292,7 @@ def test_delete_example_db():
     response = client.delete(
         c.database_endpoint,
         json={
+            "delete_reserved_fqdns": True,
             "delete_url_refs": True,
             "delete_crawlers": True,
             "delete_urls": True,

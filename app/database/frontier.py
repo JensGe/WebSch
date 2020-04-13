@@ -159,6 +159,7 @@ def get_fqdn_frontier(db, request: pyd_models.FrontierRequest):
 
 
 def get_db_stats(db):
+    clean_reservation_list(db)
     response = {
         "crawler_amount": db.query(db_models.Crawler).count(),
         "frontier_amount": db.query(db_models.FqdnFrontier).count(),

@@ -27,4 +27,4 @@ connections = 0
 
 # Frontier Settings
 response_url = "http://ec2-18-195-144-15.eu-central-1.compute.amazonaws.com/submit"
-hours_to_die = 48
+hours_to_die = 2

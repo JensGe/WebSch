@@ -10,10 +10,8 @@ url_frontier_pk = "url_frontiers.url"
 fqdn_frontier_pk = "fqdn_frontiers.fqdn"
 
 
-
 # Pydantic Model Values
-
-frontier_amount = 0
+frontier_amount = 10
 frontier_length = 0
 
 url_frontier_count = 0

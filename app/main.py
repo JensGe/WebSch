@@ -147,7 +147,7 @@ def get_frontier(request: pyd_models.FrontierRequest, db: Session = Depends(get_
     Get a Sub List of the global Frontier
 
     - **crawler_uuid**: Your crawlers UUID
-    - **amount** (default: 0 = No Limit): The amount of URL-Lists you want to receive
+    - **amount** (default: 10): The amount of URL-Lists you want to receive
     - **length** (default: 0 = No Limit): The amount of URLs in each list
     - **long_term_mode** (default: random): The modus in which the FQDN Frontier is partitioned or prioritized
     - **short_term_mode** (default: random): The modus in which the URL Frontier is prioritized

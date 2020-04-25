@@ -299,10 +299,11 @@ def test_delete_example_db():
             "delete_fqdns": True,
         },
     )
-    sleep(10)
+    sleep(5)
     after = client.get(c.stats_endpoint).json()
     assert response.status_code == status.HTTP_202_ACCEPTED
     assert after["crawler_amount"] == 0
     assert after["frontier_amount"] == 0
     assert after["url_amount"] == 0
     assert after["url_ref_amount"] == 0
+    assert after["reserved_fqdn_amount"] == 0

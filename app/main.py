@@ -4,13 +4,16 @@ from app.database import crawlers, db_models, pyd_models, sample_generator, fron
 from app.database import database
 from app.common import http_exceptions as http_es
 
-
 from fastapi import FastAPI, Depends, status, BackgroundTasks
 from fastapi.routing import Response
 from fastapi.middleware.gzip import GZipMiddleware
 
+import logging
+import os
 from sqlalchemy.orm import Session
 
+
+logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"))
 
 db_models.Base.metadata.create_all(bind=database.engine)
 
@@ -196,9 +199,6 @@ async def generate_example_db(
     - **max_url_amount** (default: 100): Maximum Pages per Web Site
     - **visited_ratio** (default: 1.0): Pages which have been visited
     - **connection_amount** (default: 0): Amount of incoming Connections per Page
-    - ~~**blacklisted_ratio** (default: 0): Percentage of blacklisted Pages~~
-    - ~~**bot_excluded_ratio** (default. 0): Percentage of bot-excluded Pages~~
-
     """
     if request.min_url_amount > request.max_url_amount:
         http_es.raise_http_400(request.min_url_amount, request.max_url_amount)

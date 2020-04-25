@@ -4,7 +4,6 @@ from app.database import db_models, pyd_models, crawlers
 from app.common import enum, http_exceptions as http_ex, common_values as c
 
 from sqlalchemy.sql.expression import func
-from sqlalchemy.orm import aliased
 
 
 def get_fqdn_list(db, request):
@@ -68,7 +67,8 @@ def get_referencing_urls(db, url, amount):
     return (
         db.query(db_models.UrlFrontier)
         .filter(
-            db_models.UrlFrontier.url_last_visited is not None
+            db_models.UrlFrontier.url_last_visited
+            is not None
             # db_models.UrlFrontier.url_last_visited < url.url_last_visited,
         )
         .order_by(func.random())
@@ -153,7 +153,7 @@ def get_fqdn_frontier(db, request: pyd_models.FrontierRequest):
     save_reservations(db, frontier_response, latest_return)
 
     frontier_response.latest_return = latest_return
-    frontier_response.response_url = c.response_url + str(request.crawler_uuid)
+    frontier_response.response_url = c.response_url
 
     return frontier_response
 

@@ -19,14 +19,14 @@ class Crawler(BasisModel):
     name: str
     reg_date: datetime
     location: str = None
-    tld_preference: enum.TLD = None
+    tld_preference: str = None
 
 
 class CreateCrawler(BasisModel):
     contact: EmailStr
     name: str
     location: str = None
-    tld_preference: enum.TLD = None
+    tld_preference: str = None
 
 
 class UpdateCrawler(BasisModel):
@@ -62,7 +62,7 @@ class Url(BasisModel):
 
 class UrlFrontier(BasisModel):
     fqdn: str
-    tld: enum.TLD = None
+    tld: str = None
 
     fqdn_last_ipv4: str = None
     fqdn_last_ipv6: str = None

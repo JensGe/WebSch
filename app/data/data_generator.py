@@ -74,7 +74,7 @@ def get_random_tld():
     # Check https://de.statista.com/statistik/daten/studie/70561/umfrage/domains-weltweit/
     # and https://ntldstats.com/tld/
 
-    with open("example_tlds.csv", "r") as file:
+    with open("app/data/example_tlds.csv", "r") as file:
         reader = csv.reader(file)
         tld_dist = [(row[0], int(row[1])) for row in reader]
         tlds, dist = map(list, zip(*tld_dist))

@@ -2,7 +2,7 @@ import random
 import string
 from datetime import datetime, timedelta
 
-from app.common import enum, distribution_sets as dist_gen
+from app.common import enum, data_generator as data_gen
 
 
 def get_random_datetime():  # ToDo also create None Dates
@@ -38,7 +38,7 @@ def get_random_academic_name():
 
 
 def get_random_fqdn():
-    return "www." + get_random_sld() + "." + dist_gen.get_random_tld()
+    return "www." + get_random_sld() + "." + data_gen.get_random_tld()
 
 
 def get_random_ipv4():
@@ -68,7 +68,7 @@ def get_random_web_filename():
 
 def get_random_url(fqdn: str):
     return "http://{}/{}{}".format(
-        fqdn, dist_gen.get_random_text(), get_random_web_filename()
+        fqdn, data_gen.get_random_text(), get_random_web_filename()
     )
 
 

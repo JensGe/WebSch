@@ -1,4 +1,4 @@
-from app.common import random_data_generator as rand_gen, distribution_sets as dists
+from app.common import random_data_generator as rand_gen, data_generator as data_gen
 from app.common import enum
 import string
 import datetime
@@ -23,7 +23,7 @@ def test_get_random_example_ipv6():
 
 def test_get_german_text():
     text_length = 7
-    random_text = dists.get_random_text(text_length)
+    random_text = data_gen.get_random_text(text_length)
     assert len(random_text) == text_length
 
 

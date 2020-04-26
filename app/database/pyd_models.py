@@ -113,3 +113,12 @@ class DeleteDatabase(BasisModel):
     delete_urls: bool = False
     delete_fqdns: bool = False
     delete_reserved_fqdns: bool = False
+
+
+class GetRandomUrls(BasisModel):
+    amount: int = 1
+
+
+class RandomUrls(BasisModel):
+    url_list: List[Url] = []
+

@@ -170,3 +170,11 @@ def get_db_stats(db):
         .count(),
     }
     return response
+
+
+def get_random_urls(db, amount: int):
+    urls = db.query(db_models.UrlFrontier).order_by(func.random()).limit(amount)
+
+    url_list = [url.url for url in urls]
+
+    return pyd_models.RandomUrls({"url_list": url_list})

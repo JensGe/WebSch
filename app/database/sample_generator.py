@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.database import db_models, frontier
 from app.common import random_data_generator as rand_gen
-from app.common import data_generator as dist_gen
+from app.data import data_generator as dist_gen
 
 
 def create_sample_crawler(db: Session, amount: int = 3):

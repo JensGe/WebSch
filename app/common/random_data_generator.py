@@ -2,7 +2,8 @@ import random
 import string
 from datetime import datetime, timedelta
 
-from app.common import enum, data_generator as data_gen
+from app.common import enum
+from app.data import data_generator as data_gen
 
 
 def get_random_datetime():  # ToDo also create None Dates

@@ -1,4 +1,4 @@
-from typing import List
+
 
 from app.database import crawlers, db_models, pyd_models, sample_generator, frontier
 from app.database import database
@@ -8,11 +8,11 @@ from fastapi import FastAPI, Depends, status, BackgroundTasks
 from fastapi.routing import Response
 from fastapi.middleware.gzip import GZipMiddleware
 
-import logging
 import os
 from sqlalchemy.orm import Session
+from typing import List
 
-
+import logging
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"))
 
 db_models.Base.metadata.create_all(bind=database.engine)
@@ -232,3 +232,16 @@ def get_db_stats(db: Session = Depends(get_db)):
     """
 
     return frontier.get_db_stats(db)
+
+@app.get(
+    "/urls",
+    response_model=pyd_models.RandomUrls,
+    tags=["Development Tools"],
+    summary="Get Random Urls from Database"
+)
+def get_random_urls(request: pyd_models.GetRandomUrls,
+                    db: Session = Depends(get_db)):
+    """
+    Returns a requested amount of random URLs from the Database
+    """
+    return frontier.get_random_urls(db, request.amount)

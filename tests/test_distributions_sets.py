@@ -1,4 +1,4 @@
-from app.common import data_generator as data_gen
+from app.data import data_generator as data_gen
 
 
 def test_get_random_pagerank():

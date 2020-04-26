@@ -1,4 +1,5 @@
-from app.common import random_data_generator as rand_gen, data_generator as data_gen
+from app.common import random_data_generator as rand_gen
+from app.data import data_generator as data_gen
 from app.common import enum
 import string
 import datetime

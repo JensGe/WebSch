@@ -1,6 +1,6 @@
 import random
 import string
-import datetime
+import csv
 
 
 def get_random_text(length: int = None, language: str = "de"):
@@ -68,3 +68,15 @@ def get_random_pagerank():
         random_pagerank = random.uniform(0.0, .000001)
 
     return random_pagerank
+
+
+def get_random_tld():
+    # Check https://de.statista.com/statistik/daten/studie/70561/umfrage/domains-weltweit/
+    # and https://ntldstats.com/tld/
+
+    with open("../app/data/example_tlds.csv", "r") as file:
+        reader = csv.reader(file)
+        tld_dist = [(row[0], int(row[1])) for row in reader]
+        tlds, dist = map(list, zip(*tld_dist))
+
+    return random.choices(population=tlds, weights=dist, k=1)[0]

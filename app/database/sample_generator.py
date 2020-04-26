@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.database import db_models, frontier
 from app.common import random_data_generator as rand_gen
-from app.common import distribution_sets as dists
+from app.common import distribution_sets as dist_gen
 
 
 def create_sample_crawler(db: Session, amount: int = 3):
@@ -21,7 +21,7 @@ def create_sample_crawler(db: Session, amount: int = 3):
                 reg_date=datetime.now(),
                 name=rand_gen.get_random_academic_name(),
                 location="Germany",
-                tld_preference=rand_gen.get_random_tld(),
+                tld_preference=dist_gen.get_random_tld(),
             )
         )
 
@@ -42,7 +42,7 @@ def new_fqdn(fqdn_basis, fqdn_url_amount):
         tld=fqdn_basis.split(".")[-1],
         fqdn_last_ipv4=rand_gen.get_random_ipv4(),
         fqdn_last_ipv6=rand_gen.get_random_example_ipv6(),
-        fqdn_pagerank=dists.get_random_pagerank(),
+        fqdn_pagerank=dist_gen.get_random_pagerank(),
         fqdn_crawl_delay=5,
         fqdn_url_count=fqdn_url_amount,
     )

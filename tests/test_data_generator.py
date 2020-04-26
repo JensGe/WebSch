@@ -1,0 +1,37 @@
+from app.data import data_generator as data_gen
+
+
+def test_get_random_pagerank():
+    rand_rank = data_gen.get_random_pagerank()
+    assert isinstance(rand_rank, float)
+
+
+def test_get_high_pagerank():
+    pagerank10 = data_gen.get_random_pagerank(rank=5)
+    pagerank100 = data_gen.get_random_pagerank(rank=50)
+    pagerank1k = data_gen.get_random_pagerank(rank=500)
+    pagerank10k = data_gen.get_random_pagerank(rank=5000)
+    pagerank100k = data_gen.get_random_pagerank(rank=50000)
+    pagerank1ml = data_gen.get_random_pagerank(rank=500000)
+    pagerank10ml = data_gen.get_random_pagerank(rank=5000000)
+    pagerank100ml = data_gen.get_random_pagerank(rank=50000000)
+    pagerank1mr = data_gen.get_random_pagerank(rank=500000000)
+    pagerank15mr = data_gen.get_random_pagerank(rank=10000000000)
+
+    assert 8.0 <= pagerank10 <= 10.0
+    assert 4.0 <= pagerank100 <= 8.0
+    assert 2.0 <= pagerank1k <= 4.0
+    assert 1.0 <= pagerank10k <= 2.0
+    assert 0.2 <= pagerank100k <= 1.0
+    assert 0.01 <= pagerank1ml <= 0.2
+    assert 0.001 <= pagerank10ml <= 0.01
+    assert 0.0001 <= pagerank100ml <= 0.001
+    assert 0.00001 <= pagerank1mr <= 0.0001
+    assert 0.0 <= pagerank15mr <= 0.00001
+
+
+def test_get_random_tld():
+    tld = data_gen.get_random_tld()
+
+    assert isinstance(tld, str)
+    assert len(tld) > 1

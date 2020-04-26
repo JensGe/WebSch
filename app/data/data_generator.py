@@ -41,10 +41,8 @@ def get_random_text(length: int = None, language: str = "de"):
     return "".join(random.choices(population=chars, weights=distribution, k=length))
 
 
-def get_random_pagerank():
+def get_random_pagerank(rank: int = random.randint(0, 14470000000)):
     # Check Springer: Inf Retrieval (2006) 9: 134 Table 1
-
-    rank = random.randint(0, 14470000000)
 
     if rank <= 10:
         random_pagerank = random.uniform(8.0, 10.0)
@@ -61,11 +59,11 @@ def get_random_pagerank():
     elif rank <= 10000000:
         random_pagerank = random.uniform(0.001, 0.01)
     elif rank <= 100000000:
-        random_pagerank = random.uniform(0.0001, 0.00001)
+        random_pagerank = random.uniform(0.0001, 0.001)
     elif rank <= 1000000000:
-        random_pagerank = random.uniform(0.000001, 0.00001)
+        random_pagerank = random.uniform(0.00001, 0.0001)
     else:
-        random_pagerank = random.uniform(0.0, .000001)
+        random_pagerank = random.uniform(0.0, 0.00001)
 
     return random_pagerank
 

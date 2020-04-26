@@ -2,7 +2,7 @@ import random
 import string
 from datetime import datetime, timedelta
 
-from app.common import enum
+from app.common import enum, distribution_sets as dists
 
 
 def get_random_datetime():  # ToDo also create None Dates
@@ -31,48 +31,6 @@ def get_random_sld():
         + last_char
     )
     return sld
-
-
-def get_random_german_text(length: int = None):
-    chars = [
-        "e",
-        "n",
-        "i",
-        "s",
-        "r",
-        "a",
-        "t",
-        "d",
-        "h",
-        "u",
-        "l",
-        "c",
-        "g",
-        "m",
-        "o",
-    ]
-    distribution = [
-        0.1740,
-        0.0978,
-        0.0755,
-        0.0758,
-        0.0700,
-        0.0651,
-        0.0615,
-        0.0508,
-        0.0476,
-        0.0435,
-        0.0344,
-        0.0306,
-        0.0301,
-        0.0253,
-        0.0251,
-    ]
-
-    if length is None:
-        length = random.randint(10, 16)
-
-    return "".join(random.choices(population=chars, weights=distribution, k=length))
 
 
 def get_random_academic_name():
@@ -106,10 +64,6 @@ def get_random_example_ipv6():
     )
 
 
-def get_random_pagerank():
-    return random.uniform(0, 0.0003)
-
-
 def get_random_web_filename():
     file = random.choice(["/index", "/home", "/impressum", "/contact"])
     extension = random.choice([".php", ".html", ".aspx", "", "/"])
@@ -118,7 +72,7 @@ def get_random_web_filename():
 
 def get_random_url(fqdn: str):
     return "http://{}/{}{}".format(
-        fqdn, get_random_german_text(), get_random_web_filename()
+        fqdn, dists.get_random_text(), get_random_web_filename()
     )
 
 

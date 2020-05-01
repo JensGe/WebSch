@@ -173,12 +173,11 @@ def get_db_stats(db):
 
 
 def get_random_urls(db, request: pyd_models.GetRandomUrls):
-    urls = (
-        db.query(db_models.UrlFrontier)
-        .filter(db_models.UrlFrontier.fqdn == request.fqdn)
-        .order_by(func.random())
-        .limit(request.amount)
-    )
+    urls = db.query(db_models.UrlFrontier)
+    if request.fqdn is not None:
+        urls = urls.filter(db_models.UrlFrontier.fqdn == request.fqdn)
+
+    urls = urls.order_by(func.random()).limit(request.amount)
 
     url_list = [url for url in urls]
 

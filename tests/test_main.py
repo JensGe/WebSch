@@ -307,3 +307,7 @@ def test_delete_example_db():
     assert after["url_amount"] == 0
     assert after["url_ref_amount"] == 0
     assert after["reserved_fqdn_amount"] == 0
+
+
+def test_get_random_urls():
+    cli

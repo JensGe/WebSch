@@ -6,7 +6,7 @@ from app.common import common_values as c, enum
 from app.database import crawlers, database
 
 from time import sleep
-from tests import values as v 
+from tests import values as v
 
 client = TestClient(app)
 db = database.SessionLocal()
@@ -310,4 +310,27 @@ def test_delete_example_db():
 
 
 def test_get_random_urls():
-    cli
+    client.post(
+        c.database_endpoint,
+        json={
+            "crawler_amount": 0,
+            "fqdn_amount": 10,
+            "min_url_amount": 1,
+            "max_url_amount": 1,
+            "connection_amount": 0,
+        },
+    )
+    full_url_list_response = client.get("urls", json={"amount": 10}).json()
+
+    print(full_url_list_response)
+    assert len(full_url_list_response["url_list"]) == 10
+
+    specific_fqdn_response = client.get(
+        "urls",
+        json={"amount": 1, "fqdn": full_url_list_response["url_list"][0]["fqdn"]},
+    ).json()
+
+    assert (
+        specific_fqdn_response["url_list"][0]["fqdn"]
+        == full_url_list_response["url_list"][0]["fqdn"]
+    )

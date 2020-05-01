@@ -172,8 +172,13 @@ def get_db_stats(db):
     return response
 
 
-def get_random_urls(db, amount: int):
-    urls = db.query(db_models.UrlFrontier).order_by(func.random()).limit(amount)
+def get_random_urls(db, request: pyd_models.GetRandomUrls):
+    urls = (
+        db.query(db_models.UrlFrontier)
+        .filter(db_models.UrlFrontier.fqdn == request.fqdn)
+        .order_by(func.random())
+        .limit(request.amount)
+    )
 
     url_list = [url for url in urls]
 

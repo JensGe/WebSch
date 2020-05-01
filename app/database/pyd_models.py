@@ -117,6 +117,7 @@ class DeleteDatabase(BasisModel):
 
 class GetRandomUrls(BasisModel):
     amount: int = 1
+    fqdn: str = None
 
 
 class RandomUrls(BasisModel):

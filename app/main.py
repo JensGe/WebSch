@@ -244,4 +244,4 @@ def get_random_urls(request: pyd_models.GetRandomUrls,
     """
     Returns a requested amount of random URLs from the Database
     """
-    return frontier.get_random_urls(db, request.amount)
+    return frontier.get_random_urls(db, request)

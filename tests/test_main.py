@@ -175,7 +175,17 @@ def test_delete_unknown_crawler():
 
 # Frontier API
 def test_get_simple_frontier():
-    crawlers.delete_crawlers(db)
+    client.delete(
+        c.database_endpoint,
+        json={
+            "delete_reserved_fqdns": True,
+            "delete_url_refs": True,
+            "delete_crawlers": True,
+            "delete_urls": True,
+            "delete_fqdns": True,
+        },
+    )
+    sleep(5)
 
     new_crawler_uuid = client.post(
         c.crawler_endpoint, json={"contact": v.test_email_1, "name": "Isaac"}

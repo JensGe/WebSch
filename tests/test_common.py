@@ -24,7 +24,7 @@ def test_get_random_example_ipv6():
 
 def test_get_german_text():
     text_length = 7
-    random_text = data_gen.get_random_text(text_length)
+    random_text = data_gen.random_text(text_length)
     assert len(random_text) == text_length
 
 

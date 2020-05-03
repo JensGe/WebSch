@@ -3,7 +3,7 @@ import string
 import csv
 
 
-def get_random_text(length: int = None, language: str = "de"):
+def random_text(length: int = None, language: str = "de"):
 
     chars = string.ascii_lowercase
     if length is None:
@@ -41,8 +41,8 @@ def get_random_text(length: int = None, language: str = "de"):
     return "".join(random.choices(population=chars, weights=distribution, k=length))
 
 
-def get_random_pagerank(rank: int = random.randint(0, 14470000000)):
-    # Check Springer: Inf Retrieval (2006) 9: 134 Table 1
+def random_pagerank(rank: int = random.randint(0, 14470000000)):
+    # Source Springer: Inf Retrieval (2006) 9: 134 Table 1
 
     if rank <= 10:
         random_pagerank = random.uniform(8.0, 10.0)
@@ -68,8 +68,8 @@ def get_random_pagerank(rank: int = random.randint(0, 14470000000)):
     return random_pagerank
 
 
-def get_random_tld():
-    # Check https://de.statista.com/statistik/daten/studie/70561/umfrage/domains-weltweit/
+def random_tld():
+    # Source: https://de.statista.com/statistik/daten/studie/70561/umfrage/domains-weltweit/
     # and https://ntldstats.com/tld/
 
     with open("app/data/example_tlds.csv", "r") as file:
@@ -78,3 +78,30 @@ def get_random_tld():
         tlds, dist = map(list, zip(*tld_dist))
 
     return random.choices(population=tlds, weights=dist, k=1)[0]
+
+
+def random_crawl_delay():
+    # Source: (Kolay et al. 2008, S. 1171 f.)
+
+    crawl_delays = [None, 1, 2, 3, 5, 10, 15, 20, 30, 45, 50, 60, 120, 200, 300, 600, 1000]
+    distibution = [
+        0.80000,
+        0.00800,
+        0.00450,
+        0.00450,
+        0.01950,
+        0.05400,
+        0.00450,
+        0.01900,
+        0.01500,
+        0.00800,
+        0.00100,
+        0.01800,
+        0.00800,
+        0.00450,
+        0.00300,
+        0.00150,
+        0.00080,
+    ]
+
+    return random.choices(population=crawl_delays, weights=distibution)[0]

@@ -39,7 +39,7 @@ def get_random_academic_name():
 
 
 def get_random_fqdn():
-    return "www." + get_random_sld() + "." + data_gen.get_random_tld()
+    return "www." + get_random_sld() + "." + data_gen.random_tld()
 
 
 def get_random_ipv4():
@@ -69,7 +69,7 @@ def get_random_web_filename():
 
 def get_random_url(fqdn: str):
     return "http://{}/{}{}".format(
-        fqdn, data_gen.get_random_text(), get_random_web_filename()
+        fqdn, data_gen.random_text(), get_random_web_filename()
     )
 
 

@@ -62,7 +62,7 @@ def create_example_frontier_response(uuid=v.sample_uuid):
     frontier_response = pyd_models.FrontierResponse(
         uuid=uuid,
         response_url="https://www.example.com/submit?code=1234567890",
-        withdrawal_date=rand_gen.get_random_datetime(),
+        withdrawal_date=rand_gen.random_datetime(),
         url_frontiers=[frontier_one, frontier_two],
     )
     frontier_response.url_frontiers_count = len(frontier_response.url_frontiers)

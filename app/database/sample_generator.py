@@ -19,7 +19,7 @@ def create_sample_crawler(db: Session, amount: int = 3):
                 uuid=str(uuid4()),
                 contact="admin@owi-crawler.com",
                 reg_date=datetime.now(),
-                name=rand_gen.get_random_academic_name(),
+                name=rand_gen.random_academic_name(),
                 location="Germany",
                 tld_preference=dist_gen.random_tld(),
             )
@@ -41,7 +41,7 @@ def new_fqdn(fqdn_basis, fqdn_url_amount):
         fqdn=fqdn_basis,
         tld=fqdn_basis.split(".")[-1],
         fqdn_last_ipv4=rand_gen.get_random_ipv4(),
-        fqdn_last_ipv6=rand_gen.get_random_example_ipv6(),
+        fqdn_last_ipv6=rand_gen.random_example_ipv6(),
         fqdn_pagerank=dist_gen.random_pagerank(),
         fqdn_crawl_delay=5,
         fqdn_url_count=fqdn_url_amount,
@@ -50,7 +50,7 @@ def new_fqdn(fqdn_basis, fqdn_url_amount):
 
 def new_url(url, fqdn, visited_ratio):
     if random.random() < visited_ratio:
-        random_date_time = rand_gen.get_random_datetime()
+        random_date_time = rand_gen.random_datetime()
     else:
         random_date_time = None
 
@@ -65,7 +65,7 @@ def new_url(url, fqdn, visited_ratio):
 
 def new_ref(url_out, url_in):
     return db_models.URLRef(
-        url_out=url_out, url_in=url_in, parsing_date=rand_gen.get_random_datetime(),
+        url_out=url_out, url_in=url_in, parsing_date=rand_gen.random_datetime(),
     )
 
 
@@ -90,7 +90,7 @@ def create_sample_frontier(
     db.commit()
 
     for fqdn in fqdn_bases:
-        urls = rand_gen.get_random_urls(fqdn, fqdn_url_amounts[fqdn_bases.index(fqdn)])
+        urls = rand_gen.random_urls(fqdn, fqdn_url_amounts[fqdn_bases.index(fqdn)])
 
         fqdn_url_list = [
             new_url(urls[i], fqdn, visited_ratio)

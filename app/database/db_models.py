@@ -61,6 +61,25 @@ class CrawlerReservation(Base):
     latest_return = Column(DateTime)
 
 
+class FetcherSettings(Base):
+    __tablename__ = "fetcher_settings"
+
+    id = Column(Integer, primary_key=True)
+    crawling_speed_factor = Column(Float)
+    default_crawl_delay = Column(Integer)
+    parallel_process = Column(Integer)
+
+    iterations = Column(Integer)
+    fqdn_amount = Column(Integer)
+    url_amount = Column(Integer)
+
+    min_links_per_page = Column(Integer)
+    max_links_per_page = Column(Integer)
+
+    internal_vs_external_threshold = Column(Float)
+    new_vs_existing_threshold = Column(Float)
+
+
 class URLRef(Base):
     __tablename__ = "url_references"
 
@@ -72,3 +91,5 @@ class URLRef(Base):
     )
     parsing_date = Column(DateTime, primary_key=True)
     Index("url_ref_index", url_out, url_in)
+
+

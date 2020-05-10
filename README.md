@@ -72,7 +72,7 @@ sudo docker ps -a
 # Start Docker with PostgreSQL Credentials as Environment Variables
 
 ```shell script
-sudo docker run --env-file ./env.list -p: 80:80
+sudo docker run --env-file ./env.list -p 80:80
 ```
 
 ## Environment Variables file

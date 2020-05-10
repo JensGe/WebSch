@@ -4,6 +4,7 @@ from app.database import db_models, pyd_models, crawlers
 from app.common import enum, http_exceptions as http_ex, common_values as c
 
 from sqlalchemy.sql.expression import func
+from sqlalchemy.orm import Session
 
 
 def get_fqdn_list(db, request):
@@ -158,7 +159,7 @@ def get_fqdn_frontier(db, request: pyd_models.FrontierRequest):
     return frontier_response
 
 
-def get_db_stats(db):
+def get_db_stats(db: Session):
     clean_reservation_list(db)
     response = {
         "crawler_amount": db.query(db_models.Crawler).count(),
@@ -172,7 +173,7 @@ def get_db_stats(db):
     return response
 
 
-def get_random_urls(db, request: pyd_models.GetRandomUrls):
+def get_random_urls(db: Session, request: pyd_models.GetRandomUrls):
     urls = db.query(db_models.UrlFrontier)
     if request.fqdn is not None:
         urls = urls.filter(db_models.UrlFrontier.fqdn == request.fqdn)
@@ -182,3 +183,90 @@ def get_random_urls(db, request: pyd_models.GetRandomUrls):
     url_list = [url for url in urls]
 
     return pyd_models.RandomUrls(url_list=url_list)
+
+
+def get_fetcher_settings(db: Session) -> pyd_models.FetcherSettings:
+    fetcher_settings = db.query(db_models.FetcherSettings).first()
+    return pyd_models.FetcherSettings(
+        crawling_speed_factor=fetcher_settings.crawling_speed_factor,
+        default_crawl_delay=fetcher_settings.default_crawl_delay,
+        parallel_process=fetcher_settings.parallel_process,
+        iterations=fetcher_settings.iterations,
+        fqdn_amount=fetcher_settings.fqdn_amount,
+        url_amount=fetcher_settings.url_amount,
+        min_links_per_page=fetcher_settings.min_links_per_page,
+        max_links_per_page=fetcher_settings.max_links_per_page,
+        internal_vs_external_threshold=fetcher_settings.internal_vs_external_threshold,
+        new_vs_existing_threshold=fetcher_settings.new_vs_existing_threshold,
+    )
+
+
+def settings_exists(db: Session):
+    if db.query(db_models.FetcherSettings).count() == 1:
+        return True
+    else:
+        return False
+
+
+def set_fetcher_settings(request: pyd_models.FetcherSettings, db: Session):
+    if not settings_exists(db):
+        db_fetcher_settings = db_models.FetcherSettings(
+            id=1,
+            crawling_speed_factor=request.crawling_speed_factor,
+            default_crawl_delay=request.default_crawl_delay,
+            parallel_process=request.parallel_process,
+            iterations=request.iterations,
+            fqdn_amount=request.fqdn_amount,
+            url_amount=request.url_amount,
+            min_links_per_page=request.min_links_per_page,
+            max_links_per_page=request.max_links_per_page,
+            internal_vs_external_threshold=request.internal_vs_external_threshold,
+            new_vs_existing_threshold=request.new_vs_existing_threshold,
+        )
+
+        db.add(db_fetcher_settings)
+
+    else:
+        db_fetcher_settings = (
+            db.query(db_models.FetcherSettings)
+            .filter(db_models.FetcherSettings.id == 1)
+            .first()
+        )
+
+        if request.crawling_speed_factor is not None:
+            db_fetcher_settings.crawling_speed_factor = request.crawling_speed_factor
+
+        if request.default_crawl_delay is not None:
+            db_fetcher_settings.default_crawl_delay = request.default_crawl_delay
+
+        if request.parallel_process is not None:
+            db_fetcher_settings.parallel_process = request.parallel_process
+
+        if request.iterations is not None:
+            db_fetcher_settings.iterations = request.iterations
+
+        if request.fqdn_amount is not None:
+            db_fetcher_settings.fqdn_amount = request.fqdn_amount
+
+        if request.url_amount is not None:
+            db_fetcher_settings.url_amount = request.url_amount
+
+        if request.min_links_per_page is not None:
+            db_fetcher_settings.min_links_per_page = request.min_links_per_page
+
+        if request.max_links_per_page is not None:
+            db_fetcher_settings.max_links_per_page = request.max_links_per_page
+
+        if request.internal_vs_external_threshold is not None:
+            db_fetcher_settings.internal_vs_external_threshold = (
+                request.internal_vs_external_threshold
+            )
+
+        if request.new_vs_existing_threshold is not None:
+            db_fetcher_settings.new_vs_existing_threshold = (
+                request.new_vs_existing_threshold
+            )
+
+    db.commit()
+    db.refresh(db_fetcher_settings)
+    return db_fetcher_settings

@@ -123,3 +123,19 @@ class GetRandomUrls(BasisModel):
 class RandomUrls(BasisModel):
     url_list: List[Url] = []
 
+
+class FetcherSettings(BasisModel):
+
+    crawling_speed_factor: float = 10.0
+    default_crawl_delay: int = 10
+    parallel_process: int = 10
+
+    iterations: int = 10
+    fqdn_amount: int = 30
+    url_amount: int = 0                          # unlimited
+
+    min_links_per_page: int = 2                  # Check Literature
+    max_links_per_page: int = 5
+
+    internal_vs_external_threshold: float = 0.85   # Check Literature
+    new_vs_existing_threshold: float = 0.35

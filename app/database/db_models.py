@@ -75,6 +75,7 @@ class FetcherSettings(Base):
 
     min_links_per_page = Column(Integer)
     max_links_per_page = Column(Integer)
+    lpp_distribution_type = Column(String)
 
     internal_vs_external_threshold = Column(Float)
     new_vs_existing_threshold = Column(Float)

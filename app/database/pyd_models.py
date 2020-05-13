@@ -136,6 +136,7 @@ class FetcherSettings(BasisModel):
 
     min_links_per_page: int = 2                  # Check Literature
     max_links_per_page: int = 5
+    lpp_distribution_type: enum.LPPDISTR = enum.LPPDISTR.discrete
 
     internal_vs_external_threshold: float = 0.85   # Check Literature
     new_vs_existing_threshold: float = 0.35

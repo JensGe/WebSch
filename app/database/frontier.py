@@ -196,6 +196,7 @@ def get_fetcher_settings(db: Session) -> pyd_models.FetcherSettings:
         url_amount=fetcher_settings.url_amount,
         min_links_per_page=fetcher_settings.min_links_per_page,
         max_links_per_page=fetcher_settings.max_links_per_page,
+        lpp_distribution_type=fetcher_settings.lpp_distribution_type,
         internal_vs_external_threshold=fetcher_settings.internal_vs_external_threshold,
         new_vs_existing_threshold=fetcher_settings.new_vs_existing_threshold,
     )
@@ -220,6 +221,7 @@ def set_fetcher_settings(request: pyd_models.FetcherSettings, db: Session):
             url_amount=request.url_amount,
             min_links_per_page=request.min_links_per_page,
             max_links_per_page=request.max_links_per_page,
+            lpp_distribution_type=request.lpp_distribution_type,
             internal_vs_external_threshold=request.internal_vs_external_threshold,
             new_vs_existing_threshold=request.new_vs_existing_threshold,
         )
@@ -256,6 +258,9 @@ def set_fetcher_settings(request: pyd_models.FetcherSettings, db: Session):
 
         if request.max_links_per_page is not None:
             db_fetcher_settings.max_links_per_page = request.max_links_per_page
+
+        if request.lpp_distribution_type is not None:
+            db_fetcher_settings.lpp_distribution_type = request.lpp_distribution_type
 
         if request.internal_vs_external_threshold is not None:
             db_fetcher_settings.internal_vs_external_threshold = (

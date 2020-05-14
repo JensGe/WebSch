@@ -7,7 +7,7 @@ from sqlalchemy.sql.expression import func
 from sqlalchemy.orm import Session
 
 
-def get_fqdn_list(db, request):
+def fqdn_list(db, request):
 
     fqdn_block_list = db.query(db_models.CrawlerReservation.fqdn).filter(
         db_models.CrawlerReservation.latest_return > datetime.now()
@@ -39,19 +39,31 @@ def get_fqdn_list(db, request):
     return rv
 
 
-def get_db_url_list(db, request, fqdn):
-    db_url_list = (
-        db.query(db_models.UrlFrontier)
-        .filter(db_models.UrlFrontier.fqdn == fqdn.fqdn)
-        .order_by(db_models.UrlFrontier.url_last_visited.asc())
+def short_term_frontier(db, request, fqdn):
+    db_url_list = db.query(db_models.UrlFrontier).filter(
+        db_models.UrlFrontier.fqdn == fqdn.fqdn
     )
+
+    # Order
+    if request.short_term_mode == enum.STF.random:
+        db_url_list = db_url_list.order_by(func.random())
+
+    if request.short_term_mode == enum.STF.old_pages_first:
+        db_url_list = db_url_list.order_by(
+            db_models.UrlFrontier.url_last_visited.asc().nullsfirst()
+        )
+
+    if request.short_term_mode == enum.STF.new_pages_first:
+        db_url_list = db_url_list.order_by(
+            db_models.UrlFrontier.url_last_visited.desc().nullslast()
+        )
 
     db_url_list = db_url_list[: request.length] if request.length > 0 else db_url_list
 
     return db_url_list
 
 
-def create_url_frontier(fqdn, url_list):
+def long_term_frontier(fqdn, url_list):
     return pyd_models.UrlFrontier(
         fqdn=fqdn.fqdn,
         tld=fqdn.tld,
@@ -139,13 +151,14 @@ def get_fqdn_frontier(db, request: pyd_models.FrontierRequest):
         http_ex.raise_http_404(request.crawler_uuid)
 
     frontier_response = pyd_models.FrontierResponse(uuid=str(request.crawler_uuid))
-    fqdn_list = get_fqdn_list(db, request)
 
-    for fqdn in fqdn_list:
-        url_list = list(get_db_url_list(db, request, fqdn))
+    fqdns = fqdn_list(db, request)
+
+    for fqdn in fqdns:
+        url_list = list(short_term_frontier(db, request, fqdn))
 
         frontier_response.urls_count += len(url_list)
-        frontier_response.url_frontiers.append(create_url_frontier(fqdn, url_list))
+        frontier_response.url_frontiers.append(long_term_frontier(fqdn, url_list))
 
     frontier_response.url_frontiers_count = len(frontier_response.url_frontiers)
 
@@ -207,6 +220,15 @@ def settings_exists(db: Session):
         return True
     else:
         return False
+
+
+def fill_db_settings_with_pyd_settings(db_settings, pyd_settings):
+
+    for pyd_attr in pyd_settings:
+        if pyd_attr is not None:
+            db_settings.attribute = pyd_attr
+
+    return db_settings
 
 
 def set_fetcher_settings(request: pyd_models.FetcherSettings, db: Session):

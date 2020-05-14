@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from typing import List
 
 import logging
+
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"))
 
 db_models.Base.metadata.create_all(bind=database.engine)
@@ -236,20 +237,20 @@ def get_db_stats(db: Session = Depends(get_db)):
     "/urls/",
     response_model=pyd_models.RandomUrls,
     tags=["Development Tools"],
-    summary="Get Random Urls from Database"
+    summary="Get Random Urls from Database",
 )
-def get_random_urls(request: pyd_models.GetRandomUrls,
-                    db: Session = Depends(get_db)):
+def get_random_urls(request: pyd_models.GetRandomUrls, db: Session = Depends(get_db)):
     """
     Returns a requested amount of random URLs from the Database
     """
     return frontier.get_random_urls(db, request)
 
 
-@app.get("/settings/",
-         response_model=pyd_models.FetcherSettings,
-         tags=["Development Tools"],
-         summary="Get Settings for Fetcher"
+@app.get(
+    "/settings/",
+    response_model=pyd_models.FetcherSettings,
+    tags=["Development Tools"],
+    summary="Get Settings for Fetcher",
 )
 def get_fetcher_settings(db: Session = Depends(get_db)):
     """
@@ -258,13 +259,15 @@ def get_fetcher_settings(db: Session = Depends(get_db)):
     return frontier.get_fetcher_settings(db)
 
 
-@app.put("/settings/",
-         response_model=pyd_models.FetcherSettings,
-         tags=["Development Tools"],
-         summary="Set Settings for Fetcher"
+@app.patch(
+    "/settings/",
+    response_model=pyd_models.FetcherSettings,
+    tags=["Development Tools"],
+    summary="Set Settings for Fetcher",
 )
-def create_fetcher_settings(request: pyd_models.FetcherSettings,
-                         db: Session = Depends(get_db)):
+def create_fetcher_settings(
+    request: pyd_models.FetcherSettings, db: Session = Depends(get_db)
+):
     """
     Returns the latest settings for every fetcher
     """

@@ -119,7 +119,7 @@ def test_get_fqdn_list():
         crawler_uuid=v.sample_uuid, amount=2, length=2
     )
 
-    fqdn_list = frontier.get_fqdn_list(db, frontier_request)
+    fqdn_list = frontier.fqdn_list(db, frontier_request)
     assert len(fqdn_list) == 2
 
 
@@ -151,13 +151,14 @@ def test_save_reservations_with_old_entries():
         latest_return=response["latest_return"],
         url_frontiers_count=response["url_frontiers_count"],
         urls_count=response["urls_count"],
-        url_frontiers=response["url_frontiers"]
+        url_frontiers=response["url_frontiers"],
     )
 
     reservation_item = (
         db.query(db_models.CrawlerReservation)
         .filter(db_models.CrawlerReservation.crawler_uuid == crawler_uuid)
-        .filter(db_models.CrawlerReservation.fqdn == fqdn).first()
+        .filter(db_models.CrawlerReservation.fqdn == fqdn)
+        .first()
     )
     reservation_item.latest_return = datetime.now() - timedelta(days=2)
     db.commit()

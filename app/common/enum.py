@@ -7,6 +7,7 @@ class STF(str, Enum):
     """
     random = "random"
     old_pages_first = "old_pages_first"
+    new_pages_first = "new_pages_first"
     change_rate = "change_rate"
 
 

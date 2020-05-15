@@ -82,6 +82,8 @@ class URLReference(BasisModel):
 
 class FrontierResponse(BasisModel):
     uuid: str
+    short_term_mode: enum.STF = None
+    long_term_mode: enum.LTF = None
     response_url: HttpUrl = None
     latest_return: datetime = None
     url_frontiers_count: int = c.url_frontier_count
@@ -133,6 +135,9 @@ class FetcherSettings(BasisModel):
     iterations: int = 10
     fqdn_amount: int = 30
     url_amount: int = 0                          # unlimited
+
+    long_term_mode = enum.LTF.random
+    short_term_mode = enum.STF.random
 
     min_links_per_page: int = 2                  # Check Literature
     max_links_per_page: int = 5

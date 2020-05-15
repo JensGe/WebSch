@@ -119,7 +119,7 @@ def test_get_fqdn_list():
         crawler_uuid=v.sample_uuid, amount=2, length=2
     )
 
-    fqdn_list = frontier.fqdn_list(db, frontier_request)
+    fqdn_list = frontier.create_fqdn_list(db, frontier_request)
     assert len(fqdn_list) == 2
 
 

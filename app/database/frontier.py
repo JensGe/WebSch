@@ -7,8 +7,7 @@ from sqlalchemy.sql.expression import func
 from sqlalchemy.orm import Session
 
 
-def fqdn_list(db, request):
-
+def create_fqdn_list(db, request):
     fqdn_block_list = db.query(db_models.CrawlerReservation.fqdn).filter(
         db_models.CrawlerReservation.latest_return > datetime.now()
     )
@@ -31,6 +30,15 @@ def fqdn_list(db, request):
     if request.long_term_mode == enum.LTF.random:
         fqdn_list = fqdn_list.order_by(func.random())
 
+    elif request.long_term_mode == enum.LTF.large_sites_first:
+        fqdn_list = fqdn_list.order_by(db_models.FqdnFrontier.fqdn_url_count.desc())
+
+    elif request.long_term_mode == enum.LTF.small_sites_first:
+        fqdn_list = fqdn_list.order_by(db_models.FqdnFrontier.fqdn_url_count.asc())
+
+    elif request.long_term_mode == enum.LTF.page_rank:
+        fqdn_list = fqdn_list.order_by(db_models.FqdnFrontier.fqdn_pagerank.desc())
+
     # Limit
     if request.amount > 0:
         fqdn_list = fqdn_list.limit(request.amount)
@@ -48,12 +56,12 @@ def short_term_frontier(db, request, fqdn):
     if request.short_term_mode == enum.STF.random:
         db_url_list = db_url_list.order_by(func.random())
 
-    if request.short_term_mode == enum.STF.old_pages_first:
+    elif request.short_term_mode == enum.STF.old_pages_first:
         db_url_list = db_url_list.order_by(
             db_models.UrlFrontier.url_last_visited.asc().nullsfirst()
         )
 
-    if request.short_term_mode == enum.STF.new_pages_first:
+    elif request.short_term_mode == enum.STF.new_pages_first:
         db_url_list = db_url_list.order_by(
             db_models.UrlFrontier.url_last_visited.desc().nullslast()
         )
@@ -102,7 +110,6 @@ def get_fqdn_list_from_frontier_response(frontier_response):
 
 
 def get_only_new_list_items(new_list, old_list):
-
     only_new_list = [item for item in new_list if item not in old_list]
 
     return only_new_list
@@ -150,9 +157,13 @@ def get_fqdn_frontier(db, request: pyd_models.FrontierRequest):
     if not crawlers.uuid_exists(db, str(request.crawler_uuid)):
         http_ex.raise_http_404(request.crawler_uuid)
 
-    frontier_response = pyd_models.FrontierResponse(uuid=str(request.crawler_uuid))
+    frontier_response = pyd_models.FrontierResponse(
+        uuid=str(request.crawler_uuid),
+        short_term_mode=request.short_term_mode,
+        long_term_mode=request.long_term_mode,
+    )
 
-    fqdns = fqdn_list(db, request)
+    fqdns = create_fqdn_list(db, request)
 
     for fqdn in fqdns:
         url_list = list(short_term_frontier(db, request, fqdn))
@@ -207,6 +218,8 @@ def get_fetcher_settings(db: Session) -> pyd_models.FetcherSettings:
         iterations=fetcher_settings.iterations,
         fqdn_amount=fetcher_settings.fqdn_amount,
         url_amount=fetcher_settings.url_amount,
+        long_term_mode=fetcher_settings.long_term_mode,
+        short_term_mode=fetcher_settings.short_term_mode,
         min_links_per_page=fetcher_settings.min_links_per_page,
         max_links_per_page=fetcher_settings.max_links_per_page,
         lpp_distribution_type=fetcher_settings.lpp_distribution_type,
@@ -222,15 +235,6 @@ def settings_exists(db: Session):
         return False
 
 
-def fill_db_settings_with_pyd_settings(db_settings, pyd_settings):
-
-    for pyd_attr in pyd_settings:
-        if pyd_attr is not None:
-            db_settings.attribute = pyd_attr
-
-    return db_settings
-
-
 def set_fetcher_settings(request: pyd_models.FetcherSettings, db: Session):
     if not settings_exists(db):
         db_fetcher_settings = db_models.FetcherSettings(
@@ -241,6 +245,8 @@ def set_fetcher_settings(request: pyd_models.FetcherSettings, db: Session):
             iterations=request.iterations,
             fqdn_amount=request.fqdn_amount,
             url_amount=request.url_amount,
+            long_term_mode=request.long_term_mode,
+            short_term_mode=request.short_term_mode,
             min_links_per_page=request.min_links_per_page,
             max_links_per_page=request.max_links_per_page,
             lpp_distribution_type=request.lpp_distribution_type,
@@ -256,6 +262,7 @@ def set_fetcher_settings(request: pyd_models.FetcherSettings, db: Session):
             .filter(db_models.FetcherSettings.id == 1)
             .first()
         )
+
 
         if request.crawling_speed_factor is not None:
             db_fetcher_settings.crawling_speed_factor = request.crawling_speed_factor
@@ -274,6 +281,12 @@ def set_fetcher_settings(request: pyd_models.FetcherSettings, db: Session):
 
         if request.url_amount is not None:
             db_fetcher_settings.url_amount = request.url_amount
+
+        if request.long_term_mode is not None:
+            db_fetcher_settings.long_term_mode = request.long_term_mode
+
+        if request.short_term_mode is not None:
+            db_fetcher_settings.short_term_mode = request.short_term_mode
 
         if request.min_links_per_page is not None:
             db_fetcher_settings.min_links_per_page = request.min_links_per_page

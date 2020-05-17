@@ -17,7 +17,7 @@ frontier_length = 0
 url_frontier_count = 0
 urls_count = 0
 
-fqdn = 20
+fqdn_amount = 20
 crawler = 3
 min_url = 10
 max_url = 100

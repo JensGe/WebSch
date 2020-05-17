@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.database import db_models, frontier
 from app.common import random_data_generator as rand_gen
+from app.common import common_values as c
 from app.data import data_generator as data_gen
 
 
@@ -71,11 +72,11 @@ def new_ref(url_out, url_in):
 
 def create_sample_frontier(
     db: Session,
-    fqdns: int = 20,
-    min_url_amount: int = 50,
-    max_url_amount: int = 100,
-    visited_ratio: float = 1.0,
-    connection_amount: int = 0,
+    fqdns: int = c.fqdn_amount,
+    min_url_amount: int = c.min_url,
+    max_url_amount: int = c.max_url,
+    visited_ratio: float = c.visited_ratio,
+    connection_amount: int = c.connections,
 ):
 
     fqdn_bases = [rand_gen.get_random_fqdn() for _ in range(fqdns)]

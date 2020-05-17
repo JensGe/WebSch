@@ -94,11 +94,12 @@ class FrontierResponse(BasisModel):
 # Developer Tools
 class GenerateRequest(BasisModel):
     crawler_amount: int = c.crawler
-    fqdn_amount: int = c.fqdn
+    fqdn_amount: int = c.fqdn_amount
     min_url_amount: int = c.min_url
     max_url_amount: int = c.max_url
     visited_ratio: float = c.visited_ratio
     connection_amount: int = c.connections
+    fixed_crawl_delay: int = None
 
 
 class StatsResponse(BasisModel):

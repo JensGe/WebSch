@@ -198,6 +198,7 @@ async def generate_example_db(
     - **max_url_amount** (default: 100): Maximum Pages per Web Site
     - **visited_ratio** (default: 1.0): Pages which have been visited
     - **connection_amount** (default: 0): Amount of incoming Connections per Page
+    - **fixed_crawl_delay** (default: None): Adjust the Crawl Delay for all Web Sites. Will be a calculated Value when no Value is chosen.
     """
     if request.min_url_amount > request.max_url_amount:
         http_es.raise_http_400(request.min_url_amount, request.max_url_amount)

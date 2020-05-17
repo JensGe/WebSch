@@ -263,7 +263,6 @@ def set_fetcher_settings(request: pyd_models.FetcherSettings, db: Session):
             .first()
         )
 
-
         if request.crawling_speed_factor is not None:
             db_fetcher_settings.crawling_speed_factor = request.crawling_speed_factor
 

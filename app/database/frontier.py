@@ -212,6 +212,7 @@ def get_random_urls(db: Session, request: pyd_models.GetRandomUrls):
 def get_fetcher_settings(db: Session) -> pyd_models.FetcherSettings:
     fetcher_settings = db.query(db_models.FetcherSettings).first()
     return pyd_models.FetcherSettings(
+        logging_mode=fetcher_settings.logging_mode,
         crawling_speed_factor=fetcher_settings.crawling_speed_factor,
         default_crawl_delay=fetcher_settings.default_crawl_delay,
         parallel_process=fetcher_settings.parallel_process,
@@ -239,6 +240,7 @@ def set_fetcher_settings(request: pyd_models.FetcherSettings, db: Session):
     if not settings_exists(db):
         db_fetcher_settings = db_models.FetcherSettings(
             id=1,
+            logging_mode=request.logging_mode,
             crawling_speed_factor=request.crawling_speed_factor,
             default_crawl_delay=request.default_crawl_delay,
             parallel_process=request.parallel_process,
@@ -262,6 +264,9 @@ def set_fetcher_settings(request: pyd_models.FetcherSettings, db: Session):
             .filter(db_models.FetcherSettings.id == 1)
             .first()
         )
+
+        if request.logging_mode is not None:
+            db_fetcher_settings.logging_mode = request.logging_mode
 
         if request.crawling_speed_factor is not None:
             db_fetcher_settings.crawling_speed_factor = request.crawling_speed_factor

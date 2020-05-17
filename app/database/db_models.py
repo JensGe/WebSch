@@ -65,6 +65,8 @@ class FetcherSettings(Base):
     __tablename__ = "fetcher_settings"
 
     id = Column(Integer, primary_key=True)
+
+    logging_mode = Column(Integer)
     crawling_speed_factor = Column(Float)
     default_crawl_delay = Column(Integer)
     parallel_process = Column(Integer)

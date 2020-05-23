@@ -107,6 +107,8 @@ class StatsResponse(BasisModel):
     url_amount: int
     url_ref_amount: int
     reserved_fqdn_amount: int
+    avg_freshness: str
+    visited_ratio: float
 
 
 class DeleteDatabase(BasisModel):

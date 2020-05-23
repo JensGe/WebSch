@@ -1,5 +1,5 @@
 import random
-from datetime import datetime
+from datetime import datetime, timezone
 from uuid import uuid4
 
 from sqlalchemy.orm import Session
@@ -19,7 +19,7 @@ def create_sample_crawler(db: Session, amount: int = 3):
             db_models.Crawler(
                 uuid=str(uuid4()),
                 contact="admin@owi-crawler.com",
-                reg_date=datetime.now(),
+                reg_date=datetime.now(tz=timezone.utc),
                 name=rand_gen.random_academic_name(),
                 location="Germany",
                 tld_preference=data_gen.random_tld(),

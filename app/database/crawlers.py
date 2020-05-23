@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from app.database import db_models, pyd_models
 from app.common import http_exceptions as http
 from uuid import uuid4
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 def uuid_exists(db: Session, uuid):
@@ -27,7 +27,7 @@ def create_crawler(db: Session, crawler: pyd_models.CreateCrawler):
         uuid=str(uuid4()),
         contact=crawler.contact,
         name=crawler.name,
-        reg_date=datetime.now(),
+        reg_date=datetime.now(tz=timezone.utc),
         location=crawler.location,
         tld_preference=crawler.tld_preference,
     )

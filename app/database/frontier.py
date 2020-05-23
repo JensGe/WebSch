@@ -1,15 +1,17 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+import time
 
 from app.database import db_models, pyd_models, crawlers
 from app.common import enum, http_exceptions as http_ex, common_values as c
 
 from sqlalchemy.sql.expression import func
 from sqlalchemy.orm import Session
+from sqlalchemy import Date
 
 
 def create_fqdn_list(db, request):
     fqdn_block_list = db.query(db_models.CrawlerReservation.fqdn).filter(
-        db_models.CrawlerReservation.latest_return > datetime.now()
+        db_models.CrawlerReservation.latest_return > datetime.now(tz=timezone.utc)
     )
 
     fqdn_list = db.query(db_models.FqdnFrontier).filter(
@@ -117,7 +119,7 @@ def get_only_new_list_items(new_list, old_list):
 
 def clean_reservation_list(db):
     db.query(db_models.CrawlerReservation).filter(
-        db_models.CrawlerReservation.latest_return < datetime.now()
+        db_models.CrawlerReservation.latest_return < datetime.now(tz=timezone.utc)
     ).delete()
 
     db.commit()
@@ -133,7 +135,9 @@ def save_reservations(db, frontier_response, latest_return):
     current_db_reservation_list = (
         db.query(db_models.CrawlerReservation)
         .filter(db_models.CrawlerReservation.crawler_uuid == uuid)
-        .filter(db_models.CrawlerReservation.latest_return > datetime.now())
+        .filter(
+            db_models.CrawlerReservation.latest_return > datetime.now(tz=timezone.utc)
+        )
     )
     current_block_list = [fqdn.fqdn for fqdn in current_db_reservation_list]
 
@@ -174,13 +178,35 @@ def get_fqdn_frontier(db, request: pyd_models.FrontierRequest):
     frontier_response.url_frontiers_count = len(frontier_response.url_frontiers)
 
     # sync crawler_url_connection persisting
-    latest_return = datetime.now() + timedelta(hours=c.hours_to_die)
+    latest_return = datetime.now(tz=timezone.utc) + timedelta(hours=c.hours_to_die)
     save_reservations(db, frontier_response, latest_return)
 
     frontier_response.latest_return = latest_return
     frontier_response.response_url = c.response_url
 
     return frontier_response
+
+
+def calculate_avg_freshness(db):
+    sum_timestamps = db.query(
+        func.to_timestamp(
+            func.avg(func.extract("epoch", db_models.UrlFrontier.url_last_visited))
+        )
+    ).first()
+    rv = sum_timestamps[0].strftime("%Y-%m-%d %H:%M:%S.%f") if sum_timestamps[0] is not None else "None"
+    return rv
+
+
+def get_visited_ratio(db):
+    visited_urls_count = (
+        db.query(db_models.UrlFrontier)
+        .filter(db_models.UrlFrontier.url_last_visited.isnot(None))
+        .count()
+    )
+    all_urls = db.query(db_models.UrlFrontier).count()
+    if all_urls == 0 or all_urls is None:
+        all_urls = -1
+    return visited_urls_count / all_urls
 
 
 def get_db_stats(db: Session):
@@ -191,8 +217,12 @@ def get_db_stats(db: Session):
         "url_amount": db.query(db_models.UrlFrontier).count(),
         "url_ref_amount": db.query(db_models.URLRef).count(),
         "reserved_fqdn_amount": db.query(db_models.CrawlerReservation)
-        .filter(db_models.CrawlerReservation.latest_return > datetime.now())
+        .filter(
+            db_models.CrawlerReservation.latest_return > datetime.now(tz=timezone.utc)
+        )
         .count(),
+        "avg_freshness": calculate_avg_freshness(db),
+        "visited_ratio": get_visited_ratio(db)
     }
     return response
 

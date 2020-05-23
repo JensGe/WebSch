@@ -8,7 +8,7 @@ from app.database import db_models
 
 from tests import values as v
 from time import sleep
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from pydantic import HttpUrl
 
@@ -160,11 +160,13 @@ def test_save_reservations_with_old_entries():
         .filter(db_models.CrawlerReservation.fqdn == fqdn)
         .first()
     )
-    reservation_item.latest_return = datetime.now() - timedelta(days=2)
+    reservation_item.latest_return = datetime.now(tz=timezone.utc) - timedelta(days=2)
     db.commit()
     db.refresh(reservation_item)
 
-    assert frontier.save_reservations(db, frontier_response, datetime.now())
+    assert frontier.save_reservations(
+        db, frontier_response, datetime.now(tz=timezone.utc)
+    )
 
 
 def test_get_referencing_urls():
@@ -219,6 +221,11 @@ def test_get_random_urls():
     result = client.get("/urls/", json={"amount": 5}).json()
     print(result)
     assert len(result["url_list"]) == 5
+
+
+def test_query_avg_freshness():
+    avg_fresh = frontier.calculate_avg_freshness(db)
+    assert isinstance(avg_fresh, str)
 
 
 def test_delete_reservation_list():

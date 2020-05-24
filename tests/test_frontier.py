@@ -228,6 +228,13 @@ def test_query_avg_freshness():
     assert isinstance(avg_fresh, str)
 
 
+def test_set_fetcher_settings():
+    request = pyd_models.FetcherSettings(iterations=1)
+    rv = frontier.set_fetcher_settings(request, db)
+
+    assert rv.iterations == request.iterations
+
+
 def test_delete_reservation_list():
     # check if deleted List is empty
     pass

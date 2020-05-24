@@ -193,7 +193,11 @@ def calculate_avg_freshness(db):
             func.avg(func.extract("epoch", db_models.UrlFrontier.url_last_visited))
         )
     ).first()
-    rv = sum_timestamps[0].strftime("%Y-%m-%d %H:%M:%S.%f") if sum_timestamps[0] is not None else "None"
+    rv = (
+        sum_timestamps[0].strftime("%Y-%m-%d %H:%M:%S.%f")
+        if sum_timestamps[0] is not None
+        else "None"
+    )
     return rv
 
 
@@ -222,7 +226,7 @@ def get_db_stats(db: Session):
         )
         .count(),
         "avg_freshness": calculate_avg_freshness(db),
-        "visited_ratio": get_visited_ratio(db)
+        "visited_ratio": get_visited_ratio(db),
     }
     return response
 
@@ -289,58 +293,21 @@ def set_fetcher_settings(request: pyd_models.FetcherSettings, db: Session):
         db.add(db_fetcher_settings)
 
     else:
+
+        reduced_request = {k: v for k, v in request.__dict__.items() if v is not None}
+
+        db.query(db_models.FetcherSettings).filter(
+            db_models.FetcherSettings.id == 1
+        ).update(reduced_request)
+        db.commit()
+
         db_fetcher_settings = (
             db.query(db_models.FetcherSettings)
             .filter(db_models.FetcherSettings.id == 1)
             .first()
         )
 
-        if request.logging_mode is not None:
-            db_fetcher_settings.logging_mode = request.logging_mode
-
-        if request.crawling_speed_factor is not None:
-            db_fetcher_settings.crawling_speed_factor = request.crawling_speed_factor
-
-        if request.default_crawl_delay is not None:
-            db_fetcher_settings.default_crawl_delay = request.default_crawl_delay
-
-        if request.parallel_process is not None:
-            db_fetcher_settings.parallel_process = request.parallel_process
-
-        if request.iterations is not None:
-            db_fetcher_settings.iterations = request.iterations
-
-        if request.fqdn_amount is not None:
-            db_fetcher_settings.fqdn_amount = request.fqdn_amount
-
-        if request.url_amount is not None:
-            db_fetcher_settings.url_amount = request.url_amount
-
-        if request.long_term_mode is not None:
-            db_fetcher_settings.long_term_mode = request.long_term_mode
-
-        if request.short_term_mode is not None:
-            db_fetcher_settings.short_term_mode = request.short_term_mode
-
-        if request.min_links_per_page is not None:
-            db_fetcher_settings.min_links_per_page = request.min_links_per_page
-
-        if request.max_links_per_page is not None:
-            db_fetcher_settings.max_links_per_page = request.max_links_per_page
-
-        if request.lpp_distribution_type is not None:
-            db_fetcher_settings.lpp_distribution_type = request.lpp_distribution_type
-
-        if request.internal_vs_external_threshold is not None:
-            db_fetcher_settings.internal_vs_external_threshold = (
-                request.internal_vs_external_threshold
-            )
-
-        if request.new_vs_existing_threshold is not None:
-            db_fetcher_settings.new_vs_existing_threshold = (
-                request.new_vs_existing_threshold
-            )
-
     db.commit()
     db.refresh(db_fetcher_settings)
+
     return db_fetcher_settings

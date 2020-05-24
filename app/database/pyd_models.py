@@ -131,21 +131,21 @@ class RandomUrls(BasisModel):
 
 class FetcherSettings(BasisModel):
 
-    logging_mode: int = 20                           # 10: DEBUG, 20: INFO
-    crawling_speed_factor: float = 10.0
-    default_crawl_delay: int = 10
-    parallel_process: int = 10
+    logging_mode: int = None                        # 10: DEBUG, 20: INFO
+    crawling_speed_factor: float = None
+    default_crawl_delay: int = None
+    parallel_process: int = None
 
-    iterations: int = 10
-    fqdn_amount: int = 30
-    url_amount: int = 0                             # unlimited
+    iterations: int = None
+    fqdn_amount: int = None
+    url_amount: int = None                          # 0 = unlimited
 
-    long_term_mode = enum.LTF.random
-    short_term_mode = enum.STF.random
+    long_term_mode: enum.LTF = None
+    short_term_mode: enum.STF = None
 
-    min_links_per_page: int = 2                     # Check Literature
-    max_links_per_page: int = 5
-    lpp_distribution_type: enum.LPPDISTR = enum.LPPDISTR.discrete
+    min_links_per_page: int = None                  # Check Literature
+    max_links_per_page: int = None
+    lpp_distribution_type: enum.LPPDISTR = None
 
-    internal_vs_external_threshold: float = 0.85    # Check Literature
-    new_vs_existing_threshold: float = 0.35
+    internal_vs_external_threshold: float = None    # Check Literature
+    new_vs_existing_threshold: float = None

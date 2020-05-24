@@ -71,13 +71,13 @@ def new_ref(url_out, url_in):
 
 
 def create_sample_frontier(db: Session, request):
-    fqdn_bases = [rand_gen.get_random_fqdn() for _ in range(request.fqdns)]
+    fqdn_bases = [rand_gen.get_random_fqdn() for _ in range(request.fqdn_amount)]
     fqdn_url_amounts = [
-        random.randint(request.min_url_amount, request.max_url_amount) for _ in range(request.fqdns)
+        random.randint(request.min_url_amount, request.max_url_amount) for _ in range(request.fqdn_amount)
     ]
 
     global_url_list = []
-    fqdn_frontier = [new_fqdn(fqdn_bases[i], fqdn_url_amounts[i], request) for i in range(request.fqdns)]
+    fqdn_frontier = [new_fqdn(fqdn_bases[i], fqdn_url_amounts[i], request) for i in range(request.fqdn_amount)]
 
     db.bulk_save_objects(fqdn_frontier)
     db.commit()

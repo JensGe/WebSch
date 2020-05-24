@@ -1,16 +1,11 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.sql.expression import func
 
 from app.common import credentials as cred
 from app.database import pyd_models, db_models
 
-import os
-import logging
-logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"))
 
-# PostgreSQL
 SQLALCHEMY_DATABASE_URL = "postgresql://{}:{}@{}/{}".format(
     cred.postgres_user, cred.postgres_pw, cred.postgres_uri, cred.postgres_db
 )

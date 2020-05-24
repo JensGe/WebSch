@@ -95,7 +95,7 @@ class URLRef(Base):
     url_in = Column(
         String, ForeignKey(c.url_frontier_pk), primary_key=True, index=True
     )
-    parsing_date = Column(DateTime, primary_key=True)
+    parsing_date = Column(DateTime(timezone=True), primary_key=True)
     Index("url_ref_index", url_out, url_in)
 
 

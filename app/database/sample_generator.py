@@ -37,14 +37,14 @@ def create_sample_crawler(db: Session, amount: int = 3):
     return crawlers
 
 
-def new_fqdn(fqdn_basis, fqdn_url_amount):
+def new_fqdn(fqdn_basis, fqdn_url_amount, request):
     return db_models.FqdnFrontier(
         fqdn=fqdn_basis,
         tld=fqdn_basis.split(".")[-1],
         fqdn_last_ipv4=rand_gen.get_random_ipv4(),
         fqdn_last_ipv6=rand_gen.random_example_ipv6(),
         fqdn_pagerank=data_gen.random_pagerank(),
-        fqdn_crawl_delay=data_gen.random_crawl_delay(),
+        fqdn_crawl_delay=data_gen.random_crawl_delay() if request.fixed_crawl_delay is None else request.fixed_crawl_delay,
         fqdn_url_count=fqdn_url_amount,
     )
 
@@ -70,22 +70,14 @@ def new_ref(url_out, url_in):
     )
 
 
-def create_sample_frontier(
-    db: Session,
-    fqdns: int = c.fqdn_amount,
-    min_url_amount: int = c.min_url,
-    max_url_amount: int = c.max_url,
-    visited_ratio: float = c.visited_ratio,
-    connection_amount: int = c.connections,
-):
-
-    fqdn_bases = [rand_gen.get_random_fqdn() for _ in range(fqdns)]
+def create_sample_frontier(db: Session, request):
+    fqdn_bases = [rand_gen.get_random_fqdn() for _ in range(request.fqdns)]
     fqdn_url_amounts = [
-        random.randint(min_url_amount, max_url_amount) for _ in range(fqdns)
+        random.randint(request.min_url_amount, request.max_url_amount) for _ in range(request.fqdns)
     ]
 
     global_url_list = []
-    fqdn_frontier = [new_fqdn(fqdn_bases[i], fqdn_url_amounts[i]) for i in range(fqdns)]
+    fqdn_frontier = [new_fqdn(fqdn_bases[i], fqdn_url_amounts[i], request) for i in range(request.fqdns)]
 
     db.bulk_save_objects(fqdn_frontier)
     db.commit()
@@ -94,18 +86,18 @@ def create_sample_frontier(
         urls = rand_gen.random_urls(fqdn, fqdn_url_amounts[fqdn_bases.index(fqdn)])
 
         fqdn_url_list = [
-            new_url(urls[i], fqdn, visited_ratio)
+            new_url(urls[i], fqdn, request.visited_ratio)
             for i in range(fqdn_url_amounts[fqdn_bases.index(fqdn)])
         ]
 
         db.bulk_save_objects(fqdn_url_list)
         db.commit()
 
-        if connection_amount > 0:
+        if request.connection_amount > 0:
             db_url_ref_list = []
 
             for url in fqdn_url_list:
-                ref_urls = frontier.get_referencing_urls(db, url, connection_amount)
+                ref_urls = frontier.get_referencing_urls(db, url, request.connection_amount)
                 ref_rows = [new_ref(ref_url.url, url.url) for ref_url in ref_urls]
                 db_url_ref_list.extend(ref_rows)
 

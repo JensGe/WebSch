@@ -99,6 +99,7 @@ class GenerateRequest(BasisModel):
     max_url_amount: int = c.max_url
     visited_ratio: float = c.visited_ratio
     connection_amount: int = c.connections
+    fixed_crawl_delay: int = None
 
 
 class StatsResponse(BasisModel):

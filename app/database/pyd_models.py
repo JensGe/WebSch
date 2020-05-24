@@ -138,7 +138,7 @@ class FetcherSettings(BasisModel):
 
     iterations: int = None
     fqdn_amount: int = None
-    url_amount: int = None                          # 0 = unlimited
+    url_amount: int = None                          # 0: unlimited
 
     long_term_mode: enum.LTF = None
     short_term_mode: enum.STF = None

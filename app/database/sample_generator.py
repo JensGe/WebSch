@@ -1,11 +1,13 @@
 import random
-from datetime import datetime
+from datetime import datetime, timezone
 from uuid import uuid4
 
 from sqlalchemy.orm import Session
 
 from app.database import db_models, frontier
 from app.common import random_data_generator as rand_gen
+from app.common import common_values as c
+from app.data import data_generator as data_gen
 
 
 def create_sample_crawler(db: Session, amount: int = 3):
@@ -17,10 +19,10 @@ def create_sample_crawler(db: Session, amount: int = 3):
             db_models.Crawler(
                 uuid=str(uuid4()),
                 contact="admin@owi-crawler.com",
-                reg_date=datetime.now(),
-                name=rand_gen.get_random_academic_name(),
+                reg_date=datetime.now(tz=timezone.utc),
+                name=rand_gen.random_academic_name(),
                 location="Germany",
-                tld_preference=rand_gen.get_random_tld(),
+                tld_preference=data_gen.random_tld(),
             )
         )
 
@@ -35,21 +37,21 @@ def create_sample_crawler(db: Session, amount: int = 3):
     return crawlers
 
 
-def new_fqdn(fqdn_basis, fqdn_url_amount):
+def new_fqdn(fqdn_basis, fqdn_url_amount, request):
     return db_models.FqdnFrontier(
         fqdn=fqdn_basis,
         tld=fqdn_basis.split(".")[-1],
         fqdn_last_ipv4=rand_gen.get_random_ipv4(),
-        fqdn_last_ipv6=rand_gen.get_random_example_ipv6(),
-        fqdn_pagerank=rand_gen.get_random_pagerank(),
-        fqdn_crawl_delay=5,
+        fqdn_last_ipv6=rand_gen.random_example_ipv6(),
+        fqdn_pagerank=data_gen.random_pagerank(),
+        fqdn_crawl_delay=data_gen.random_crawl_delay() if request.fixed_crawl_delay is None else request.fixed_crawl_delay,
         fqdn_url_count=fqdn_url_amount,
     )
 
 
 def new_url(url, fqdn, visited_ratio):
     if random.random() < visited_ratio:
-        random_date_time = rand_gen.get_random_datetime()
+        random_date_time = rand_gen.random_datetime()
     else:
         random_date_time = None
 
@@ -64,46 +66,38 @@ def new_url(url, fqdn, visited_ratio):
 
 def new_ref(url_out, url_in):
     return db_models.URLRef(
-        url_out=url_out, url_in=url_in, parsing_date=rand_gen.get_random_datetime(),
+        url_out=url_out, url_in=url_in, parsing_date=rand_gen.random_datetime(),
     )
 
 
-def create_sample_frontier(
-    db: Session,
-    fqdns: int = 20,
-    min_url_amount: int = 50,
-    max_url_amount: int = 100,
-    visited_ratio: float = 1.0,
-    connection_amount: int = 0,
-):
-
-    fqdn_bases = [rand_gen.get_random_fqdn() for _ in range(fqdns)]
+def create_sample_frontier(db: Session, request):
+    fqdn_bases = [rand_gen.get_random_fqdn() for _ in range(request.fqdn_amount)]
     fqdn_url_amounts = [
-        random.randint(min_url_amount, max_url_amount) for _ in range(fqdns)
+        random.randint(request.min_url_amount, request.max_url_amount) for _ in range(request.fqdn_amount)
     ]
 
     global_url_list = []
-    fqdn_frontier = [new_fqdn(fqdn_bases[i], fqdn_url_amounts[i]) for i in range(fqdns)]
+    fqdn_frontier = [new_fqdn(fqdn_bases[i], fqdn_url_amounts[i], request) for i in range(request.fqdn_amount)]
 
     db.bulk_save_objects(fqdn_frontier)
     db.commit()
 
     for fqdn in fqdn_bases:
-        urls = rand_gen.get_random_urls(fqdn, fqdn_url_amounts[fqdn_bases.index(fqdn)])
+        urls = rand_gen.random_urls(fqdn, fqdn_url_amounts[fqdn_bases.index(fqdn)])
 
         fqdn_url_list = [
-            new_url(urls[i], fqdn, visited_ratio)
+            new_url(urls[i], fqdn, request.visited_ratio)
             for i in range(fqdn_url_amounts[fqdn_bases.index(fqdn)])
         ]
 
         db.bulk_save_objects(fqdn_url_list)
         db.commit()
 
-        if connection_amount > 0:
+        if request.connection_amount > 0:
             db_url_ref_list = []
 
             for url in fqdn_url_list:
-                ref_urls = frontier.get_referencing_urls(db, url, connection_amount)
+                ref_urls = frontier.get_referencing_urls(db, url, request.connection_amount)
                 ref_rows = [new_ref(ref_url.url, url.url) for ref_url in ref_urls]
                 db_url_ref_list.extend(ref_rows)
 

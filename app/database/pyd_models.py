@@ -19,14 +19,14 @@ class Crawler(BasisModel):
     name: str
     reg_date: datetime
     location: str = None
-    tld_preference: enum.TLD = None
+    tld_preference: str = None
 
 
 class CreateCrawler(BasisModel):
     contact: EmailStr
     name: str
     location: str = None
-    tld_preference: enum.TLD = None
+    tld_preference: str = None
 
 
 class UpdateCrawler(BasisModel):
@@ -62,7 +62,7 @@ class Url(BasisModel):
 
 class UrlFrontier(BasisModel):
     fqdn: str
-    tld: enum.TLD = None
+    tld: str = None
 
     fqdn_last_ipv4: str = None
     fqdn_last_ipv6: str = None
@@ -82,6 +82,8 @@ class URLReference(BasisModel):
 
 class FrontierResponse(BasisModel):
     uuid: str
+    short_term_mode: enum.STF = None
+    long_term_mode: enum.LTF = None
     response_url: HttpUrl = None
     latest_return: datetime = None
     url_frontiers_count: int = c.url_frontier_count
@@ -92,11 +94,12 @@ class FrontierResponse(BasisModel):
 # Developer Tools
 class GenerateRequest(BasisModel):
     crawler_amount: int = c.crawler
-    fqdn_amount: int = c.fqdn
+    fqdn_amount: int = c.fqdn_amount
     min_url_amount: int = c.min_url
     max_url_amount: int = c.max_url
     visited_ratio: float = c.visited_ratio
     connection_amount: int = c.connections
+    fixed_crawl_delay: int = None
 
 
 class StatsResponse(BasisModel):
@@ -105,6 +108,8 @@ class StatsResponse(BasisModel):
     url_amount: int
     url_ref_amount: int
     reserved_fqdn_amount: int
+    avg_freshness: str
+    visited_ratio: float
 
 
 class DeleteDatabase(BasisModel):
@@ -113,3 +118,34 @@ class DeleteDatabase(BasisModel):
     delete_urls: bool = False
     delete_fqdns: bool = False
     delete_reserved_fqdns: bool = False
+
+
+class GetRandomUrls(BasisModel):
+    amount: int = 1
+    fqdn: str = None
+
+
+class RandomUrls(BasisModel):
+    url_list: List[Url] = []
+
+
+class FetcherSettings(BasisModel):
+
+    logging_mode: int = None                        # 10: DEBUG, 20: INFO
+    crawling_speed_factor: float = None
+    default_crawl_delay: int = None
+    parallel_process: int = None
+
+    iterations: int = None
+    fqdn_amount: int = None
+    url_amount: int = None                          # 0 = unlimited
+
+    long_term_mode: enum.LTF = None
+    short_term_mode: enum.STF = None
+
+    min_links_per_page: int = None                  # Check Literature
+    max_links_per_page: int = None
+    lpp_distribution_type: enum.LPPDISTR = None
+
+    internal_vs_external_threshold: float = None    # Check Literature
+    new_vs_existing_threshold: float = None

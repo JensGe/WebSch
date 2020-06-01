@@ -1,16 +1,18 @@
-from typing import List
-
 from app.database import crawlers, db_models, pyd_models, sample_generator, frontier
 from app.database import database
 from app.common import http_exceptions as http_es
-
 
 from fastapi import FastAPI, Depends, status, BackgroundTasks
 from fastapi.routing import Response
 from fastapi.middleware.gzip import GZipMiddleware
 
+import os
 from sqlalchemy.orm import Session
+from typing import List
 
+import logging
+
+logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"))
 
 db_models.Base.metadata.create_all(bind=database.engine)
 
@@ -195,9 +197,8 @@ async def generate_example_db(
     - **max_url_amount** (default: 100): Maximum Pages per Web Site
     - **visited_ratio** (default: 1.0): Pages which have been visited
     - **connection_amount** (default: 0): Amount of incoming Connections per Page
-    - ~~**blacklisted_ratio** (default: 0): Percentage of blacklisted Pages~~
-    - ~~**bot_excluded_ratio** (default. 0): Percentage of bot-excluded Pages~~
-
+    - **fixed_crawl_delay** (default: None): Adjust the Crawl Delay for all Web Sites.
+        Will be a distributed-randomized Value when no Value is chosen.
     """
     if request.min_url_amount > request.max_url_amount:
         http_es.raise_http_400(request.min_url_amount, request.max_url_amount)
@@ -209,11 +210,7 @@ async def generate_example_db(
     background_tasks.add_task(
         sample_generator.create_sample_frontier,
         db,
-        fqdns=request.fqdn_amount,
-        min_url_amount=request.min_url_amount,
-        max_url_amount=request.max_url_amount,
-        visited_ratio=request.visited_ratio,
-        connection_amount=request.connection_amount,
+        request
     )
 
     return Response(status_code=status.HTTP_202_ACCEPTED)
@@ -231,3 +228,44 @@ def get_db_stats(db: Session = Depends(get_db)):
     """
 
     return frontier.get_db_stats(db)
+
+
+@app.get(
+    "/urls/",
+    response_model=pyd_models.RandomUrls,
+    tags=["Development Tools"],
+    summary="Get Random Urls from Database",
+)
+def get_random_urls(request: pyd_models.GetRandomUrls, db: Session = Depends(get_db)):
+    """
+    Returns a requested amount of random URLs from the Database
+    """
+    return frontier.get_random_urls(db, request)
+
+
+@app.get(
+    "/settings/",
+    response_model=pyd_models.FetcherSettings,
+    tags=["Development Tools"],
+    summary="Get Settings for Fetcher",
+)
+def get_fetcher_settings(db: Session = Depends(get_db)):
+    """
+    Returns the latest settings for every fetcher
+    """
+    return frontier.get_fetcher_settings(db)
+
+
+@app.patch(
+    "/settings/",
+    response_model=pyd_models.FetcherSettings,
+    tags=["Development Tools"],
+    summary="Set Settings for Fetcher",
+)
+def create_fetcher_settings(
+    request: pyd_models.FetcherSettings, db: Session = Depends(get_db)
+):
+    """
+    Returns the latest settings for every fetcher
+    """
+    return frontier.set_fetcher_settings(request, db)

@@ -8,7 +8,7 @@ from app.database import db_models
 
 from tests import values as v
 from time import sleep
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from pydantic import HttpUrl
 
@@ -62,7 +62,7 @@ def create_example_frontier_response(uuid=v.sample_uuid):
     frontier_response = pyd_models.FrontierResponse(
         uuid=uuid,
         response_url="https://www.example.com/submit?code=1234567890",
-        withdrawal_date=rand_gen.get_random_datetime(),
+        withdrawal_date=rand_gen.random_datetime(),
         url_frontiers=[frontier_one, frontier_two],
     )
     frontier_response.url_frontiers_count = len(frontier_response.url_frontiers)
@@ -119,7 +119,7 @@ def test_get_fqdn_list():
         crawler_uuid=v.sample_uuid, amount=2, length=2
     )
 
-    fqdn_list = frontier.get_fqdn_list(db, frontier_request)
+    fqdn_list = frontier.create_fqdn_list(db, frontier_request)
     assert len(fqdn_list) == 2
 
 
@@ -151,24 +151,25 @@ def test_save_reservations_with_old_entries():
         latest_return=response["latest_return"],
         url_frontiers_count=response["url_frontiers_count"],
         urls_count=response["urls_count"],
-        url_frontiers=response["url_frontiers"]
+        url_frontiers=response["url_frontiers"],
     )
 
     reservation_item = (
         db.query(db_models.CrawlerReservation)
         .filter(db_models.CrawlerReservation.crawler_uuid == crawler_uuid)
-        .filter(db_models.CrawlerReservation.fqdn == fqdn).first()
+        .filter(db_models.CrawlerReservation.fqdn == fqdn)
+        .first()
     )
-    reservation_item.latest_return = datetime.now() - timedelta(days=2)
+    reservation_item.latest_return = datetime.now(tz=timezone.utc) - timedelta(days=2)
     db.commit()
     db.refresh(reservation_item)
 
-    assert frontier.save_reservations(db, frontier_response, datetime.now())
+    assert frontier.save_reservations(
+        db, frontier_response, datetime.now(tz=timezone.utc)
+    )
 
 
 def test_get_referencing_urls():
-
-
     client.post(
         c.database_endpoint,
         json={
@@ -202,6 +203,37 @@ def test_get_referencing_urls():
     stats_after = client.get(c.stats_endpoint).json()
     assert stats_after["url_amount"] == stats_before["url_amount"] + 1
     assert stats_after["url_ref_amount"] == stats_before["url_ref_amount"] + 1
+
+
+def test_get_random_urls():
+    client.post(
+        c.database_endpoint,
+        json={
+            "crawler_amount": 0,
+            "fqdn_amount": 1,
+            "min_url_amount": 10,
+            "max_url_amount": 10,
+            "connection_amount": 0,
+        },
+    )
+    sleep(3)
+
+    result = client.get("/urls/", json={"amount": 5}).json()
+    print(result)
+    assert len(result["url_list"]) == 5
+
+
+def test_query_avg_freshness():
+    avg_fresh = frontier.calculate_avg_freshness(db)
+    assert isinstance(avg_fresh, str)
+
+
+def test_set_fetcher_settings():
+    request = pyd_models.FetcherSettings(iterations=1)
+    rv = frontier.set_fetcher_settings(request, db)
+
+    assert rv.iterations == request.iterations
+
 
 def test_delete_reservation_list():
     # check if deleted List is empty

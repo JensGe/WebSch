@@ -6,7 +6,7 @@ from app.common import common_values as c, enum
 from app.database import crawlers, database
 
 from time import sleep
-from tests import values as v 
+from tests import values as v
 
 client = TestClient(app)
 db = database.SessionLocal()
@@ -175,7 +175,17 @@ def test_delete_unknown_crawler():
 
 # Frontier API
 def test_get_simple_frontier():
-    crawlers.delete_crawlers(db)
+    client.delete(
+        c.database_endpoint,
+        json={
+            "delete_reserved_fqdns": True,
+            "delete_url_refs": True,
+            "delete_crawlers": True,
+            "delete_urls": True,
+            "delete_fqdns": True,
+        },
+    )
+    sleep(5)
 
     new_crawler_uuid = client.post(
         c.crawler_endpoint, json={"contact": v.test_email_1, "name": "Isaac"}
@@ -247,7 +257,7 @@ def test_get_frontiers():
 def test_get_db_stats():
     response = client.get(c.stats_endpoint)
     assert response.status_code == status.HTTP_200_OK
-    assert len(response.json()) == 5
+    assert len(response.json()) == 7
 
 
 def test_generate_example_db():
@@ -299,10 +309,38 @@ def test_delete_example_db():
             "delete_fqdns": True,
         },
     )
-    sleep(10)
+    sleep(5)
     after = client.get(c.stats_endpoint).json()
     assert response.status_code == status.HTTP_202_ACCEPTED
     assert after["crawler_amount"] == 0
     assert after["frontier_amount"] == 0
     assert after["url_amount"] == 0
     assert after["url_ref_amount"] == 0
+    assert after["reserved_fqdn_amount"] == 0
+
+
+def test_get_random_urls():
+    client.post(
+        c.database_endpoint,
+        json={
+            "crawler_amount": 0,
+            "fqdn_amount": 10,
+            "min_url_amount": 1,
+            "max_url_amount": 1,
+            "connection_amount": 0,
+        },
+    )
+    full_url_list_response = client.get("urls", json={"amount": 10}).json()
+
+    print(full_url_list_response)
+    assert len(full_url_list_response["url_list"]) == 10
+
+    specific_fqdn_response = client.get(
+        "urls",
+        json={"amount": 1, "fqdn": full_url_list_response["url_list"][0]["fqdn"]},
+    ).json()
+
+    assert (
+        specific_fqdn_response["url_list"][0]["fqdn"]
+        == full_url_list_response["url_list"][0]["fqdn"]
+    )

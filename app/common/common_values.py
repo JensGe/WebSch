@@ -17,7 +17,7 @@ frontier_length = 0
 url_frontier_count = 0
 urls_count = 0
 
-fqdn = 20
+fqdn_amount = 20
 crawler = 3
 min_url = 10
 max_url = 100
@@ -26,5 +26,5 @@ connections = 0
 
 
 # Frontier Settings
-response_url = "http://ec2-18-195-144-15.eu-central-1.compute.amazonaws.com/submit"
+response_url = "http://ec2-18-195-144-15.eu-central-1.compute.amazonaws.com/submit/"
 hours_to_die = 2

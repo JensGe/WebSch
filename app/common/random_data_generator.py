@@ -3,9 +3,10 @@ import string
 from datetime import datetime, timedelta
 
 from app.common import enum
+from app.data import data_generator as data_gen
 
 
-def get_random_datetime():  # ToDo also create None Dates
+def random_datetime():  # ToDo also create None Dates
     start = datetime(year=2019, month=1, day=1, hour=0, minute=0, second=0)
     end = datetime(year=2020, month=3, day=3, hour=0, minute=0, second=0)
     delta = end - start
@@ -14,11 +15,7 @@ def get_random_datetime():  # ToDo also create None Dates
     return start + timedelta(seconds=random_second)
 
 
-def get_random_tld():
-    return random.choice([e.value for e in enum.TLD])
-
-
-def get_random_sld():
+def random_sld():
     first_char = random.choice(string.ascii_lowercase)
     random_allowed_characters = string.ascii_lowercase + "0123456789-"
     last_char = random.choice(random_allowed_characters[:-1])
@@ -33,49 +30,7 @@ def get_random_sld():
     return sld
 
 
-def get_random_german_text(length: int = None):
-    chars = [
-        "e",
-        "n",
-        "i",
-        "s",
-        "r",
-        "a",
-        "t",
-        "d",
-        "h",
-        "u",
-        "l",
-        "c",
-        "g",
-        "m",
-        "o",
-    ]
-    distribution = [
-        0.1740,
-        0.0978,
-        0.0755,
-        0.0758,
-        0.0700,
-        0.0651,
-        0.0615,
-        0.0508,
-        0.0476,
-        0.0435,
-        0.0344,
-        0.0306,
-        0.0301,
-        0.0253,
-        0.0251,
-    ]
-
-    if length is None:
-        length = random.randint(10, 16)
-
-    return "".join(random.choices(population=chars, weights=distribution, k=length))
-
-
-def get_random_academic_name():
+def random_academic_name():
     return (
         str(random.choice([e.value for e in enum.ACADEMICS]))
         + " "
@@ -84,7 +39,7 @@ def get_random_academic_name():
 
 
 def get_random_fqdn():
-    return "www." + get_random_sld() + "." + get_random_tld()
+    return "www." + random_sld() + "." + data_gen.random_tld()
 
 
 def get_random_ipv4():
@@ -96,36 +51,32 @@ def get_random_ipv4():
     )
 
 
-def get_random_hex():
+def random_hex():
     return random.choice(string.digits + "ABCDEF")
 
 
-def get_random_example_ipv6():
+def random_example_ipv6():
     return "2001:DB8::{}{}{}{}".format(
-        get_random_hex(), get_random_hex(), get_random_hex(), get_random_hex()
+        random_hex(), random_hex(), random_hex(), random_hex()
     )
 
 
-def get_random_pagerank():
-    return random.uniform(0, 0.0003)
-
-
-def get_random_web_filename():
+def random_web_filename():
     file = random.choice(["/index", "/home", "/impressum", "/contact"])
     extension = random.choice([".php", ".html", ".aspx", "", "/"])
     return file + extension
 
 
-def get_random_url(fqdn: str):
+def random_url(fqdn: str):
     return "http://{}/{}{}".format(
-        fqdn, get_random_german_text(), get_random_web_filename()
+        fqdn, data_gen.random_text(), random_web_filename()
     )
 
 
-def get_random_urls(fqdn: str, amount: int):
+def random_urls(fqdn: str, amount: int):
     url_set = set()
     while len(url_set) < amount:
-        url_set.add(get_random_url(fqdn))
+        url_set.add(random_url(fqdn))
     return list(url_set)
 
 

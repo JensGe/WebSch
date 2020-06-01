@@ -21,7 +21,7 @@ app = FastAPI(
     redoc_url=None,
 )
 
-app.add_middleware(GZipMiddleware, minimum_size=1000)
+app.add_middleware(GZipMiddleware, minimum_size=150)
 
 
 # Dependency

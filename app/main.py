@@ -23,7 +23,7 @@ app = FastAPI(
     redoc_url=None,
 )
 
-app.add_middleware(GZipMiddleware, minimum_size=1000)
+app.add_middleware(GZipMiddleware, minimum_size=150)
 
 
 # Dependency
@@ -65,7 +65,6 @@ def register_crawler(crawler: pyd_models.CreateCrawler, db: Session = Depends(ge
     Create a Crawler
 
     - **contact**: The e-mail address of the crawlers owner
-    - **name**: A unique Name per Owner
     - **name**: A unique name for the crawler per contact
     - **location** (optional): The location where the crawler resides
     - **pref_tld** (optional): The Top-Level-Domain, which the crawler prefers to crawl

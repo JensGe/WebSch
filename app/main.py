@@ -195,7 +195,7 @@ async def generate_example_db(
     - **fqdn_amount** (default: 20): Number of Web Sites to generate
     - **min_url_amount** (default: 10): Minimum Pages per Web Site
     - **max_url_amount** (default: 100): Maximum Pages per Web Site
-    - **visited_ratio** (default: 1.0): Pages which have been visited
+    - **visited_ratio** (default: 0.0): Pages which have been visited
     - **connection_amount** (default: 0): Amount of incoming Connections per Page
     - **fixed_crawl_delay** (default: None): Adjust the Crawl Delay for all Web Sites.
         Will be a distributed-randomized Value when no Value is chosen.

@@ -78,7 +78,7 @@ def long_term_frontier(fqdn, url_list):
         url_list=url_list,
         fqdn_last_ipv4=fqdn.fqdn_last_ipv4,
         fqdn_last_ipv6=fqdn.fqdn_last_ipv6,
-        fqdn_pagerank=fqdn.fqdn_pagerank,
+        fqdn_avg_pagerank=fqdn.fqdn_avg_pagerank,
         fqdn_crawl_delay=fqdn.fqdn_crawl_delay,
         fqdn_url_count=len(url_list),
     )

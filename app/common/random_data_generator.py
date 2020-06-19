@@ -6,9 +6,9 @@ from app.common import enum
 from app.data import data_generator as data_gen
 
 
-def random_datetime():  # ToDo also create None Dates
-    start = datetime(year=2019, month=1, day=1, hour=0, minute=0, second=0)
-    end = datetime(year=2020, month=3, day=3, hour=0, minute=0, second=0)
+def random_datetime():
+    start = datetime(year=2000, month=1, day=1, hour=0, minute=0, second=0)
+    end = datetime.now()
     delta = end - start
     int_delta = (delta.days * 24 * 60 * 60) + delta.seconds
     random_second = random.randrange(int_delta)

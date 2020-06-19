@@ -37,7 +37,7 @@ def create_fqdn_list(db, request):
         fqdn_list = fqdn_list.order_by(db_models.FqdnFrontier.fqdn_url_count.asc())
 
     elif request.long_term_mode == enum.LTF.page_rank:
-        fqdn_list = fqdn_list.order_by(db_models.FqdnFrontier.fqdn_pagerank.desc())
+        fqdn_list = fqdn_list.order_by(db_models.FqdnFrontier.fqdn_avg_pagerank.desc())
 
     # Limit
     if request.amount > 0:

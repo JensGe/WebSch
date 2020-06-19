@@ -19,7 +19,7 @@ db_models.Base.metadata.create_all(bind=database.engine)
 app = FastAPI(
     title="WebSch",
     description="A Scheduler for a distributed Web Fetcher System",
-    version="0.2.7",
+    version="0.3.0",
     redoc_url=None,
 )
 

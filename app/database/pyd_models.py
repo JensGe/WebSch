@@ -136,6 +136,7 @@ class FetcherSettings(BasisModel):
     crawling_speed_factor: float = None
     default_crawl_delay: int = None
     parallel_process: int = None
+    parallel_fetcher: int = None
 
     iterations: int = None
     fqdn_amount: int = None

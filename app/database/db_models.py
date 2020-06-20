@@ -71,6 +71,7 @@ class FetcherSettings(Base):
     crawling_speed_factor = Column(Float)
     default_crawl_delay = Column(Integer)
     parallel_process = Column(Integer)
+    parallel_fetcher = Column(Integer)
 
     iterations = Column(Integer)
     fqdn_amount = Column(Integer)

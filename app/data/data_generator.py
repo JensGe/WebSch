@@ -69,10 +69,7 @@ def random_pagerank(rank: int = random.randint(0, 60000000000)):
 
 
 def random_tld():
-    # Source: https://de.statista.com/statistik/daten/studie/70561/umfrage/domains-weltweit/
-    # and https://ntldstats.com/tld/
-
-    with open("app/data/example_tlds.csv", "r") as file:
+    with open("app/data/top200-tlds.csv", "r") as file:
         reader = csv.reader(file)
         tld_dist = [(row[0], int(row[1])) for row in reader]
         tlds, dist = map(list, zip(*tld_dist))

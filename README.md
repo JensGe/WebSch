@@ -20,8 +20,8 @@ Distributed Fetcher ask for new URL Lists per REST API call.
 
 ## Python Packages
 
-The project is build on the python packages FastAPI (https://fastapi.tiangolo.com/). 
-FastApi itself is build on the following packages:
+The project is built on the python package FastAPI (https://fastapi.tiangolo.com/). 
+FastApi itself is built on top of the following packages:
 - Starlette (https://www.starlette.io/)
 - pydantic (https://pydantic-docs.helpmanual.io/)
 
@@ -34,7 +34,7 @@ The Docker Image provided by FastAPI is used as well
 
 The project is deployed on an AWS EC2 Ubuntu Machine. 
 
-[Link to Online Docs] http://ec2-3-16-31-169.us-east-2.compute.amazonaws.com/docs
+[Link to Online Docs] http://ec2-18-185-96-23.eu-central-1.compute.amazonaws.com/docs
 
 # Commands
 
@@ -80,6 +80,7 @@ sudo docker run --env-file ./env.list -p 80:80
 POSTGRES_ENV_USER=...
 POSTGRES_ENV_PW=...
 POSTGRES_ENV_URI=...
+POSTGRES_ENV_DB=...
 ```
 
 

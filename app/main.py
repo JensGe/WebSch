@@ -221,6 +221,7 @@ async def generate_example_db(
         request
     )
 
+    background_tasks.add_task(database.refresh_fqdn_hashes, db)
     return Response(status_code=status.HTTP_202_ACCEPTED)
 
 

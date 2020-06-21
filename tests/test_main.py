@@ -3,7 +3,8 @@ from fastapi import status
 
 from app.main import app
 from app.common import common_values as c, enum
-from app.database import fetchers, database
+from app.database import fetchers, database, db_models
+
 
 from time import sleep
 from tests import values as v
@@ -252,6 +253,48 @@ def test_get_frontiers():
     )
     assert response2.status_code == status.HTTP_200_OK
 
+
+def test_get_fqdn_list_with_fqdn_hash():
+    client.delete(
+        c.database_endpoint,
+        json={
+            "delete_url_refs": True,
+            "delete_fetchers": True,
+            "delete_urls": True,
+            "delete_fqdns": True,
+            "delete_reserved_fqdns": True,
+        },
+    )
+    sleep(1)
+    client.post(
+        c.database_endpoint,
+        json={
+            "fetcher_amount": 3,
+            "fqdn_amount": 50,
+            "min_url_amount": 1,
+            "max_url_amount": 1,
+            "connection_amount": 0,
+        },
+    )
+    sleep(3)
+
+    fetcher_uuid = client.get(c.fetcher_endpoint).json()[0]["uuid"]
+
+    response = client.post(
+        c.frontier_endpoint,
+        json={
+            "fetcher_uuid": fetcher_uuid,
+            "amount": 0,
+            "length": 0,
+            "long_term_mode": enum.LTF.fqdn_hash,
+        },
+    )
+
+    count_hash = response.json()["url_frontiers_count"]
+    db_hash_count = db.query(db_models.Frontier).filter(db_models.Frontier.fqdn_hash == 0).count()
+
+    assert response.status_code == 200
+    assert count_hash == db_hash_count
 
 # Dev API
 def test_get_db_stats():

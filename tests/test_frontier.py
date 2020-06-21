@@ -233,5 +233,3 @@ def test_set_fetcher_settings():
     rv = frontier.set_fetcher_settings(request, db)
 
     assert rv.iterations == request.iterations
-
-

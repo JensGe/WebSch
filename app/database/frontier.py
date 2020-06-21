@@ -26,6 +26,18 @@ def create_fqdn_list(db, request):
 
         fqdn_list = fqdn_list.filter(db_models.Frontier.tld == fetcher_pref_tld)
 
+    if request.long_term_mode == enum.LTF.fqdn_hash:
+        fetcher = (
+            db.query(db_models.Fetcher).order_by(db_models.Fetcher.reg_date.asc()).all()
+        )
+
+        fetcher_index = next(
+            (i for i, item in enumerate(fetcher) if item.uuid == str(request.fetcher_uuid)),
+            -1,
+        )
+
+        fqdn_list = fqdn_list.filter(db_models.Frontier.fqdn_hash == fetcher_index)
+
     # Order
     if request.long_term_mode == enum.LTF.random:
         fqdn_list = fqdn_list.order_by(func.random())
@@ -36,9 +48,8 @@ def create_fqdn_list(db, request):
     elif request.long_term_mode == enum.LTF.small_sites_first:
         fqdn_list = fqdn_list.order_by(db_models.Frontier.fqdn_url_count.asc())
 
-    elif request.long_term_mode == enum.LTF.page_rank:
+    elif request.long_term_mode == enum.LTF.avg_pagerank:
         fqdn_list = fqdn_list.order_by(db_models.Frontier.fqdn_avg_pagerank.desc())
-
 
     # Limit
     if request.amount > 0:
@@ -49,9 +60,7 @@ def create_fqdn_list(db, request):
 
 
 def short_term_frontier(db, request, fqdn):
-    db_url_list = db.query(db_models.Url).filter(
-        db_models.Url.fqdn == fqdn.fqdn
-    )
+    db_url_list = db.query(db_models.Url).filter(db_models.Url.fqdn == fqdn.fqdn)
 
     # Order
     if request.short_term_mode == enum.STF.random:
@@ -88,10 +97,7 @@ def long_term_frontier(fqdn, url_list):
 def get_referencing_urls(db, url, amount):
     return (
         db.query(db_models.Url)
-        .filter(
-            db_models.Url.url_last_visited
-            is not None
-        )
+        .filter(db_models.Url.url_last_visited is not None)
         .order_by(func.random())
         .limit(amount)
     )

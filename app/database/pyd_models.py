@@ -63,7 +63,7 @@ class Url(BasisModel):
 
 class Frontier(BasisModel):
     fqdn: str
-    fqdn_hash: str = None
+    fqdn_hash: int = None
     tld: str = None
 
     fqdn_last_ipv4: str = None

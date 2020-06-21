@@ -27,7 +27,7 @@ class Fetcher(Base):
 class Frontier(Base):
     __tablename__ = "frontiers"
 
-    fqdn_hash = Column(String)
+    fqdn_hash = Column(Integer)
     fqdn = Column(String, primary_key=True, index=True)
     tld = Column(String, index=True)
 

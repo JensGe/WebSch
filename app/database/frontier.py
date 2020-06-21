@@ -84,6 +84,7 @@ def short_term_frontier(db, request, fqdn):
 def long_term_frontier(fqdn, url_list):
     return pyd_models.Frontier(
         fqdn=fqdn.fqdn,
+        fetcher_idx=fqdn.fetcher_idx,
         tld=fqdn.tld,
         url_list=url_list,
         fqdn_last_ipv4=fqdn.fqdn_last_ipv4,

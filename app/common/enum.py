@@ -1,16 +1,6 @@
 from enum import Enum
 
 
-class STF(str, Enum):
-    """
-    Short Term Frontier Strategy
-    """
-    random = "random"
-    old_pages_first = "old_pages_first"
-    new_pages_first = "new_pages_first"
-    change_rate = "change_rate"
-
-
 class LTF(str, Enum):
     """
     Long Term Frontier Strategy
@@ -20,10 +10,22 @@ class LTF(str, Enum):
     large_sites_first = "large_sites_first"
     small_sites_first = "small_sites_first"
     old_sites_first = "old_sites_first"
-    page_rank = "page_rank"
-    geo_distance = "geo_distance"
-    average_change_rate = "average_change_rate"
+    new_sites_first = "new_sites_first"
+    avg_pagerank = "avg_pagerank"
+    avg_change_rate = "avg_change_rate"
+    fqdn_hash = "fqdn_hash"
     consistent_hashing = "consistent_hashing"
+
+
+class STF(str, Enum):
+    """
+    Short Term Frontier Strategy
+    """
+    random = "random"
+    old_pages_first = "old_pages_first"
+    new_pages_first = "new_pages_first"
+    pagerank = "pagerank"
+    change_rate = "change_rate"
 
 
 class LPPDISTR(str, Enum):

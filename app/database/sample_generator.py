@@ -37,10 +37,10 @@ def create_sample_fetcher(db: Session, amount: int = 3):
 
 
 def new_fqdn(fqdn_basis, fqdn_url_amount, fetcher_amount, request):
-    fqdn_hash = hash(fqdn_basis) % fetcher_amount if fetcher_amount != 0 else None
+    fetcher_idx = hash(fqdn_basis) % fetcher_amount if fetcher_amount != 0 else None
     return db_models.Frontier(
         fqdn=fqdn_basis,
-        fqdn_hash=fqdn_hash,
+        fetcher_idx=fetcher_idx,
         tld=fqdn_basis.split(".")[-1],
         fqdn_last_ipv4=rand_gen.get_random_ipv4(),
         fqdn_last_ipv6=rand_gen.random_example_ipv6(),

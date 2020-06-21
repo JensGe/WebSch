@@ -291,7 +291,7 @@ def test_get_fqdn_list_with_fqdn_hash():
     )
 
     count_hash = response.json()["url_frontiers_count"]
-    db_hash_count = db.query(db_models.Frontier).filter(db_models.Frontier.fqdn_hash == 0).count()
+    db_hash_count = db.query(db_models.Frontier).filter(db_models.Frontier.fetcher_idx == 0).count()
 
     assert response.status_code == 200
     assert count_hash == db_hash_count

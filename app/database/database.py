@@ -45,7 +45,7 @@ def refresh_fqdn_hashes(db):
     fetcher_amount = db.query(db_models.Fetcher).count()
 
     for f in frontier:
-        f.fqdn_hash = hash(f.fqdn) % fetcher_amount if fetcher_amount != 0 else None
+        f.fetcher_idx = hash(f.fqdn) % fetcher_amount if fetcher_amount != 0 else None
 
     db.bulk_save_objects(frontier)
     db.commit()

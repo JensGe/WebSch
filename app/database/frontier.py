@@ -36,7 +36,7 @@ def create_fqdn_list(db, request):
             -1,
         )
 
-        fqdn_list = fqdn_list.filter(db_models.Frontier.fqdn_hash == fetcher_index)
+        fqdn_list = fqdn_list.filter(db_models.Frontier.fetcher_idx == fetcher_index)
 
     # Order
     if request.long_term_mode == enum.LTF.random:

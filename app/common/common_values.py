@@ -21,10 +21,10 @@ fqdn_amount = 20
 crawler = 3
 min_url = 10
 max_url = 100
-visited_ratio = 1.0
+visited_ratio = 0.0
 connections = 0
 
 
 # Frontier Settings
 response_url = "http://ec2-18-195-144-15.eu-central-1.compute.amazonaws.com/submit/"
-hours_to_die = 2
+hours_to_die = 12

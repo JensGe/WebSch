@@ -6,8 +6,8 @@ frontier_endpoint = "/frontiers/"
 
 
 # DB_Models
-url_frontier_pk = "url_frontiers.url"
-fqdn_frontier_pk = "fqdn_frontiers.fqdn"
+url_frontier_pk = "urls.url"
+fqdn_frontier_pk = "frontiers.fqdn"
 
 
 # Pydantic Model Values

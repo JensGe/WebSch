@@ -24,8 +24,8 @@ class Crawler(Base):
     tld_preference = Column(String)
 
 
-class FqdnFrontier(Base):
-    __tablename__ = "fqdn_frontiers"
+class Frontier(Base):
+    __tablename__ = "frontiers"
 
     fqdn_hash = Column(String)
     fqdn = Column(String, primary_key=True, index=True)
@@ -39,8 +39,8 @@ class FqdnFrontier(Base):
     fqdn_crawl_delay = Column(Integer)
 
 
-class UrlFrontier(Base):
-    __tablename__ = "url_frontiers"
+class Url(Base):
+    __tablename__ = "urls"
 
     fqdn = Column(String, ForeignKey(c.fqdn_frontier_pk))
     url = Column(String, primary_key=True, index=True)

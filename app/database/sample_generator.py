@@ -37,7 +37,7 @@ def create_sample_crawler(db: Session, amount: int = 3):
 
 
 def new_fqdn(fqdn_basis, fqdn_url_amount, request):
-    return db_models.FqdnFrontier(
+    return db_models.Frontier(
         fqdn=fqdn_basis,
         tld=fqdn_basis.split(".")[-1],
         fqdn_last_ipv4=rand_gen.get_random_ipv4(),
@@ -50,13 +50,13 @@ def new_fqdn(fqdn_basis, fqdn_url_amount, request):
     )
 
 
-def new_url(url, fqdn, visited_ratio):
-    if random.random() < visited_ratio:
+def new_url(url, fqdn, request):
+    if random.random() < request.visited_ratio:
         random_date_time = rand_gen.random_datetime()
     else:
         random_date_time = None
 
-    return db_models.UrlFrontier(
+    return db_models.Url(
         url=url,
         fqdn=fqdn,
         url_pagerank=data_gen.random_pagerank(),
@@ -92,7 +92,7 @@ def create_sample_frontier(db: Session, request):
         urls = rand_gen.random_urls(fqdn, fqdn_url_amounts[fqdn_bases.index(fqdn)])
 
         fqdn_url_list = [
-            new_url(urls[i], fqdn, request.visited_ratio)
+            new_url(urls[i], fqdn, request)
             for i in range(fqdn_url_amounts[fqdn_bases.index(fqdn)])
         ]
 

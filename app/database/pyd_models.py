@@ -61,8 +61,9 @@ class Url(BasisModel):
     url_bot_excluded: bool = None
 
 
-class UrlFrontier(BasisModel):
+class Frontier(BasisModel):
     fqdn: str
+    fqdn_hash: str = None
     tld: str = None
 
     fqdn_last_ipv4: str = None
@@ -89,7 +90,7 @@ class FrontierResponse(BasisModel):
     latest_return: datetime = None
     url_frontiers_count: int = c.url_frontier_count
     urls_count: int = c.urls_count
-    url_frontiers: List[UrlFrontier] = []
+    url_frontiers: List[Frontier] = []
 
 
 # Developer Tools

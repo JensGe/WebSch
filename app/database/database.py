@@ -26,11 +26,11 @@ def reset(db, request: pyd_models.DeleteDatabase):
         db.commit()
 
     if request.delete_urls:
-        db.query(db_models.UrlFrontier).delete()
+        db.query(db_models.Url).delete()
         db.commit()
 
     if request.delete_fqdns:
-        db.query(db_models.FqdnFrontier).delete()
+        db.query(db_models.Frontier).delete()
         db.commit()
 
     if request.delete_reserved_fqdns:

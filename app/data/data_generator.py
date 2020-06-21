@@ -42,8 +42,6 @@ def random_text(length: int = None, language: str = "de"):
 
 
 def random_pagerank(rank: int = random.randint(0, 60000000000)):
-    # Source Springer: Inf Retrieval (2006) 9: 134 Table 1
-
     if rank <= 10:
         random_pagerank = random.uniform(8.0, 10.0)
     elif rank <= 100:
@@ -69,7 +67,7 @@ def random_pagerank(rank: int = random.randint(0, 60000000000)):
 
 
 def random_tld():
-    with open("app/data/top200-tlds.csv", "r") as file:
+    with open("app/data/top200_tlds.csv", "r") as file:
         reader = csv.reader(file)
         tld_dist = [(row[0], int(row[1])) for row in reader]
         tlds, dist = map(list, zip(*tld_dist))
@@ -78,8 +76,6 @@ def random_tld():
 
 
 def random_crawl_delay():
-    # Source: (Kolay et al. 2008, S. 1171 f.)
-
     crawl_delays = [None, 1, 2, 3, 5, 10, 15, 20, 30, 45, 50, 60, 120, 200, 300, 600, 1000]
     distibution = [
         0.80000,

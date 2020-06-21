@@ -12,8 +12,8 @@ def create_fqdn_list(db, request):
         db_models.CrawlerReservation.latest_return > datetime.now(tz=timezone.utc)
     )
 
-    fqdn_list = db.query(db_models.FqdnFrontier).filter(
-        db_models.FqdnFrontier.fqdn.notin_(fqdn_block_list)
+    fqdn_list = db.query(db_models.Frontier).filter(
+        db_models.Frontier.fqdn.notin_(fqdn_block_list)
     )
 
     # Filter
@@ -24,20 +24,20 @@ def create_fqdn_list(db, request):
             .first()
         ).tld_preference
 
-        fqdn_list = fqdn_list.filter(db_models.FqdnFrontier.tld == crawler_pref_tld)
+        fqdn_list = fqdn_list.filter(db_models.Frontier.tld == crawler_pref_tld)
 
     # Order
     if request.long_term_mode == enum.LTF.random:
         fqdn_list = fqdn_list.order_by(func.random())
 
     elif request.long_term_mode == enum.LTF.large_sites_first:
-        fqdn_list = fqdn_list.order_by(db_models.FqdnFrontier.fqdn_url_count.desc())
+        fqdn_list = fqdn_list.order_by(db_models.Frontier.fqdn_url_count.desc())
 
     elif request.long_term_mode == enum.LTF.small_sites_first:
-        fqdn_list = fqdn_list.order_by(db_models.FqdnFrontier.fqdn_url_count.asc())
+        fqdn_list = fqdn_list.order_by(db_models.Frontier.fqdn_url_count.asc())
 
     elif request.long_term_mode == enum.LTF.page_rank:
-        fqdn_list = fqdn_list.order_by(db_models.FqdnFrontier.fqdn_avg_pagerank.desc())
+        fqdn_list = fqdn_list.order_by(db_models.Frontier.fqdn_avg_pagerank.desc())
 
     # Limit
     if request.amount > 0:
@@ -48,8 +48,8 @@ def create_fqdn_list(db, request):
 
 
 def short_term_frontier(db, request, fqdn):
-    db_url_list = db.query(db_models.UrlFrontier).filter(
-        db_models.UrlFrontier.fqdn == fqdn.fqdn
+    db_url_list = db.query(db_models.Url).filter(
+        db_models.Url.fqdn == fqdn.fqdn
     )
 
     # Order
@@ -58,12 +58,12 @@ def short_term_frontier(db, request, fqdn):
 
     elif request.short_term_mode == enum.STF.old_pages_first:
         db_url_list = db_url_list.order_by(
-            db_models.UrlFrontier.url_last_visited.asc().nullsfirst()
+            db_models.Url.url_last_visited.asc().nullsfirst()
         )
 
     elif request.short_term_mode == enum.STF.new_pages_first:
         db_url_list = db_url_list.order_by(
-            db_models.UrlFrontier.url_last_visited.desc().nullslast()
+            db_models.Url.url_last_visited.desc().nullslast()
         )
 
     db_url_list = db_url_list[: request.length] if request.length > 0 else db_url_list
@@ -72,7 +72,7 @@ def short_term_frontier(db, request, fqdn):
 
 
 def long_term_frontier(fqdn, url_list):
-    return pyd_models.UrlFrontier(
+    return pyd_models.Frontier(
         fqdn=fqdn.fqdn,
         tld=fqdn.tld,
         url_list=url_list,
@@ -86,9 +86,9 @@ def long_term_frontier(fqdn, url_list):
 
 def get_referencing_urls(db, url, amount):
     return (
-        db.query(db_models.UrlFrontier)
+        db.query(db_models.Url)
         .filter(
-            db_models.UrlFrontier.url_last_visited
+            db_models.Url.url_last_visited
             is not None
         )
         .order_by(func.random())
@@ -187,7 +187,7 @@ def get_fqdn_frontier(db, request: pyd_models.FrontierRequest):
 def calculate_avg_freshness(db):
     sum_timestamps = db.query(
         func.to_timestamp(
-            func.avg(func.extract("epoch", db_models.UrlFrontier.url_last_visited))
+            func.avg(func.extract("epoch", db_models.Url.url_last_visited))
         )
     ).first()
     rv = (
@@ -200,11 +200,11 @@ def calculate_avg_freshness(db):
 
 def get_visited_ratio(db):
     visited_urls_count = (
-        db.query(db_models.UrlFrontier)
-        .filter(db_models.UrlFrontier.url_last_visited.isnot(None))
+        db.query(db_models.Url)
+        .filter(db_models.Url.url_last_visited.isnot(None))
         .count()
     )
-    all_urls = db.query(db_models.UrlFrontier).count()
+    all_urls = db.query(db_models.Url).count()
     if all_urls == 0 or all_urls is None:
         all_urls = -1
     return visited_urls_count / all_urls
@@ -214,8 +214,8 @@ def get_db_stats(db: Session):
     clean_reservation_list(db)
     response = {
         "crawler_amount": db.query(db_models.Crawler).count(),
-        "frontier_amount": db.query(db_models.FqdnFrontier).count(),
-        "url_amount": db.query(db_models.UrlFrontier).count(),
+        "frontier_amount": db.query(db_models.Frontier).count(),
+        "url_amount": db.query(db_models.Url).count(),
         "url_ref_amount": db.query(db_models.URLRef).count(),
         "reserved_fqdn_amount": db.query(db_models.CrawlerReservation)
         .filter(
@@ -229,9 +229,9 @@ def get_db_stats(db: Session):
 
 
 def get_random_urls(db: Session, request: pyd_models.GetRandomUrls):
-    urls = db.query(db_models.UrlFrontier)
+    urls = db.query(db_models.Url)
     if request.fqdn is not None:
-        urls = urls.filter(db_models.UrlFrontier.fqdn == request.fqdn)
+        urls = urls.filter(db_models.Url.fqdn == request.fqdn)
 
     urls = urls.order_by(func.random()).limit(request.amount)
 

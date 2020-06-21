@@ -21,7 +21,7 @@ db = database.SessionLocal()
 
 
 def create_example_frontier_response(uuid=v.sample_uuid):
-    frontier_one = pyd_models.UrlFrontier(
+    frontier_one = pyd_models.Frontier(
         fqdn=example_domain_com,
         tld="com",
         url_list=[
@@ -40,7 +40,7 @@ def create_example_frontier_response(uuid=v.sample_uuid):
         ],
     )
 
-    frontier_two = pyd_models.UrlFrontier(
+    frontier_two = pyd_models.Frontier(
         fqdn=example_domain_de,
         tld="de",
         url_list=[

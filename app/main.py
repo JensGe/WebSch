@@ -60,7 +60,9 @@ def read_fetcher(db: Session = Depends(get_db)):
     summary="Create a Fetcher",
     response_description="Information about the newly created Fetcher",
 )
-def register_fetcher(fetcher: pyd_models.CreateFetcher, db: Session = Depends(get_db)):
+def register_fetcher(fetcher: pyd_models.CreateFetcher,
+                     background_tasks: BackgroundTasks,
+                     db: Session = Depends(get_db)):
     """
     Create a Fetcher
 
@@ -70,6 +72,9 @@ def register_fetcher(fetcher: pyd_models.CreateFetcher, db: Session = Depends(ge
     - **pref_tld** (optional): The Top-Level-Domain, which the fetcher prefers to crawl
     """
     new_fetcher = fetchers.create_fetcher(db, fetcher)
+
+    background_tasks.add_task(database.refresh_fqdn_hashes, db)
+
     return new_fetcher
 
 
@@ -125,13 +130,16 @@ def patch_fetcher(fetcher: pyd_models.UpdateFetcher, db: Session = Depends(get_d
     summary="Delete a Fetcher",
     response_description="No Content",
 )
-def delete_fetcher(fetcher: pyd_models.DeleteFetcher, db: Session = Depends(get_db)):
+def delete_fetcher(fetcher: pyd_models.DeleteFetcher,
+                   background_tasks: BackgroundTasks,
+                   db: Session = Depends(get_db)):
     """
     Delete a specific Fetcher
 
     - **uuid**: UUID of the fetcher, which has to be deleted
     """
     fetchers.delete_fetcher(db, fetcher)
+    background_tasks.add_task(database.refresh_fqdn_hashes, db)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 

@@ -40,6 +40,15 @@ def reset(db, request: pyd_models.DeleteDatabase):
     return True
 
 
-def recalculate_fqdn_hashes():
-    # on crawler_amount change recalculate all fqdn hashes
-    pass
+def refresh_fqdn_hashes(db):
+    frontier = db.query(db_models.Frontier).all()
+    fetcher_amount = db.query(db_models.Fetcher).count()
+
+    for f in frontier:
+        f.fqdn_hash = hash(f.fqdn) % fetcher_amount if fetcher_amount != 0 else None
+
+    db.bulk_save_objects(frontier)
+    db.commit()
+
+
+    return True

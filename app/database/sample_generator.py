@@ -9,13 +9,13 @@ from app.common import random_data_generator as rand_gen
 from app.data import data_generator as data_gen
 
 
-def create_sample_crawler(db: Session, amount: int = 3):
+def create_sample_fetcher(db: Session, amount: int = 3):
 
     crawlers = []
 
     for _ in range(amount):
         crawlers.append(
-            db_models.Crawler(
+            db_models.Fetcher(
                 uuid=str(uuid4()),
                 contact="admin@owi-crawler.com",
                 reg_date=datetime.now(tz=timezone.utc),
@@ -36,9 +36,11 @@ def create_sample_crawler(db: Session, amount: int = 3):
     return crawlers
 
 
-def new_fqdn(fqdn_basis, fqdn_url_amount, request):
+def new_fqdn(fqdn_basis, fqdn_url_amount, fetcher_amount, request):
+    fqdn_hash = hash(fqdn_basis) % fetcher_amount if fetcher_amount != 0 else None
     return db_models.Frontier(
         fqdn=fqdn_basis,
+        fqdn_hash=fqdn_hash,
         tld=fqdn_basis.split(".")[-1],
         fqdn_last_ipv4=rand_gen.get_random_ipv4(),
         fqdn_last_ipv6=rand_gen.random_example_ipv6(),
@@ -73,6 +75,7 @@ def new_ref(url_out, url_in):
 
 
 def create_sample_frontier(db: Session, request):
+    fetcher_amount = db.query(db_models.Fetcher).count()
     fqdn_bases = [rand_gen.get_random_fqdn() for _ in range(request.fqdn_amount)]
     fqdn_url_amounts = [
         random.randint(request.min_url_amount, request.max_url_amount)
@@ -81,7 +84,7 @@ def create_sample_frontier(db: Session, request):
 
     global_url_list = []
     fqdn_frontier = [
-        new_fqdn(fqdn_bases[i], fqdn_url_amounts[i], request)
+        new_fqdn(fqdn_bases[i], fqdn_url_amounts[i], fetcher_amount, request)
         for i in range(request.fqdn_amount)
     ]
 

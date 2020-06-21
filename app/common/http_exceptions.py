@@ -4,14 +4,14 @@ from fastapi import HTTPException, status
 def raise_http_404(uuid):
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
-        detail="Crawler with UUID: {} was not found".format(uuid),
+        detail="Fetcher with UUID: {} was not found".format(uuid),
     )
 
 
 def raise_http_409(contact, name):
     raise HTTPException(
         status_code=status.HTTP_409_CONFLICT,
-        detail="Combination of Crawler Contact ({}) and Crawler Name ({}) already "
+        detail="Combination of Fetcher Contact ({}) and Fetcher Name ({}) already "
         "exists, please choose another name for your crawler".format(contact, name),
     )
 

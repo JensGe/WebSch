@@ -3,7 +3,7 @@ from fastapi import status
 
 from app.main import app
 from app.common import common_values as c, enum
-from app.database import crawlers, database
+from app.database import fetchers, database
 
 from time import sleep
 from tests import values as v
@@ -12,19 +12,19 @@ client = TestClient(app)
 db = database.SessionLocal()
 
 
-# Crawler API
-def test_get_all_crawler():
-    crawlers.delete_crawlers(db)
-    client.post(c.crawler_endpoint, json={"contact": v.test_email_1, "name": "IsaacV"})
-    client.post(c.crawler_endpoint, json={"contact": v.test_email_1, "name": "IsaacVI"})
-    json_response = client.get(c.crawler_endpoint).json()
+# Fetcher API
+def test_get_all_fetcher():
+    fetchers.delete_fetchers(db)
+    client.post(c.fetcher_endpoint, json={"contact": v.test_email_1, "name": "IsaacV"})
+    client.post(c.fetcher_endpoint, json={"contact": v.test_email_1, "name": "IsaacVI"})
+    json_response = client.get(c.fetcher_endpoint).json()
     assert len(json_response) == 2
 
 
-def test_create_crawler():
-    crawlers.delete_crawlers(db)
+def test_create_fetcher():
+    fetchers.delete_fetchers(db)
     response = client.post(
-        c.crawler_endpoint,
+        c.fetcher_endpoint,
         json={
             "contact": "jens@honzont.de",
             "name": "IsaacIV",
@@ -35,45 +35,45 @@ def test_create_crawler():
     assert response.status_code == status.HTTP_201_CREATED
 
 
-def test_create_crawler_duplicate():
-    crawlers.delete_crawlers(db)
-    client.post(c.crawler_endpoint, json={"contact": v.test_email_1, "name": "IsaacIV"})
+def test_create_fetcher_duplicate():
+    fetchers.delete_fetchers(db)
+    client.post(c.fetcher_endpoint, json={"contact": v.test_email_1, "name": "IsaacIV"})
     response2 = client.post(
-        c.crawler_endpoint, json={"contact": v.test_email_1, "name": "IsaacIV"}
+        c.fetcher_endpoint, json={"contact": v.test_email_1, "name": "IsaacIV"}
     )
     assert response2.status_code == status.HTTP_409_CONFLICT
 
 
-def test_update_crawler():
-    crawlers.delete_crawlers(db)
+def test_update_fetcher():
+    fetchers.delete_fetchers(db)
     create_response = client.post(
-        c.crawler_endpoint,
+        c.fetcher_endpoint,
         json={"contact": v.test_email_1, "name": "IsaacIV", "location": "Germany"},
     ).json()
     uuid = create_response["uuid"]
     contact = create_response["contact"]
     name = "IsaacXII"
     update_response = client.put(
-        c.crawler_endpoint, json={"uuid": uuid, "contact": contact, "name": name}
+        c.fetcher_endpoint, json={"uuid": uuid, "contact": contact, "name": name}
     )
     assert update_response.status_code == status.HTTP_200_OK
     assert update_response.json()["location"] is None
 
 
-def test_update_unknown_crawler():
-    update_response = client.put(c.crawler_endpoint, json={"uuid": v.sample_uuid},)
+def test_update_unknown_fetcher():
+    update_response = client.put(c.fetcher_endpoint, json={"uuid": v.sample_uuid}, )
     assert update_response.status_code == status.HTTP_404_NOT_FOUND
 
 
-def test_update_to_duplicate_crawler():
+def test_update_to_duplicate_fetcher():
     # ToDo
     assert True
 
 
-def test_patch_crawler_mix():
-    crawlers.delete_crawlers(db)
+def test_patch_fetcher_mix():
+    fetchers.delete_fetchers(db)
     create_response = client.post(
-        c.crawler_endpoint,
+        c.fetcher_endpoint,
         json={
             "contact": v.test_email_1,
             "name": "IsaacIV",
@@ -85,22 +85,22 @@ def test_patch_crawler_mix():
     name = "IsaacIX"
 
     update_response = client.patch(
-        c.crawler_endpoint, json={"uuid": uuid, "name": name}
+        c.fetcher_endpoint, json={"uuid": uuid, "name": name}
     )
     assert update_response.status_code == status.HTTP_200_OK
     assert update_response.json()["name"] == "IsaacIX"
     assert update_response.json()["location"] == "Germany"
 
 
-def test_patch_unknown_crawler():
-    patch_response = client.patch(c.crawler_endpoint, json={"uuid": v.sample_uuid},)
+def test_patch_unknown_fetcher():
+    patch_response = client.patch(c.fetcher_endpoint, json={"uuid": v.sample_uuid}, )
     assert patch_response.status_code == status.HTTP_404_NOT_FOUND
 
 
-def test_patch_crawler_empty_patch():
-    crawlers.delete_crawlers(db)
+def test_patch_fetcher_empty_patch():
+    fetchers.delete_fetchers(db)
     create_response = client.post(
-        c.crawler_endpoint,
+        c.fetcher_endpoint,
         json={
             "contact": v.test_email_1,
             "name": "IsaacIII",
@@ -110,17 +110,17 @@ def test_patch_crawler_empty_patch():
     ).json()
 
     uuid = create_response["uuid"]
-    update_response = client.patch(c.crawler_endpoint, json={"uuid": uuid})
+    update_response = client.patch(c.fetcher_endpoint, json={"uuid": uuid})
     assert update_response.status_code == status.HTTP_200_OK
     assert update_response.json()["name"] == "IsaacIII"
     assert update_response.json()["location"] == "Germany"
     assert update_response.json()["tld_preference"] == "de"
 
 
-def test_patch_crawler_full_patch():
-    crawlers.delete_crawlers(db)
+def test_patch_fetcher_full_patch():
+    fetchers.delete_fetchers(db)
     create_response = client.post(
-        c.crawler_endpoint,
+        c.fetcher_endpoint,
         json={
             "contact": v.test_email_1,
             "name": "IsaacXXI",
@@ -131,7 +131,7 @@ def test_patch_crawler_full_patch():
 
     uuid = create_response["uuid"]
     update_response = client.patch(
-        c.crawler_endpoint,
+        c.fetcher_endpoint,
         json={
             "uuid": uuid,
             "name": "IsaacXXII",
@@ -145,30 +145,30 @@ def test_patch_crawler_full_patch():
     assert update_response.json()["tld_preference"] == "se"
 
 
-def test_patch_to_duplicate_crawler():
+def test_patch_to_duplicate_fetcher():
     # ToDo
     assert True
 
 
-def test_delete_crawler():
-    crawlers.delete_crawlers(db)
+def test_delete_fetcher():
+    fetchers.delete_fetchers(db)
     json_response = client.post(
-        c.crawler_endpoint, json={"contact": v.test_email_1, "name": "IsaacVII"}
+        c.fetcher_endpoint, json={"contact": v.test_email_1, "name": "IsaacVII"}
     ).json()
     created_uuid = json_response["uuid"]
     print("UUID: {}".format(created_uuid))
-    delete_response = client.delete(c.crawler_endpoint, json={"uuid": created_uuid})
+    delete_response = client.delete(c.fetcher_endpoint, json={"uuid": created_uuid})
 
     assert delete_response.status_code == status.HTTP_204_NO_CONTENT
     assert delete_response.content == b""
 
-    json_response = client.get(c.crawler_endpoint).json()
+    json_response = client.get(c.fetcher_endpoint).json()
     assert len(json_response) == 0
 
 
-def test_delete_unknown_crawler():
-    crawlers.delete_crawlers(db)
-    delete_response = client.delete(c.crawler_endpoint, json={"uuid": v.sample_uuid})
+def test_delete_unknown_fetcher():
+    fetchers.delete_fetchers(db)
+    delete_response = client.delete(c.fetcher_endpoint, json={"uuid": v.sample_uuid})
 
     assert delete_response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -180,21 +180,21 @@ def test_get_simple_frontier():
         json={
             "delete_reserved_fqdns": True,
             "delete_url_refs": True,
-            "delete_crawlers": True,
+            "delete_fetchers": True,
             "delete_urls": True,
             "delete_fqdns": True,
         },
     )
     sleep(5)
 
-    new_crawler_uuid = client.post(
-        c.crawler_endpoint, json={"contact": v.test_email_1, "name": "Isaac"}
+    new_fetcher_uuid = client.post(
+        c.fetcher_endpoint, json={"contact": v.test_email_1, "name": "Isaac"}
     ).json()["uuid"]
 
     client.post(
         c.database_endpoint,
         json={
-            "crawler_amount": 0,
+            "fetcher_amount": 0,
             "fqdn_amount": 5,
             "min_url_amount": 2,
             "max_url_amount": 2,
@@ -205,7 +205,7 @@ def test_get_simple_frontier():
 
     response = client.post(
         c.frontier_endpoint,
-        json={"crawler_uuid": new_crawler_uuid, "amount": 2, "length": 2},
+        json={"fetcher_uuid": new_fetcher_uuid, "amount": 2, "length": 2},
     )
     print(response)
 
@@ -215,25 +215,25 @@ def test_get_simple_frontier():
 
 
 def test_get_simple_frontier_with_bad_uuid():
-    crawlers.delete_crawlers(db)
+    fetchers.delete_fetchers(db)
     response = client.post(
         c.frontier_endpoint,
-        json={"crawler_uuid": v.sample_uuid, "amount": 1, "length": 1},
+        json={"fetcher_uuid": v.sample_uuid, "amount": 1, "length": 1},
     )
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
 def test_get_frontiers():
-    crawlers.delete_crawlers(db)
-    new_crawler_uuid = client.post(
-        c.crawler_endpoint, json={"contact": v.test_email_1, "name": "Isaac"}
+    fetchers.delete_fetchers(db)
+    new_fetcher_uuid = client.post(
+        c.fetcher_endpoint, json={"contact": v.test_email_1, "name": "Isaac"}
     ).json()["uuid"]
 
     response1 = client.post(
         c.frontier_endpoint,
         json={
-            "crawler_uuid": new_crawler_uuid,
+            "fetcher_uuid": new_fetcher_uuid,
             "amount": 1,
             "length": 1,
             "prio_mode": enum.STF.old_pages_first,
@@ -244,7 +244,7 @@ def test_get_frontiers():
     response2 = client.post(
         c.frontier_endpoint,
         json={
-            "crawler_uuid": new_crawler_uuid,
+            "fetcher_uuid": new_fetcher_uuid,
             "amount": 1,
             "length": 1,
             "prio_mode": enum.STF.change_rate,
@@ -265,7 +265,7 @@ def test_generate_example_db():
     response = client.post(
         c.database_endpoint,
         json={
-            "crawler_amount": 1,
+            "fetcher_amount": 1,
             "fqdn_amount": 1,
             "min_url_amount": 1,
             "max_url_amount": 1,
@@ -275,7 +275,7 @@ def test_generate_example_db():
     sleep(10)
     after = client.get(c.stats_endpoint).json()
     assert response.status_code == status.HTTP_202_ACCEPTED
-    assert after["crawler_amount"] == before["crawler_amount"] + 1
+    assert after["fetcher_amount"] == before["fetcher_amount"] + 1
     assert after["frontier_amount"] == before["frontier_amount"] + 1
     assert after["url_amount"] == before["url_amount"] + 1
     assert after["url_ref_amount"] == before["url_ref_amount"] + 2
@@ -285,7 +285,7 @@ def test_generate_example_frontier_wrong_initial_values():
     response = client.post(
         c.database_endpoint,
         json={
-            "crawler_amount": 0,
+            "fetcher_amount": 0,
             "fqdn_amount": 1,
             "min_url_amount": 2,
             "max_url_amount": 1,
@@ -304,7 +304,7 @@ def test_delete_example_db():
         json={
             "delete_reserved_fqdns": True,
             "delete_url_refs": True,
-            "delete_crawlers": True,
+            "delete_fetchers": True,
             "delete_urls": True,
             "delete_fqdns": True,
         },
@@ -312,7 +312,7 @@ def test_delete_example_db():
     sleep(5)
     after = client.get(c.stats_endpoint).json()
     assert response.status_code == status.HTTP_202_ACCEPTED
-    assert after["crawler_amount"] == 0
+    assert after["fetcher_amount"] == 0
     assert after["frontier_amount"] == 0
     assert after["url_amount"] == 0
     assert after["url_ref_amount"] == 0
@@ -323,7 +323,7 @@ def test_get_random_urls():
     client.post(
         c.database_endpoint,
         json={
-            "crawler_amount": 0,
+            "fetcher_amount": 0,
             "fqdn_amount": 10,
             "min_url_amount": 1,
             "max_url_amount": 1,

@@ -62,7 +62,7 @@ def create_example_frontier_response(uuid=v.sample_uuid):
     frontier_response = pyd_models.FrontierResponse(
         uuid=uuid,
         response_url="https://www.example.com/submit?code=1234567890",
-        withdrawal_date=rand_gen.random_datetime(),
+        latest_return=rand_gen.random_datetime(),
         url_frontiers=[frontier_one, frontier_two],
     )
     frontier_response.url_frontiers_count = len(frontier_response.url_frontiers)
@@ -106,7 +106,7 @@ def test_get_fqdn_list():
     client.post(
         c.database_endpoint,
         json={
-            "crawler_amount": 0,
+            "fetcher_amount": 0,
             "fqdn_amount": 5,
             "min_url_amount": 2,
             "max_url_amount": 2,
@@ -116,7 +116,7 @@ def test_get_fqdn_list():
     sleep(3)
 
     frontier_request = pyd_models.FrontierRequest(
-        crawler_uuid=v.sample_uuid, amount=2, length=2
+        fetcher_uuid=v.sample_uuid, amount=2, length=2
     )
 
     fqdn_list = frontier.create_fqdn_list(db, frontier_request)
@@ -127,7 +127,7 @@ def test_save_reservations_with_old_entries():
     client.post(
         c.database_endpoint,
         json={
-            "crawler_amount": 1,
+            "fetcher_amount": 1,
             "fqdn_amount": 5,
             "min_url_amount": 2,
             "max_url_amount": 2,
@@ -136,17 +136,17 @@ def test_save_reservations_with_old_entries():
     )
     sleep(3)
 
-    crawler_uuid = client.get(c.crawler_endpoint).json()[0]["uuid"]
+    fetcher_uuid = client.get(c.fetcher_endpoint).json()[0]["uuid"]
 
     response = client.post(
         c.frontier_endpoint,
-        json={"crawler_uuid": crawler_uuid, "amount": 2, "length": 10, "tld": "de"},
+        json={"fetcher_uuid": fetcher_uuid, "amount": 2, "length": 10, "tld": "de"},
     ).json()
 
     fqdn = response["url_frontiers"][0]["fqdn"]
 
     frontier_response = pyd_models.FrontierResponse(
-        uuid=crawler_uuid,
+        uuid=fetcher_uuid,
         response_url=response["response_url"],
         latest_return=response["latest_return"],
         url_frontiers_count=response["url_frontiers_count"],
@@ -155,9 +155,9 @@ def test_save_reservations_with_old_entries():
     )
 
     reservation_item = (
-        db.query(db_models.CrawlerReservation)
-        .filter(db_models.CrawlerReservation.crawler_uuid == crawler_uuid)
-        .filter(db_models.CrawlerReservation.fqdn == fqdn)
+        db.query(db_models.FetcherReservation)
+        .filter(db_models.FetcherReservation.fetcher_uuid == fetcher_uuid)
+        .filter(db_models.FetcherReservation.fqdn == fqdn)
         .first()
     )
     reservation_item.latest_return = datetime.now(tz=timezone.utc) - timedelta(days=2)
@@ -173,7 +173,7 @@ def test_get_referencing_urls():
     client.post(
         c.database_endpoint,
         json={
-            "crawler_amount": 0,
+            "fetcher_amount": 0,
             "fqdn_amount": 1,
             "min_url_amount": 1,
             "max_url_amount": 1,
@@ -189,7 +189,7 @@ def test_get_referencing_urls():
     client.post(
         c.database_endpoint,
         json={
-            "crawler_amount": 0,
+            "fetcher_amount": 0,
             "fqdn_amount": 1,
             "min_url_amount": 1,
             "max_url_amount": 1,
@@ -209,7 +209,7 @@ def test_get_random_urls():
     client.post(
         c.database_endpoint,
         json={
-            "crawler_amount": 0,
+            "fetcher_amount": 0,
             "fqdn_amount": 1,
             "min_url_amount": 10,
             "max_url_amount": 10,
@@ -235,11 +235,3 @@ def test_set_fetcher_settings():
     assert rv.iterations == request.iterations
 
 
-def test_delete_reservation_list():
-    # check if deleted List is empty
-    pass
-
-
-def test_clean_old_items_from_reservation_list():
-    # check if deleted list ist empty when filtering for only old items
-    pass

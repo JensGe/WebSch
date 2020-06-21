@@ -1,4 +1,4 @@
-from app.database import crawlers, db_models, pyd_models, sample_generator, frontier
+from app.database import fetchers, db_models, pyd_models, sample_generator, frontier
 from app.database import database
 from app.common import http_exceptions as http_es
 
@@ -35,103 +35,103 @@ def get_db():
         db.close()
 
 
-# Crawler
+# Fetcher
 @app.get(
-    "/crawlers/",
-    response_model=List[pyd_models.Crawler],
-    tags=["Crawler", "Development Tools"],
-    summary="List all Crawlers",
-    response_description="A List of all Crawler in the Database",
+    "/fetchers/",
+    response_model=List[pyd_models.Fetcher],
+    tags=["Fetcher", "Development Tools"],
+    summary="List all Fetcher",
+    response_description="A List of all Fetcher in the Database",
 )
-def read_crawler(db: Session = Depends(get_db)):
+def read_fetcher(db: Session = Depends(get_db)):
     """
-    List all Crawler
+    List all Fetcher
     """
-    all_crawler = crawlers.get_all_crawler(db)
-    return all_crawler
+    all_fetcher = fetchers.get_all_fetcher(db)
+    return all_fetcher
 
 
 @app.post(
-    "/crawlers/",
+    "/fetchers/",
     status_code=status.HTTP_201_CREATED,
-    response_model=pyd_models.Crawler,
+    response_model=pyd_models.Fetcher,
     response_model_exclude_unset=True,
-    tags=["Crawler"],
-    summary="Create a crawler",
-    response_description="Information about the newly created crawler",
+    tags=["Fetcher"],
+    summary="Create a Fetcher",
+    response_description="Information about the newly created Fetcher",
 )
-def register_crawler(crawler: pyd_models.CreateCrawler, db: Session = Depends(get_db)):
+def register_fetcher(fetcher: pyd_models.CreateFetcher, db: Session = Depends(get_db)):
     """
-    Create a Crawler
+    Create a Fetcher
 
-    - **contact**: The e-mail address of the crawlers owner
-    - **name**: A unique name for the crawler per contact
-    - **location** (optional): The location where the crawler resides
-    - **pref_tld** (optional): The Top-Level-Domain, which the crawler prefers to crawl
+    - **contact**: The e-mail address of the fetchers owner
+    - **name**: A unique name for the fetcher per contact
+    - **location** (optional): The location where the fetcher resides
+    - **pref_tld** (optional): The Top-Level-Domain, which the fetcher prefers to crawl
     """
-    new_crawler = crawlers.create_crawler(db, crawler)
-    return new_crawler
+    new_fetcher = fetchers.create_fetcher(db, fetcher)
+    return new_fetcher
 
 
 @app.put(
-    "/crawlers/",
+    "/fetchers/",
     status_code=status.HTTP_200_OK,
-    response_model=pyd_models.Crawler,
+    response_model=pyd_models.Fetcher,
     response_model_exclude_unset=True,
-    tags=["Crawler"],
-    summary="Reset crawler information",
-    response_description="Information about the crawler",
+    tags=["Fetcher"],
+    summary="Reset fetcher information",
+    response_description="Information about the fetcher",
 )
-def update_crawler(crawler: pyd_models.UpdateCrawler, db: Session = Depends(get_db)):
+def update_crawler(fetcher: pyd_models.UpdateFetcher, db: Session = Depends(get_db)):
     """
-    Update a Crawler - Unprovided Fields will be reset
+    Update a Fetcher - Unprovided Fields will be reset
 
-    - **crawler_uuid**: The crawlers UUID to update
-    - **contact**: The e-mail address of the crawlers owner
-    - **location** (optional): The location where the crawler resides
-    - **pref_tld** (optional): The Top-Level-Domain, which the crawler prefers to crawl
+    - **fetcher_uuid**: The fetchers UUID to update
+    - **contact**: The e-mail address of the fetchers owner
+    - **location** (optional): The location where the fetcher resides
+    - **pref_tld** (optional): The Top-Level-Domain, which the fetcher prefers to crawl
     """
-    updated_crawler = crawlers.update_crawler(db, crawler)
-    return updated_crawler
+    updated_fetcher = fetchers.update_fetcher(db, fetcher)
+    return updated_fetcher
 
 
 @app.patch(
-    "/crawlers/",
+    "/fetchers/",
     status_code=status.HTTP_200_OK,
-    response_model=pyd_models.Crawler,
+    response_model=pyd_models.Fetcher,
     response_model_exclude_unset=True,
-    tags=["Crawler"],
-    summary="Update a crawler",
-    response_description="Information about the updated created crawler",
+    tags=["Fetcher"],
+    summary="Update a fetcher",
+    response_description="Information about the updated created fetcher",
 )
-def patch_crawler(crawler: pyd_models.UpdateCrawler, db: Session = Depends(get_db)):
+def patch_fetcher(fetcher: pyd_models.UpdateFetcher, db: Session = Depends(get_db)):
     """
-    Update a Crawler -  Unprovided Fields will be ignored
+    Update a Fetcher -  Unprovided Fields will be ignored
 
-    - **crawler_uuid**: The crawlers UUID to update
-    - **contact**: The e-mail address of the crawlers owner
-    - **location** (optional): The location where the crawler resides
-    - **pref_tld** (optional): The Top-Level-Domain, which the crawler prefers to crawl
+    - **fetcher_uuid**: The fetchers UUID to update
+    - **contact**: The e-mail address of the fetchers owner
+    - **location** (optional): The location where the fetcher resides
+    - **pref_tld** (optional): The Top-Level-Domain, which the fetcher prefers to crawl
     """
 
-    patched_crawler = crawlers.patch_crawler(db, crawler)
-    return patched_crawler
+    patched_fetcher = fetchers.patch_fetcher(db, fetcher)
+    return patched_fetcher
 
 
 @app.delete(
-    "/crawlers/",
+    "/fetchers/",
     status_code=status.HTTP_204_NO_CONTENT,
-    tags=["Crawler"],
-    summary="Delete a Crawler",
+    tags=["Fetcher"],
+    summary="Delete a Fetcher",
     response_description="No Content",
 )
-def delete_crawler(crawler: pyd_models.DeleteCrawler, db: Session = Depends(get_db)):
+def delete_fetcher(fetcher: pyd_models.DeleteFetcher, db: Session = Depends(get_db)):
     """
-    Delete a specific Crawler
+    Delete a specific Fetcher
 
-    - **uuid**: UUID of the crawler, which has to be deleted
+    - **uuid**: UUID of the fetcher, which has to be deleted
     """
-    crawlers.delete_crawler(db, crawler)
+    fetchers.delete_fetcher(db, fetcher)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
@@ -147,7 +147,7 @@ def get_frontier(request: pyd_models.FrontierRequest, db: Session = Depends(get_
     """
     Get a Sub List of the global Frontier
 
-    - **crawler_uuid**: Your crawlers UUID
+    - **fetcher_uuid**: Your fetchers UUID
     - **amount** (default: 10): The amount of URL-Lists you want to receive
     - **length** (default: 0 = No Limit): The amount of URLs in each list
     - **long_term_mode** (default: random): The modus in which the FQDN Frontier is partitioned or prioritized
@@ -170,7 +170,7 @@ async def delete_example_db(
     Deletes the complete Example Database
 
     - **delete_url_refs** (default: false): Deletes all URL References
-    - **delete_crawlers (default: false): Deletes all Crawler Records
+    - **delete_fetchers (default: false): Deletes all Fetcher Records
     - **delete_urls (default: false): Deletes all URL Records
     - **delete_fqdns (default: false): Deletes all FQDN Records
     - **delete_reserved_fqdns (default: false): Deletes all Reservations
@@ -189,9 +189,9 @@ async def generate_example_db(
 ):
     """
     Creates and uploads Example-Data to the Database for testing purposes.
-    Includes Crawler, FQDNs and URLs.
+    Includes Fetcher, FQDNs and URLs.
 
-    - **crawler_amount** (default: 3): Number of Crawler to generate
+    - **fetcher_amount** (default: 3): Number of Fetcher to generate
     - **fqdn_amount** (default: 20): Number of Web Sites to generate
     - **min_url_amount** (default: 10): Minimum Pages per Web Site
     - **max_url_amount** (default: 100): Maximum Pages per Web Site
@@ -204,7 +204,7 @@ async def generate_example_db(
         http_es.raise_http_400(request.min_url_amount, request.max_url_amount)
 
     background_tasks.add_task(
-        sample_generator.create_sample_crawler, db, amount=request.crawler_amount,
+        sample_generator.create_sample_fetcher, db, amount=request.fetcher_amount,
     )
 
     background_tasks.add_task(
@@ -224,7 +224,7 @@ async def generate_example_db(
 )
 def get_db_stats(db: Session = Depends(get_db)):
     """
-    Returns Statistic from current Database Status
+    Returns Statistics from current Database Status
     """
 
     return frontier.get_db_stats(db)

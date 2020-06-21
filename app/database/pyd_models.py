@@ -12,8 +12,8 @@ class BasisModel(BaseModel):
         orm_mode = True
 
 
-# Crawler
-class Crawler(BasisModel):
+# Fetcher
+class Fetcher(BasisModel):
     uuid: UUID
     contact: EmailStr
     name: str
@@ -22,14 +22,14 @@ class Crawler(BasisModel):
     tld_preference: str = None
 
 
-class CreateCrawler(BasisModel):
+class CreateFetcher(BasisModel):
     contact: EmailStr
     name: str
     location: str = None
     tld_preference: str = None
 
 
-class UpdateCrawler(BasisModel):
+class UpdateFetcher(BasisModel):
     uuid: UUID
     contact: EmailStr = None
     name: str = None
@@ -37,13 +37,13 @@ class UpdateCrawler(BasisModel):
     tld_preference: str = None
 
 
-class DeleteCrawler(BasisModel):
+class DeleteFetcher(BasisModel):
     uuid: UUID
 
 
 # Frontier
 class FrontierRequest(BasisModel):
-    crawler_uuid: UUID
+    fetcher_uuid: UUID
     amount: int = c.frontier_amount
     length: int = c.frontier_length
     short_term_mode: enum.STF = enum.STF.random
@@ -95,7 +95,7 @@ class FrontierResponse(BasisModel):
 
 # Developer Tools
 class GenerateRequest(BasisModel):
-    crawler_amount: int = c.crawler
+    fetcher_amount: int = c.fetcher
     fqdn_amount: int = c.fqdn_amount
     min_url_amount: int = c.min_url
     max_url_amount: int = c.max_url
@@ -105,7 +105,7 @@ class GenerateRequest(BasisModel):
 
 
 class StatsResponse(BasisModel):
-    crawler_amount: int
+    fetcher_amount: int
     frontier_amount: int
     url_amount: int
     url_ref_amount: int
@@ -116,7 +116,7 @@ class StatsResponse(BasisModel):
 
 class DeleteDatabase(BasisModel):
     delete_url_refs: bool = False
-    delete_crawlers: bool = False
+    delete_fetchers: bool = False
     delete_urls: bool = False
     delete_fqdns: bool = False
     delete_reserved_fqdns: bool = False

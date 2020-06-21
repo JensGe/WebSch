@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
-from app.database import db_models, pyd_models, crawlers
+from app.database import db_models, pyd_models, fetchers
 from app.common import enum, http_exceptions as http_ex, common_values as c
 
 from sqlalchemy.sql.expression import func
@@ -8,8 +8,8 @@ from sqlalchemy.orm import Session
 
 
 def create_fqdn_list(db, request):
-    fqdn_block_list = db.query(db_models.CrawlerReservation.fqdn).filter(
-        db_models.CrawlerReservation.latest_return > datetime.now(tz=timezone.utc)
+    fqdn_block_list = db.query(db_models.FetcherReservation.fqdn).filter(
+        db_models.FetcherReservation.latest_return > datetime.now(tz=timezone.utc)
     )
 
     fqdn_list = db.query(db_models.Frontier).filter(
@@ -18,13 +18,13 @@ def create_fqdn_list(db, request):
 
     # Filter
     if request.long_term_mode == enum.LTF.top_level_domain:
-        crawler_pref_tld = (
-            db.query(db_models.Crawler)
-            .filter(db_models.Crawler.uuid == str(request.crawler_uuid))
+        fetcher_pref_tld = (
+            db.query(db_models.Fetcher)
+            .filter(db_models.Fetcher.uuid == str(request.fetcher_uuid))
             .first()
         ).tld_preference
 
-        fqdn_list = fqdn_list.filter(db_models.Frontier.tld == crawler_pref_tld)
+        fqdn_list = fqdn_list.filter(db_models.Frontier.tld == fetcher_pref_tld)
 
     # Order
     if request.long_term_mode == enum.LTF.random:
@@ -116,8 +116,8 @@ def get_only_new_list_items(new_list, old_list):
 
 
 def clean_reservation_list(db):
-    db.query(db_models.CrawlerReservation).filter(
-        db_models.CrawlerReservation.latest_return < datetime.now(tz=timezone.utc)
+    db.query(db_models.FetcherReservation).filter(
+        db_models.FetcherReservation.latest_return < datetime.now(tz=timezone.utc)
     ).delete()
 
     db.commit()
@@ -131,10 +131,10 @@ def save_reservations(db, frontier_response, latest_return):
     clean_reservation_list(db)
 
     current_db_reservation_list = (
-        db.query(db_models.CrawlerReservation)
-        .filter(db_models.CrawlerReservation.crawler_uuid == uuid)
+        db.query(db_models.FetcherReservation)
+        .filter(db_models.FetcherReservation.fetcher_uuid == uuid)
         .filter(
-            db_models.CrawlerReservation.latest_return > datetime.now(tz=timezone.utc)
+            db_models.FetcherReservation.latest_return > datetime.now(tz=timezone.utc)
         )
     )
     current_block_list = [fqdn.fqdn for fqdn in current_db_reservation_list]
@@ -144,8 +144,8 @@ def save_reservations(db, frontier_response, latest_return):
     )
 
     new_db_block_list = [
-        db_models.CrawlerReservation(
-            crawler_uuid=str(uuid), fqdn=fqdn, latest_return=latest_return
+        db_models.FetcherReservation(
+            fetcher_uuid=str(uuid), fqdn=fqdn, latest_return=latest_return
         )
         for fqdn in fqdn_new_block_list
     ]
@@ -156,11 +156,11 @@ def save_reservations(db, frontier_response, latest_return):
 
 
 def get_fqdn_frontier(db, request: pyd_models.FrontierRequest):
-    if not crawlers.uuid_exists(db, str(request.crawler_uuid)):
-        http_ex.raise_http_404(request.crawler_uuid)
+    if not fetchers.uuid_exists(db, str(request.fetcher_uuid)):
+        http_ex.raise_http_404(request.fetcher_uuid)
 
     frontier_response = pyd_models.FrontierResponse(
-        uuid=str(request.crawler_uuid),
+        uuid=str(request.fetcher_uuid),
         short_term_mode=request.short_term_mode,
         long_term_mode=request.long_term_mode,
     )
@@ -175,7 +175,6 @@ def get_fqdn_frontier(db, request: pyd_models.FrontierRequest):
 
     frontier_response.url_frontiers_count = len(frontier_response.url_frontiers)
 
-    # sync crawler_url_connection persisting
     latest_return = datetime.now(tz=timezone.utc) + timedelta(hours=c.hours_to_die)
     save_reservations(db, frontier_response, latest_return)
 
@@ -214,13 +213,13 @@ def get_visited_ratio(db):
 def get_db_stats(db: Session):
     clean_reservation_list(db)
     response = {
-        "crawler_amount": db.query(db_models.Crawler).count(),
+        "fetcher_amount": db.query(db_models.Fetcher).count(),
         "frontier_amount": db.query(db_models.Frontier).count(),
         "url_amount": db.query(db_models.Url).count(),
         "url_ref_amount": db.query(db_models.URLRef).count(),
-        "reserved_fqdn_amount": db.query(db_models.CrawlerReservation)
+        "reserved_fqdn_amount": db.query(db_models.FetcherReservation)
         .filter(
-            db_models.CrawlerReservation.latest_return > datetime.now(tz=timezone.utc)
+            db_models.FetcherReservation.latest_return > datetime.now(tz=timezone.utc)
         )
         .count(),
         "avg_freshness": calculate_avg_freshness(db),

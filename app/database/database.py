@@ -21,8 +21,8 @@ def reset(db, request: pyd_models.DeleteDatabase):
         db.query(db_models.URLRef).delete()
         db.commit()
 
-    if request.delete_crawlers:
-        db.query(db_models.Crawler).delete()
+    if request.delete_fetchers:
+        db.query(db_models.Fetcher).delete()
         db.commit()
 
     if request.delete_urls:
@@ -34,7 +34,12 @@ def reset(db, request: pyd_models.DeleteDatabase):
         db.commit()
 
     if request.delete_reserved_fqdns:
-        db.query(db_models.CrawlerReservation).delete()
+        db.query(db_models.FetcherReservation).delete()
         db.commit()
 
     return True
+
+
+def recalculate_fqdn_hashes():
+    # on crawler_amount change recalculate all fqdn hashes
+    pass

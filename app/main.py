@@ -73,7 +73,8 @@ def register_fetcher(fetcher: pyd_models.CreateFetcher,
     """
     new_fetcher = fetchers.create_fetcher(db, fetcher)
 
-    background_tasks.add_task(database.refresh_fqdn_hashes, db)
+    # background_tasks.add_task(database.refresh_fqdn_hashes, db)
+    database.refresh_fqdn_hashes(db)
 
     return new_fetcher
 
@@ -139,7 +140,8 @@ def delete_fetcher(fetcher: pyd_models.DeleteFetcher,
     - **uuid**: UUID of the fetcher, which has to be deleted
     """
     fetchers.delete_fetcher(db, fetcher)
-    background_tasks.add_task(database.refresh_fqdn_hashes, db)
+    # background_tasks.add_task(database.refresh_fqdn_hashes, db)
+    database.refresh_fqdn_hashes(db)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 

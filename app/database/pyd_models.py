@@ -112,6 +112,7 @@ class StatsResponse(BasisModel):
     reserved_fqdn_amount: int
     avg_freshness: str
     visited_ratio: float
+    fqdn_hash_range: float
 
 
 class DeleteDatabase(BasisModel):

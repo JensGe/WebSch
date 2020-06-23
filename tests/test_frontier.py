@@ -228,6 +228,23 @@ def test_query_avg_freshness():
     assert isinstance(avg_fresh, str)
 
 
+def test_query_fqdn_hash_range():
+    client.post(
+        c.database_endpoint,
+        json={
+            "fetcher_amount": 3,
+            "fqdn_amount": 1000,
+            "min_url_amount": 1,
+            "max_url_amount": 1,
+            "connection_amount": 0,
+        },
+    )
+    result = frontier.get_fqdn_hash_range(db)
+
+    print(result)
+    assert isinstance(result, float)
+
+
 def test_set_fetcher_settings():
     request = pyd_models.FetcherSettings(iterations=1)
     rv = frontier.set_fetcher_settings(request, db)

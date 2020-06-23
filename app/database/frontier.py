@@ -32,7 +32,11 @@ def create_fqdn_list(db, request):
         )
 
         fetcher_index = next(
-            (i for i, item in enumerate(fetcher) if item.uuid == str(request.fetcher_uuid)),
+            (
+                i
+                for i, item in enumerate(fetcher)
+                if item.uuid == str(request.fetcher_uuid)
+            ),
             -1,
         )
 
@@ -217,6 +221,27 @@ def get_visited_ratio(db):
     return visited_urls_count / all_urls
 
 
+def get_fqdn_hash_range(db):
+    hash_counts = (
+        db.query(db_models.Frontier.fetcher_idx, func.count(db_models.Frontier.fqdn))
+        .group_by(db_models.Frontier.fetcher_idx)
+        .order_by(db_models.Frontier.fetcher_idx)
+        .all()
+    )
+
+    hash_values = [x[1] for x in hash_counts]
+
+    count = len(hash_values)
+    min_value = min(hash_values)
+    max_value = max(hash_values)
+    avg_value = sum(hash_values) / count
+
+    hash_range = max_value - min_value
+    perc_range = (hash_range / 2) / avg_value
+
+    return round(perc_range, 2)
+
+
 def get_db_stats(db: Session):
     clean_reservation_list(db)
     response = {
@@ -231,6 +256,7 @@ def get_db_stats(db: Session):
         .count(),
         "avg_freshness": calculate_avg_freshness(db),
         "visited_ratio": get_visited_ratio(db),
+        "fqdn_hash_range": get_fqdn_hash_range(db),
     }
     return response
 

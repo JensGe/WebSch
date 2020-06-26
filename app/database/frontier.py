@@ -17,7 +17,7 @@ def create_fqdn_list(db, request):
     )
 
     # Filter
-    if request.long_term_mode == enum.LTF.top_level_domain:
+    if request.long_term_part_mode == enum.LONGPART.top_level_domain:
         fetcher_pref_tld = (
             db.query(db_models.Fetcher)
             .filter(db_models.Fetcher.uuid == str(request.fetcher_uuid))
@@ -26,7 +26,7 @@ def create_fqdn_list(db, request):
 
         fqdn_list = fqdn_list.filter(db_models.Frontier.tld == fetcher_pref_tld)
 
-    if request.long_term_mode == enum.LTF.fqdn_hash:
+    if request.long_term_part_mode == enum.LONGPART.fqdn_hash:
         fetcher = (
             db.query(db_models.Fetcher).order_by(db_models.Fetcher.reg_date.asc()).all()
         )
@@ -43,16 +43,16 @@ def create_fqdn_list(db, request):
         fqdn_list = fqdn_list.filter(db_models.Frontier.fetcher_idx == fetcher_index)
 
     # Order
-    if request.long_term_mode == enum.LTF.random:
+    if request.long_term_prio_mode == enum.LONGPRIO.random:
         fqdn_list = fqdn_list.order_by(func.random())
 
-    elif request.long_term_mode == enum.LTF.large_sites_first:
+    elif request.long_term_prio_mode == enum.LONGPRIO.large_sites_first:
         fqdn_list = fqdn_list.order_by(db_models.Frontier.fqdn_url_count.desc())
 
-    elif request.long_term_mode == enum.LTF.small_sites_first:
+    elif request.long_term_prio_mode == enum.LONGPRIO.small_sites_first:
         fqdn_list = fqdn_list.order_by(db_models.Frontier.fqdn_url_count.asc())
 
-    elif request.long_term_mode == enum.LTF.avg_pagerank:
+    elif request.long_term_prio_mode == enum.LONGPRIO.avg_pagerank:
         fqdn_list = fqdn_list.order_by(db_models.Frontier.fqdn_avg_pagerank.desc())
 
     # Limit
@@ -67,15 +67,15 @@ def short_term_frontier(db, request, fqdn):
     db_url_list = db.query(db_models.Url).filter(db_models.Url.fqdn == fqdn.fqdn)
 
     # Order
-    if request.short_term_mode == enum.STF.random:
+    if request.short_term_prio_mode == enum.SHORTPRIO.random:
         db_url_list = db_url_list.order_by(func.random())
 
-    elif request.short_term_mode == enum.STF.old_pages_first:
+    elif request.short_term_prio_mode == enum.SHORTPRIO.old_pages_first:
         db_url_list = db_url_list.order_by(
             db_models.Url.url_last_visited.asc().nullsfirst()
         )
 
-    elif request.short_term_mode == enum.STF.new_pages_first:
+    elif request.short_term_prio_mode == enum.SHORTPRIO.new_pages_first:
         db_url_list = db_url_list.order_by(
             db_models.Url.url_last_visited.desc().nullslast()
         )
@@ -172,8 +172,9 @@ def get_fqdn_frontier(db, request: pyd_models.FrontierRequest):
 
     frontier_response = pyd_models.FrontierResponse(
         uuid=str(request.fetcher_uuid),
-        short_term_mode=request.short_term_mode,
-        long_term_mode=request.long_term_mode,
+        short_term_prio_mode=request.short_term_prio_mode,
+        long_term_prio_mode=request.long_term_prio_mode,
+        long_term_part_mode=request.long_term_part_mode,
     )
 
     fqdns = create_fqdn_list(db, request)
@@ -284,8 +285,9 @@ def get_fetcher_settings(db: Session) -> pyd_models.FetcherSettings:
         iterations=fetcher_settings.iterations,
         fqdn_amount=fetcher_settings.fqdn_amount,
         url_amount=fetcher_settings.url_amount,
-        long_term_mode=fetcher_settings.long_term_mode,
-        short_term_mode=fetcher_settings.short_term_mode,
+        long_term_prio_mode=fetcher_settings.long_term_prio_mode,
+        long_term_part_mode=fetcher_settings.long_term_part_mode,
+        short_term_prio_mode=fetcher_settings.short_term_prio_mode,
         min_links_per_page=fetcher_settings.min_links_per_page,
         max_links_per_page=fetcher_settings.max_links_per_page,
         lpp_distribution_type=fetcher_settings.lpp_distribution_type,
@@ -313,8 +315,9 @@ def set_fetcher_settings(request: pyd_models.FetcherSettings, db: Session):
             iterations=request.iterations,
             fqdn_amount=request.fqdn_amount,
             url_amount=request.url_amount,
-            long_term_mode=request.long_term_mode,
-            short_term_mode=request.short_term_mode,
+            long_term_prio_mode=request.long_term_prio_mode,
+            long_term_part_mode=request.long_term_part_mode,
+            short_term_prio_mode=request.short_term_prio_mode,
             min_links_per_page=request.min_links_per_page,
             max_links_per_page=request.max_links_per_page,
             lpp_distribution_type=request.lpp_distribution_type,

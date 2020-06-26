@@ -160,8 +160,9 @@ def get_frontier(request: pyd_models.FrontierRequest, db: Session = Depends(get_
     - **fetcher_uuid**: Your fetchers UUID
     - **amount** (default: 10): The amount of URL-Lists you want to receive
     - **length** (default: 0 = No Limit): The amount of URLs in each list
-    - **long_term_mode** (default: random): The modus in which the FQDN Frontier is partitioned or prioritized
-    - **short_term_mode** (default: random): The modus in which the URL Frontier is prioritized
+    - **long_term_prio_mode** (default: random): The modus in which the FQDN Frontier is prioritized
+    - **long_term_part_mode** (default: none): The modus in which the FQDN Frontier is partitioned
+    - **short_term_prio_mode** (default: random): The modus in which the URL Frontier is prioritized
     """
     fqdn_frontier = frontier.get_fqdn_frontier(db, request)
     return fqdn_frontier

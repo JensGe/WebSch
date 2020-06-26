@@ -46,8 +46,9 @@ class FrontierRequest(BasisModel):
     fetcher_uuid: UUID
     amount: int = c.frontier_amount
     length: int = c.frontier_length
-    short_term_mode: enum.STF = enum.STF.random
-    long_term_mode: enum.LTF = enum.LTF.random
+    short_term_prio_mode: enum.SHORTPRIO = enum.SHORTPRIO.random
+    long_term_prio_mode: enum.LONGPRIO = enum.LONGPRIO.random
+    long_term_part_mode: enum.LONGPART = enum.LONGPART.none
 
 
 class Url(BasisModel):
@@ -84,8 +85,9 @@ class URLReference(BasisModel):
 
 class FrontierResponse(BasisModel):
     uuid: str
-    short_term_mode: enum.STF = None
-    long_term_mode: enum.LTF = None
+    short_term_prio_mode: enum.SHORTPRIO = None
+    long_term_prio_mode: enum.LONGPRIO = None
+    long_term_part_mode: enum.LONGPART = None
     response_url: HttpUrl = None
     latest_return: datetime = None
     url_frontiers_count: int = c.url_frontier_count
@@ -144,12 +146,13 @@ class FetcherSettings(BasisModel):
     fqdn_amount: int = None
     url_amount: int = None                          # 0: unlimited
 
-    long_term_mode: enum.LTF = None
-    short_term_mode: enum.STF = None
+    short_term_prio_mode: enum.SHORTPRIO = None
+    long_term_prio_mode: enum.LONGPRIO = None
+    long_term_part_mode: enum.LONGPART = None
 
     min_links_per_page: int = None                  # Check Literature
     max_links_per_page: int = None
-    lpp_distribution_type: enum.LPPDISTR = None
+    lpp_distribution_type: enum.PAGELINKDISTR = None
 
     internal_vs_external_threshold: float = None    # Check Literature
     new_vs_existing_threshold: float = None

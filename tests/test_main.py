@@ -237,7 +237,7 @@ def test_get_frontiers():
             "fetcher_uuid": new_fetcher_uuid,
             "amount": 1,
             "length": 1,
-            "prio_mode": enum.STF.old_pages_first,
+            "prio_mode": enum.SHORTPRIO.old_pages_first,
         },
     )
     assert response1.status_code == status.HTTP_200_OK
@@ -248,7 +248,7 @@ def test_get_frontiers():
             "fetcher_uuid": new_fetcher_uuid,
             "amount": 1,
             "length": 1,
-            "prio_mode": enum.STF.change_rate,
+            "prio_mode": enum.SHORTPRIO.change_rate,
         },
     )
     assert response2.status_code == status.HTTP_200_OK
@@ -286,7 +286,7 @@ def test_get_fqdn_list_with_fqdn_hash():
             "fetcher_uuid": fetcher_uuid,
             "amount": 0,
             "length": 0,
-            "long_term_mode": enum.LTF.fqdn_hash,
+            "long_term_mode": enum.LONGPRIO.fqdn_hash,
         },
     )
 

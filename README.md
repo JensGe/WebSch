@@ -8,7 +8,7 @@ Distributed Fetcher ask for new URL Lists per REST API call.
 
 [![Build Status](https://travis-ci.org/JensGe/owi_Scheduler.svg?branch=master)](https://travis-ci.org/JensGe/owi_Scheduler)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=JensGe_WebSch&metric=alert_status)](https://sonarcloud.io/dashboard?id=JensGe_WebSch)
-[![codecov](https://codecov.io/gh/JensGe/WebSch/branch/master/graph/badge.svg)](https://codecov.io/gh/JensGe/WebSch)
+[![codecov](https://codecov.io/gh/JensGe/owi_Scheduler/branch/master/graph/badge.svg)](https://codecov.io/gh/JensGe/owi_Scheduler)
 
 [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=JensGe_WebSch&metric=ncloc)](https://sonarcloud.io/dashboard?id=JensGe_WebSch)
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=JensGe_WebSch&metric=bugs)](https://sonarcloud.io/dashboard?id=JensGe_WebSch)

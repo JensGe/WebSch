@@ -1,12 +1,10 @@
-from fastapi.testclient import TestClient
-
-from app.main import app
 from app.database import frontier, pyd_models, database
 from app.common import random_data_generator as rand_gen, common_values as c
 
 from app.database import db_models
 
 from tests import values as v
+from tests import rest_api as rest
 from time import sleep
 from datetime import datetime, timedelta, timezone
 
@@ -15,8 +13,6 @@ from pydantic import HttpUrl
 example_domain_com = "www.example.com"
 example_domain_de = "www.example.com"
 
-
-client = TestClient(app)
 db = database.SessionLocal()
 
 
@@ -102,21 +98,13 @@ def test_difference_two_string_lists():
     assert only_in_new_list == asserted_only_in_new_list
 
 
-def test_get_fqdn_list():
-    client.post(
-        c.database_endpoint,
-        json={
-            "fetcher_amount": 0,
-            "fqdn_amount": 5,
-            "min_url_amount": 2,
-            "max_url_amount": 2,
-            "connection_amount": 0,
-        },
-    )
-    sleep(3)
+def test_create_fqdn_list():
+    rest.delete_full_database_with_rest(full=True)
+    rest.create_database_with_rest(fetcher_amount=3, fqdn_amount=10)
+    uuid = rest.get_first_crawler_uuid_with_rest()
 
     frontier_request = pyd_models.FrontierRequest(
-        fetcher_uuid=v.sample_uuid, amount=2, length=2
+        fetcher_uuid=uuid, amount=2, length=2
     )
 
     fqdn_list = frontier.create_fqdn_list(db, frontier_request)
@@ -124,24 +112,12 @@ def test_get_fqdn_list():
 
 
 def test_save_reservations_with_old_entries():
-    client.post(
-        c.database_endpoint,
-        json={
-            "fetcher_amount": 1,
-            "fqdn_amount": 5,
-            "min_url_amount": 2,
-            "max_url_amount": 2,
-            "connection_amount": 0,
-        },
-    )
-    sleep(3)
+    rest.delete_full_database_with_rest(full=True)
+    rest.create_database_with_rest(fetcher_amount=3, fqdn_amount=10)
 
-    fetcher_uuid = client.get(c.fetcher_endpoint).json()[0]["uuid"]
+    fetcher_uuid = rest.get_first_crawler_uuid_with_rest()
 
-    response = client.post(
-        c.frontier_endpoint,
-        json={"fetcher_uuid": fetcher_uuid, "amount": 2, "length": 10, "tld": "de"},
-    ).json()
+    response = rest.get_simple_frontier_with_rest(fetcher_uuid)
 
     fqdn = response["url_frontiers"][0]["fqdn"]
 
@@ -170,56 +146,26 @@ def test_save_reservations_with_old_entries():
 
 
 def test_get_referencing_urls():
-    client.post(
-        c.database_endpoint,
-        json={
-            "fetcher_amount": 0,
-            "fqdn_amount": 1,
-            "min_url_amount": 1,
-            "max_url_amount": 1,
-            "visited_ratio": 0.0,
-            "connection_amount": 0,
-        },
-    )
+    rest.delete_full_database_with_rest(full=True)
+    rest.create_database_with_rest()
 
-    sleep(3)
+    sleep(1)
+    stats_before = rest.get_stats_with_rest()
 
-    stats_before = client.get(c.stats_endpoint).json()
+    rest.create_database_with_rest(connection_amount=1)
 
-    client.post(
-        c.database_endpoint,
-        json={
-            "fetcher_amount": 0,
-            "fqdn_amount": 1,
-            "min_url_amount": 1,
-            "max_url_amount": 1,
-            "visited_ratio": 0.0,
-            "connection_amount": 1,
-        },
-    )
+    stats_after = rest.get_stats_with_rest()
 
-    sleep(3)
-
-    stats_after = client.get(c.stats_endpoint).json()
     assert stats_after["url_amount"] == stats_before["url_amount"] + 1
     assert stats_after["url_ref_amount"] == stats_before["url_ref_amount"] + 1
 
 
 def test_get_random_urls():
-    client.post(
-        c.database_endpoint,
-        json={
-            "fetcher_amount": 0,
-            "fqdn_amount": 1,
-            "min_url_amount": 10,
-            "max_url_amount": 10,
-            "connection_amount": 0,
-        },
-    )
-    sleep(3)
+    rest.delete_full_database_with_rest(full=True)
+    rest.create_database_with_rest(min_url_amount=10, max_url_amount=10)
 
-    result = client.get("/urls/", json={"amount": 5}).json()
-    print(result)
+    result = rest.get_random_urls_with_rest(amount=5)
+
     assert len(result["url_list"]) == 5
 
 
@@ -229,19 +175,10 @@ def test_query_avg_freshness():
 
 
 def test_query_fqdn_hash_range():
-    client.post(
-        c.database_endpoint,
-        json={
-            "fetcher_amount": 3,
-            "fqdn_amount": 1000,
-            "min_url_amount": 1,
-            "max_url_amount": 1,
-            "connection_amount": 0,
-        },
-    )
-    result = frontier.get_fqdn_hash_range(db)
+    rest.delete_full_database_with_rest(full=True)
+    rest.create_database_with_rest(fetcher_amount=3, fqdn_amount=50)
 
-    print(result)
+    result = frontier.get_fqdn_hash_range(db)
     assert isinstance(result, float)
 
 

@@ -232,13 +232,17 @@ def get_fqdn_hash_range(db):
 
     hash_values = [x[1] for x in hash_counts]
 
-    count = len(hash_values)
-    min_value = min(hash_values)
-    max_value = max(hash_values)
-    avg_value = sum(hash_values) / count
+    if hash_values:
+        count = len(hash_values)
+        min_value = min(hash_values)
+        max_value = max(hash_values)
+        avg_value = sum(hash_values) / count
 
-    hash_range = max_value - min_value
-    perc_range = (hash_range / 2) / avg_value
+        hash_range = max_value - min_value
+        perc_range = (hash_range / 2) / avg_value
+
+    else:
+        perc_range = 0.0
 
     return round(perc_range, 2)
 

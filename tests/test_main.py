@@ -8,6 +8,7 @@ from app.database import fetchers, database, db_models
 
 from time import sleep
 from tests import values as v
+from tests import rest_api as rest
 
 client = TestClient(app)
 db = database.SessionLocal()
@@ -62,7 +63,7 @@ def test_update_fetcher():
 
 
 def test_update_unknown_fetcher():
-    update_response = client.put(c.fetcher_endpoint, json={"uuid": v.sample_uuid}, )
+    update_response = client.put(c.fetcher_endpoint, json={"uuid": v.sample_uuid},)
     assert update_response.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -94,7 +95,7 @@ def test_patch_fetcher_mix():
 
 
 def test_patch_unknown_fetcher():
-    patch_response = client.patch(c.fetcher_endpoint, json={"uuid": v.sample_uuid}, )
+    patch_response = client.patch(c.fetcher_endpoint, json={"uuid": v.sample_uuid},)
     assert patch_response.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -255,52 +256,33 @@ def test_get_frontiers():
 
 
 def test_get_fqdn_list_with_fqdn_hash():
-    client.delete(
-        c.database_endpoint,
-        json={
-            "delete_url_refs": True,
-            "delete_fetchers": True,
-            "delete_urls": True,
-            "delete_fqdns": True,
-            "delete_reserved_fqdns": True,
-        },
-    )
-    sleep(1)
-    client.post(
-        c.database_endpoint,
-        json={
-            "fetcher_amount": 3,
-            "fqdn_amount": 50,
-            "min_url_amount": 1,
-            "max_url_amount": 1,
-            "connection_amount": 0,
-        },
-    )
-    sleep(3)
+    rest.delete_full_database_with_rest(full=True)
+    rest.create_database_with_rest(fetcher_amount=3, fqdn_amount=50)
 
-    fetcher_uuid = client.get(c.fetcher_endpoint).json()[0]["uuid"]
+    fetcher_uuid = rest.get_first_crawler_uuid_with_rest()
 
-    response = client.post(
-        c.frontier_endpoint,
-        json={
+    response = rest.get_frontier_with_rest(
+        json_dict={
             "fetcher_uuid": fetcher_uuid,
             "amount": 0,
             "length": 0,
-            "long_term_mode": enum.LONGPRIO.fqdn_hash,
-        },
+            "long_term_part_mode": enum.LONGPART.fqdn_hash,
+        }
+    )
+    count_hash = response["url_frontiers_count"]
+
+    db_hash_count = (
+        db.query(db_models.Frontier).filter(db_models.Frontier.fetcher_idx == 0).count()
     )
 
-    count_hash = response.json()["url_frontiers_count"]
-    db_hash_count = db.query(db_models.Frontier).filter(db_models.Frontier.fetcher_idx == 0).count()
-
-    assert response.status_code == 200
     assert count_hash == db_hash_count
+
 
 # Dev API
 def test_get_db_stats():
     response = client.get(c.stats_endpoint)
     assert response.status_code == status.HTTP_200_OK
-    assert len(response.json()) == 7
+    assert len(response.json()) == 8
 
 
 def test_generate_example_db():
@@ -352,14 +334,13 @@ def test_delete_example_db():
             "delete_fqdns": True,
         },
     )
-    sleep(5)
-    after = client.get(c.stats_endpoint).json()
+    stats = rest.get_stats_with_rest()
     assert response.status_code == status.HTTP_202_ACCEPTED
-    assert after["fetcher_amount"] == 0
-    assert after["frontier_amount"] == 0
-    assert after["url_amount"] == 0
-    assert after["url_ref_amount"] == 0
-    assert after["reserved_fqdn_amount"] == 0
+    assert stats["fetcher_amount"] == 0
+    assert stats["frontier_amount"] == 0
+    assert stats["url_amount"] == 0
+    assert stats["url_ref_amount"] == 0
+    assert stats["reserved_fqdn_amount"] == 0
 
 
 def test_get_random_urls():

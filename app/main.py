@@ -60,9 +60,11 @@ def read_fetcher(db: Session = Depends(get_db)):
     summary="Create a Fetcher",
     response_description="Information about the newly created Fetcher",
 )
-def register_fetcher(fetcher: pyd_models.CreateFetcher,
-                     background_tasks: BackgroundTasks,
-                     db: Session = Depends(get_db)):
+def register_fetcher(
+    fetcher: pyd_models.CreateFetcher,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+):
     """
     Create a Fetcher
 
@@ -73,8 +75,8 @@ def register_fetcher(fetcher: pyd_models.CreateFetcher,
     """
     new_fetcher = fetchers.create_fetcher(db, fetcher)
 
-    # background_tasks.add_task(database.refresh_fqdn_hashes, db)
-    database.refresh_fqdn_hashes(db)
+    if frontier.fqdn_hash_activated(db):
+        background_tasks.add_task(database.refresh_fqdn_hashes, db)
 
     return new_fetcher
 
@@ -131,17 +133,21 @@ def patch_fetcher(fetcher: pyd_models.UpdateFetcher, db: Session = Depends(get_d
     summary="Delete a Fetcher",
     response_description="No Content",
 )
-def delete_fetcher(fetcher: pyd_models.DeleteFetcher,
-                   background_tasks: BackgroundTasks,
-                   db: Session = Depends(get_db)):
+def delete_fetcher(
+    fetcher: pyd_models.DeleteFetcher,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+):
     """
     Delete a specific Fetcher
 
     - **uuid**: UUID of the fetcher, which has to be deleted
     """
     fetchers.delete_fetcher(db, fetcher)
-    # background_tasks.add_task(database.refresh_fqdn_hashes, db)
-    database.refresh_fqdn_hashes(db)
+
+    if frontier.fqdn_hash_activated(db):
+        background_tasks.add_task(database.refresh_fqdn_hashes, db)
+
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
@@ -218,13 +224,11 @@ async def generate_example_db(
         sample_generator.create_sample_fetcher, db, amount=request.fetcher_amount,
     )
 
-    background_tasks.add_task(
-        sample_generator.create_sample_frontier,
-        db,
-        request
-    )
+    background_tasks.add_task(sample_generator.create_sample_frontier, db, request)
 
-    background_tasks.add_task(database.refresh_fqdn_hashes, db)
+    if frontier.fqdn_hash_activated(db):
+        background_tasks.add_task(database.refresh_fqdn_hashes, db)
+
     return Response(status_code=status.HTTP_202_ACCEPTED)
 
 
@@ -275,9 +279,17 @@ def get_fetcher_settings(db: Session = Depends(get_db)):
     summary="Set Settings for Fetcher",
 )
 def create_fetcher_settings(
-    request: pyd_models.FetcherSettings, db: Session = Depends(get_db)
+    request: pyd_models.FetcherSettings,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
 ):
     """
     Returns the latest settings for every fetcher
     """
-    return frontier.set_fetcher_settings(request, db)
+
+    updated_fetcher_settings = frontier.set_fetcher_settings(request, db)
+
+    if frontier.fqdn_hash_activated(db):
+        background_tasks.add_task(database.refresh_fqdn_hashes, db)
+
+    return updated_fetcher_settings

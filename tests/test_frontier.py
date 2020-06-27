@@ -187,3 +187,15 @@ def test_set_fetcher_settings():
     rv = frontier.set_fetcher_settings(request, db)
 
     assert rv.iterations == request.iterations
+
+
+def test_fqdn_hash_activated():
+    rest.activate_fqdn_hash()
+    assert frontier.fqdn_hash_activated(db) is True
+
+
+def test_fqdn_hash_deactivated():
+    rest.deactivate_fqdn_hash()
+    assert frontier.fqdn_hash_activated(db) is False
+
+

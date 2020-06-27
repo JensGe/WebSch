@@ -77,3 +77,11 @@ def get_stats_with_rest():
 
 def get_random_urls_with_rest(amount: int = 1):
     return client.get("/urls/", json={"amount": amount}).json()
+
+
+def activate_fqdn_hash():
+    client.patch("/settings/", json={"long_term_part_mode": "fqdn_hash"})
+
+
+def deactivate_fqdn_hash():
+    client.patch("/settings/", json={"long_term_part_mode": "none"})

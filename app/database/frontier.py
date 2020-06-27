@@ -108,6 +108,12 @@ def get_referencing_urls(db, url, amount):
     )
 
 
+def fqdn_hash_activated(db):
+    return db.query(db_models.FetcherSettings.long_term_part_mode).filter(
+        db_models.FetcherSettings.id == 1
+    ).first()[0] == enum.LONGPART.fqdn_hash
+
+
 def get_url_list_from_frontier_response(frontier_response):
     url_list = []
     for url_frontier in frontier_response.url_frontiers:
@@ -348,5 +354,7 @@ def set_fetcher_settings(request: pyd_models.FetcherSettings, db: Session):
 
     db.commit()
     db.refresh(db_fetcher_settings)
+
+
 
     return db_fetcher_settings

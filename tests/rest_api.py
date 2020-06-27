@@ -18,11 +18,11 @@ def delete_full_database_with_rest(
     reserved_fqdns=False,
 ):
     if full:
-        url_refs = (True,)
-        fetchers = (True,)
-        urls = (True,)
-        fqdns = (True,)
-        reserved_fqdns = (True,)
+        url_refs = True
+        fetchers = True
+        urls = True
+        fqdns = True
+        reserved_fqdns = True
     client.delete(
         c.database_endpoint,
         json={

@@ -1,4 +1,4 @@
-# WebSch Overview
+# owi Scheduler Overview
 
 A distributed Web Crawling Schedulercomponent to distribute URLs from Frontier to multiple Fetcher. 
 

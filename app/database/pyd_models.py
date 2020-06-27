@@ -164,3 +164,11 @@ class FetcherSettings(BasisModel):
 
     internal_vs_external_threshold: float = 1.0
     new_vs_existing_threshold: float = 1.0
+
+
+class SimulatedParsedList(BasisModel):
+    uuid: str
+    fqdn_count: int
+    fqdns: List[Frontier]
+    url_count: int
+    urls: List[Url]

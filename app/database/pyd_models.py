@@ -95,6 +95,14 @@ class FrontierResponse(BasisModel):
     url_frontiers: List[Frontier] = []
 
 
+class SubmitFrontier(BasisModel):
+    uuid: str
+    fqdn_count: int
+    fqdns: List[Frontier]
+    url_count: int
+    urls: List[Url] = []
+
+
 # Developer Tools
 class GenerateRequest(BasisModel):
     fetcher_amount: int = c.fetcher

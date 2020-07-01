@@ -6,5 +6,6 @@ RUN pip install pytest
 RUN pip install sqlalchemy
 RUN pip install psycopg2
 RUN pip install -U fastapi
+RUN pip install xxhash
 
 COPY ./app app

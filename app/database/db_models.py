@@ -18,13 +18,17 @@ class Fetcher(Base):
     __tablename__ = "fetcher"
 
     uuid = Column(String, primary_key=True, index=True)
-    fetcher_hash = Column(BigInteger)
 
     contact = Column(String)
     name = Column(String)
     reg_date = Column(DateTime(timezone=True))
     location = Column(String)
     tld_preference = Column(String)
+
+
+class FetcherHashes(Base):
+    fetcher_hash = Column(BigInteger)
+    fetcher_uuid = Column(String, ForeignKey(c.db_fetcher_pk))
 
 
 class Frontier(Base):

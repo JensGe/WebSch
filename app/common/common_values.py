@@ -27,6 +27,8 @@ max_url = 100
 visited_ratio = 0.0
 connections = 0
 
+# Fetcher Settings
+ch_hash_amount = 32
 
 # Frontier Settings
 response_url = "http://ec2-18-195-144-15.eu-central-1.compute.amazonaws.com/submit/"

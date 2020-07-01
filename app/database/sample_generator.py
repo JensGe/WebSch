@@ -6,36 +6,47 @@ from sqlalchemy.orm import Session
 
 from app.database import db_models, frontier
 from app.common import random_data_generator as rand_gen
+from app.common import common_values as c
 from app.data import data_generator as data_gen
 
 
 def create_sample_fetcher(db: Session, amount: int = 3):
 
-    crawlers = []
+    fetchers = []
+    fetcher_hashes = []
 
     for _ in range(amount):
         new_uuid = str(uuid4())
-        crawlers.append(
+        fetchers.append(
             db_models.Fetcher(
                 uuid=new_uuid,
-                fetcher_hash=data_gen.generate_hash(new_uuid),
-                contact="admin@owi-crawler.com",
+                contact="admin@owi-fetcher.com",
                 reg_date=datetime.now(tz=timezone.utc),
                 name=rand_gen.random_academic_name(),
                 location="Germany",
                 tld_preference=data_gen.random_tld(),
             )
         )
+        fetcher_hashes.extend(
+            [
+                db_models.FetcherHashes(
+                    fetcher_uuid=new_uuid,
+                    fetcher_hash=data_gen.generate_hash(new_uuid, seed=i),
+                )
+                for i in range(c.ch_hash_amount)
+            ]
+        )
 
-    for crawler in crawlers:
-        db.add(crawler)
+    for fetcher in fetchers:
+        db.add(fetcher)
 
+    db.bulk_save_objects(fetcher_hashes)
     db.commit()
 
-    for crawler in crawlers:
-        db.refresh(crawler)
+    for fetcher in fetchers:
+        db.refresh(fetcher)
 
-    return crawlers
+    return fetchers
 
 
 def new_fqdn(fqdn_basis, fqdn_url_amount, fetcher_amount, request):

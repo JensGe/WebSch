@@ -3,13 +3,19 @@ import string
 import csv
 import zlib
 import hashlib
+import xxhash
 
 
-# def generate_hash(text: str):
+# def generate_hash_zlib(text: str):
 #     return zlib.crc32(str.encode(text)) & 0xffffffff
 
 
-def generate_hash(text: str) -> int:
+def generate_hash(text: str, seed: int = 0) -> int:
+    int_hash = xxhash.xxh64(str.encode(text), seed=seed).intdigest()
+    return int_hash % 9223372036854775807
+
+
+def generate_hash_hashlib_md5(text: str) -> int:
     byte_hash = hashlib.md5(str.encode(text)).digest()
     int_hash = int.from_bytes(byte_hash, "big")
     return int_hash % 32767

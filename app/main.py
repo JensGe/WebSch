@@ -75,7 +75,7 @@ def register_fetcher(
     """
     new_fetcher = fetchers.create_fetcher(db, fetcher)
 
-    if frontier.fqdn_hash_activated(db):
+    if database.fqdn_hash_activated(db):
         background_tasks.add_task(database.refresh_fqdn_hashes, db)
 
     return new_fetcher
@@ -145,7 +145,7 @@ def delete_fetcher(
     """
     fetchers.delete_fetcher(db, fetcher)
 
-    if frontier.fqdn_hash_activated(db):
+    if database.fqdn_hash_activated(db):
         background_tasks.add_task(database.refresh_fqdn_hashes, db)
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
@@ -226,7 +226,7 @@ async def generate_example_db(
 
     background_tasks.add_task(sample_generator.create_sample_frontier, db, request)
 
-    if frontier.fqdn_hash_activated(db):
+    if database.fqdn_hash_activated(db):
         background_tasks.add_task(database.refresh_fqdn_hashes, db)
 
     return Response(status_code=status.HTTP_202_ACCEPTED)
@@ -289,7 +289,7 @@ def create_fetcher_settings(
 
     updated_fetcher_settings = frontier.set_fetcher_settings(request, db)
 
-    if frontier.fqdn_hash_activated(db):
+    if database.fqdn_hash_activated(db):
         background_tasks.add_task(database.refresh_fqdn_hashes, db)
 
     return updated_fetcher_settings

@@ -14,9 +14,11 @@ def create_sample_fetcher(db: Session, amount: int = 3):
     crawlers = []
 
     for _ in range(amount):
+        new_uuid = str(uuid4())
         crawlers.append(
             db_models.Fetcher(
-                uuid=str(uuid4()),
+                uuid=new_uuid,
+                fetcher_hash=data_gen.generate_hash(new_uuid),
                 contact="admin@owi-crawler.com",
                 reg_date=datetime.now(tz=timezone.utc),
                 name=rand_gen.random_academic_name(),
@@ -37,10 +39,12 @@ def create_sample_fetcher(db: Session, amount: int = 3):
 
 
 def new_fqdn(fqdn_basis, fqdn_url_amount, fetcher_amount, request):
-    fetcher_idx = hash(fqdn_basis) % fetcher_amount if fetcher_amount != 0 else None
+    fqdn_hash = data_gen.generate_hash(fqdn_basis)
+    fetcher_idx = fqdn_hash % fetcher_amount if fetcher_amount != 0 else None
     return db_models.Frontier(
         fqdn=fqdn_basis,
-        fetcher_idx=fetcher_idx,
+        fqdn_hash=fqdn_hash,
+        fqdn_hash_fetcher_index=fetcher_idx,
         tld=fqdn_basis.split(".")[-1],
         fqdn_last_ipv4=rand_gen.get_random_ipv4(),
         fqdn_last_ipv6=rand_gen.random_example_ipv6(),

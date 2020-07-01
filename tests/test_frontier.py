@@ -99,25 +99,23 @@ def test_difference_two_string_lists():
 
 
 def test_create_fqdn_list():
-    rest.delete_full_database_with_rest(full=True)
-    rest.create_database_with_rest(fetcher_amount=3, fqdn_amount=10)
-    uuid = rest.get_first_crawler_uuid_with_rest()
+    rest.delete_full_database(full=True)
+    rest.create_database(fetcher_amount=3, fqdn_amount=10)
+    uuid = rest.get_first_fetcher_uuid()
 
-    frontier_request = pyd_models.FrontierRequest(
-        fetcher_uuid=uuid, amount=2, length=2
-    )
+    frontier_request = pyd_models.FrontierRequest(fetcher_uuid=uuid, amount=2, length=2)
 
     fqdn_list = frontier.create_fqdn_list(db, frontier_request)
     assert len(fqdn_list) == 2
 
 
 def test_save_reservations_with_old_entries():
-    rest.delete_full_database_with_rest(full=True)
-    rest.create_database_with_rest(fetcher_amount=3, fqdn_amount=10)
+    rest.delete_full_database(full=True)
+    rest.create_database(fetcher_amount=3, fqdn_amount=10)
 
-    fetcher_uuid = rest.get_first_crawler_uuid_with_rest()
+    fetcher_uuid = rest.get_first_fetcher_uuid()
 
-    response = rest.get_simple_frontier_with_rest(fetcher_uuid)
+    response = rest.get_simple_frontier(fetcher_uuid)
 
     fqdn = response["url_frontiers"][0]["fqdn"]
 
@@ -146,25 +144,25 @@ def test_save_reservations_with_old_entries():
 
 
 def test_get_referencing_urls():
-    rest.delete_full_database_with_rest(full=True)
-    rest.create_database_with_rest()
+    rest.delete_full_database(full=True)
+    rest.create_database()
 
     sleep(1)
-    stats_before = rest.get_stats_with_rest()
+    stats_before = rest.get_stats()
 
-    rest.create_database_with_rest(connection_amount=1)
+    rest.create_database(connection_amount=1)
 
-    stats_after = rest.get_stats_with_rest()
+    stats_after = rest.get_stats()
 
     assert stats_after["url_amount"] == stats_before["url_amount"] + 1
     assert stats_after["url_ref_amount"] == stats_before["url_ref_amount"] + 1
 
 
 def test_get_random_urls():
-    rest.delete_full_database_with_rest(full=True)
-    rest.create_database_with_rest(min_url_amount=10, max_url_amount=10)
+    rest.delete_full_database(full=True)
+    rest.create_database(min_url_amount=10, max_url_amount=10)
 
-    result = rest.get_random_urls_with_rest(amount=5)
+    result = rest.get_random_urls(amount=5)
 
     assert len(result["url_list"]) == 5
 
@@ -175,8 +173,8 @@ def test_query_avg_freshness():
 
 
 def test_query_fqdn_hash_range():
-    rest.delete_full_database_with_rest(full=True)
-    rest.create_database_with_rest(fetcher_amount=3, fqdn_amount=50)
+    rest.delete_full_database(full=True)
+    rest.create_database(fetcher_amount=3, fqdn_amount=50)
 
     result = frontier.get_fqdn_hash_range(db)
     assert isinstance(result, float)
@@ -191,11 +189,67 @@ def test_set_fetcher_settings():
 
 def test_fqdn_hash_activated():
     rest.activate_fqdn_hash()
-    assert frontier.fqdn_hash_activated(db) is True
+    assert database.fqdn_hash_activated(db) is True
 
 
 def test_fqdn_hash_deactivated():
-    rest.deactivate_fqdn_hash()
-    assert frontier.fqdn_hash_activated(db) is False
+    rest.reset_long_term_part_strategy()
+    assert database.fqdn_hash_activated(db) is False
+
+
+def test_consistent_hash_activated():
+    rest.activate_consistent_hash()
+    assert database.consistent_hash_activated(db) is True
+
+
+def test_consistent_hash_deactivated():
+    rest.reset_long_term_part_strategy()
+    assert database.fqdn_hash_activated(db) is False
+
+
+def test_get_hash_range_with_db():
+    rest.delete_full_database(full=True)
+    rest.create_database(fetcher_amount=5)
+
+    uuid = rest.get_first_fetcher_uuid()
+    fetcher_hashes = (
+        db.query(db_models.Fetcher.uuid, db_models.Fetcher.fetcher_hash)
+        .order_by(db_models.Fetcher.fetcher_hash.asc())
+        .all()
+    )
+
+    print(fetcher_hashes)
+
+    min_hash, max_hash = frontier.get_hash_range(fetcher_hashes, uuid)
+    print("min: {}, max: {}".format(min_hash, max_hash))
+    assert isinstance(min_hash, int)
+    assert isinstance(max_hash, int)
+    assert min_hash < max_hash or max_hash == fetcher_hashes[0][1]
+
+
+def test_get_hash_pure():
+    uuid = "9b200069-3773-4270-aa1c-2d89c1335623"
+    fetcher_hashes = [
+        ("9b200069-3773-4270-aa1c-2d89c1335623", 2537359433),
+        ("2ac1e563-5261-4044-9f94-36a09726d00f", 2638481537),
+        ("cd21a2f3-c808-453f-b2ee-3e45e01a7573", 2999322988),
+    ]
+
+    min_hash, max_hash = frontier.get_hash_range(fetcher_hashes, uuid)
+    assert min_hash == fetcher_hashes[0][1]
+    assert max_hash == fetcher_hashes[1][1]
+
+
+def test_get_hash_pure_circled():
+    uuid = "cd21a2f3-c808-453f-b2ee-3e45e01a7573"
+    fetcher_hashes = [
+        ("9b200069-3773-4270-aa1c-2d89c1335623", 2537359433),
+        ("2ac1e563-5261-4044-9f94-36a09726d00f", 2638481537),
+        ("cd21a2f3-c808-453f-b2ee-3e45e01a7573", 2999322988),
+    ]
+
+    min_hash, max_hash = frontier.get_hash_range(fetcher_hashes, uuid)
+    assert min_hash == fetcher_hashes[2][1]
+    assert max_hash == fetcher_hashes[0][1]
 
 

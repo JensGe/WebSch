@@ -1,15 +1,16 @@
 from fastapi.testclient import TestClient
 
 from app.main import app
-from app.database import frontier, pyd_models, database
-from app.common import random_data_generator as rand_gen, common_values as c
+from app.database import database
+from app.common import enum
+from app.common import common_values as c
 
 client = TestClient(app)
 db = database.SessionLocal()
 
 
 # Database
-def delete_full_database_with_rest(
+def delete_full_database(
     full=False,
     url_refs=False,
     fetchers=False,
@@ -35,7 +36,7 @@ def delete_full_database_with_rest(
     )
 
 
-def create_database_with_rest(
+def create_database(
     fetcher_amount: int = 1,
     fqdn_amount: int = 1,
     min_url_amount: int = 1,
@@ -56,32 +57,49 @@ def create_database_with_rest(
     )
 
 
-def get_first_crawler_uuid_with_rest():
+def get_first_fetcher_uuid():
     return client.get(c.fetcher_endpoint).json()[0]["uuid"]
 
 
-def get_simple_frontier_with_rest(uuid):
+def get_fetcher_uuid_and_hash():
+    fetcher_obj = client.get(c.fetcher_endpoint).json()
+    return [
+        dict(uuid=fetcher["uuid"], fetcher_hash=fetcher["fetcher_hash"])
+        for fetcher in fetcher_obj
+    ]
+
+
+def get_simple_frontier(uuid):
     return client.post(
         c.frontier_endpoint,
         json={"fetcher_uuid": uuid, "amount": 2, "length": 10, "tld": "de"},
     ).json()
 
 
-def get_frontier_with_rest(json_dict):
+def get_frontier(json_dict):
     return client.post(c.frontier_endpoint, json=json_dict,).json()
 
 
-def get_stats_with_rest():
+def get_stats():
     return client.get(c.stats_endpoint).json()
 
 
-def get_random_urls_with_rest(amount: int = 1):
-    return client.get("/urls/", json={"amount": amount}).json()
+def get_random_urls(amount: int = 1):
+    return client.get(c.urls_endpoint, json={"amount": amount}).json()
 
 
 def activate_fqdn_hash():
-    client.patch("/settings/", json={"long_term_part_mode": "fqdn_hash"})
+    client.patch(
+        c.settings_endpoint, json={"long_term_part_mode": enum.LONGPART.fqdn_hash}
+    )
 
 
-def deactivate_fqdn_hash():
-    client.patch("/settings/", json={"long_term_part_mode": "none"})
+def activate_consistent_hash():
+    client.patch(
+        c.settings_endpoint,
+        json={"long_term_part_mode": enum.LONGPART.consistent_hashing},
+    )
+
+
+def reset_long_term_part_strategy():
+    client.patch(c.settings_endpoint, json={"long_term_part_mode": enum.LONGPART.none})

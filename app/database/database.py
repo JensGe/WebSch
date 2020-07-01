@@ -3,7 +3,9 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
 from app.common import credentials as cred
+from app.common import enum
 from app.database import pyd_models, db_models
+
 
 
 SQLALCHEMY_DATABASE_URL = "postgresql://{}:{}@{}/{}".format(
@@ -46,9 +48,27 @@ def refresh_fqdn_hashes(db):
 
     if fetcher_amount != 0:
         for f in frontier:
-            f.fetcher_idx = hash(f.fqdn) % fetcher_amount
+            f.fqdn_hash_fetcher_index = hash(f.fqdn) % fetcher_amount
 
         db.bulk_save_objects(frontier)
         db.commit()
 
     return True
+
+
+def fqdn_hash_activated(db):
+    return (
+        db.query(db_models.FetcherSettings.long_term_part_mode)
+        .filter(db_models.FetcherSettings.id == 1)
+        .first()[0]
+        == enum.LONGPART.fqdn_hash
+    )
+
+
+def consistent_hash_activated(db):
+    return (
+        db.query(db_models.FetcherSettings.long_term_part_mode)
+        .filter(db_models.FetcherSettings.id == 1)
+        .first()[0]
+        == enum.LONGPART.consistent_hashing
+    )

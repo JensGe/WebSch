@@ -3,6 +3,7 @@ from sqlalchemy import (
     Column,
     ForeignKey,
     Integer,
+    BigInteger,
     String,
     DateTime,
     Float,
@@ -17,6 +18,8 @@ class Fetcher(Base):
     __tablename__ = "fetcher"
 
     uuid = Column(String, primary_key=True, index=True)
+    fetcher_hash = Column(BigInteger)
+
     contact = Column(String)
     name = Column(String)
     reg_date = Column(DateTime(timezone=True))
@@ -27,9 +30,11 @@ class Fetcher(Base):
 class Frontier(Base):
     __tablename__ = "frontiers"
 
-    fetcher_idx = Column(Integer)
     fqdn = Column(String, primary_key=True, index=True)
     tld = Column(String, index=True)
+
+    fqdn_hash = Column(BigInteger)
+    fqdn_hash_fetcher_index = Column(Integer)
 
     fqdn_last_ipv4 = Column(String)
     fqdn_last_ipv6 = Column(String)
@@ -42,7 +47,7 @@ class Frontier(Base):
 class Url(Base):
     __tablename__ = "urls"
 
-    fqdn = Column(String, ForeignKey(c.fqdn_frontier_pk))
+    fqdn = Column(String, ForeignKey(c.db_fqdn_pk))
     url = Column(String, primary_key=True, index=True)
 
     url_pagerank = Column(Float)
@@ -56,9 +61,9 @@ class FetcherReservation(Base):
     __tablename__ = "fetcher_reservations"
 
     fetcher_uuid = Column(
-        String, ForeignKey("fetcher.uuid", ondelete="CASCADE"), primary_key=True
+        String, ForeignKey(c.db_fetcher_pk, ondelete="CASCADE"), primary_key=True
     )
-    fqdn = Column(String, ForeignKey(c.fqdn_frontier_pk), primary_key=True)
+    fqdn = Column(String, ForeignKey(c.db_fqdn_pk), primary_key=True)
     latest_return = Column(DateTime(timezone=True))
 
 
@@ -93,10 +98,10 @@ class URLRef(Base):
     __tablename__ = "url_references"
 
     url_out = Column(
-        String, ForeignKey(c.url_frontier_pk), primary_key=True, index=True
+        String, ForeignKey(c.db_url_pk), primary_key=True, index=True
     )
     url_in = Column(
-        String, ForeignKey(c.url_frontier_pk), primary_key=True, index=True
+        String, ForeignKey(c.db_url_pk), primary_key=True, index=True
     )
     parsing_date = Column(DateTime(timezone=True), primary_key=True)
     Index("url_ref_index", url_out, url_in)

@@ -26,7 +26,7 @@ def create_fqdn_list(db, request):
 
         fqdn_list = fqdn_list.filter(db_models.Frontier.tld == fetcher_pref_tld)
 
-    if request.long_term_part_mode == enum.LONGPART.fqdn_hash:
+    elif request.long_term_part_mode == enum.LONGPART.fqdn_hash:
         fetcher = (
             db.query(db_models.Fetcher).order_by(db_models.Fetcher.reg_date.asc()).all()
         )
@@ -40,7 +40,20 @@ def create_fqdn_list(db, request):
             -1,
         )
 
-        fqdn_list = fqdn_list.filter(db_models.Frontier.fetcher_idx == fetcher_index)
+        fqdn_list = fqdn_list.filter(
+            db_models.Frontier.fqdn_hash_fetcher_index == fetcher_index
+        )
+
+    elif request.long_term_part_mode == enum.LONGPART.consistent_hashing:
+        fetcher_hashes = (
+            db.query(db_models.Fetcher.uuid, db_models.Fetcher.fetcher_hash)
+            .order_by(db_models.Fetcher.fetcher_hash.asc())
+            .all()
+        )
+        min_hash, max_hash = get_hash_range(fetcher_hashes, request.fetcher_uuid)
+
+        fqdn_list = fqdn_list.filter(db_models.Frontier.fqdn_hash >= min_hash)
+        fqdn_list = fqdn_list.filter(db_models.Frontier.fqdn_hash < max_hash)
 
     # Order
     if request.long_term_prio_mode == enum.LONGPRIO.random:
@@ -61,6 +74,20 @@ def create_fqdn_list(db, request):
 
     rv = [item for item in fqdn_list]
     return rv
+
+
+def get_hash_range(fetcher_hashes, fetcher_uuid):
+    min_hash = ""
+    min_idx = 0
+    for idx, (f_uuid, f_hash) in enumerate(fetcher_hashes):
+        if f_uuid == fetcher_uuid:
+            min_hash = f_hash
+            min_idx = idx
+
+    max_idx = 0 if min_idx == len(fetcher_hashes)-1 else min_idx + 1
+    max_hash = fetcher_hashes[max_idx][1]
+
+    return min_hash, max_hash
 
 
 def short_term_frontier(db, request, fqdn):
@@ -88,7 +115,7 @@ def short_term_frontier(db, request, fqdn):
 def long_term_frontier(fqdn, url_list):
     return pyd_models.Frontier(
         fqdn=fqdn.fqdn,
-        fetcher_idx=fqdn.fetcher_idx,
+        fetcher_idx=fqdn.fqdn_hash_fetcher_index,
         tld=fqdn.tld,
         url_list=url_list,
         fqdn_last_ipv4=fqdn.fqdn_last_ipv4,
@@ -106,12 +133,6 @@ def get_referencing_urls(db, url, amount):
         .order_by(func.random())
         .limit(amount)
     )
-
-
-def fqdn_hash_activated(db):
-    return db.query(db_models.FetcherSettings.long_term_part_mode).filter(
-        db_models.FetcherSettings.id == 1
-    ).first()[0] == enum.LONGPART.fqdn_hash
 
 
 def get_url_list_from_frontier_response(frontier_response):
@@ -230,9 +251,12 @@ def get_visited_ratio(db):
 
 def get_fqdn_hash_range(db):
     hash_counts = (
-        db.query(db_models.Frontier.fetcher_idx, func.count(db_models.Frontier.fqdn))
-        .group_by(db_models.Frontier.fetcher_idx)
-        .order_by(db_models.Frontier.fetcher_idx)
+        db.query(
+            db_models.Frontier.fqdn_hash_fetcher_index,
+            func.count(db_models.Frontier.fqdn),
+        )
+        .group_by(db_models.Frontier.fqdn_hash_fetcher_index)
+        .order_by(db_models.Frontier.fqdn_hash_fetcher_index)
         .all()
     )
 
@@ -354,7 +378,5 @@ def set_fetcher_settings(request: pyd_models.FetcherSettings, db: Session):
 
     db.commit()
     db.refresh(db_fetcher_settings)
-
-
 
     return db_fetcher_settings

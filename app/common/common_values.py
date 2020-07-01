@@ -3,11 +3,14 @@ fetcher_endpoint = "/fetchers/"
 database_endpoint = "/database/"
 stats_endpoint = "/stats/"
 frontier_endpoint = "/frontiers/"
+settings_endpoint = "/settings/"
+urls_endpoint = "/urls/"
 
 
 # DB_Models
-url_frontier_pk = "urls.url"
-fqdn_frontier_pk = "frontiers.fqdn"
+db_url_pk = "urls.url"
+db_fqdn_pk = "frontiers.fqdn"
+db_fetcher_pk = "fetcher.uuid"
 
 
 # Pydantic Model Values

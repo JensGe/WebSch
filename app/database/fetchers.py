@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 
-from app.database import db_models, pyd_models
+from app.database import db_models, pyd_models, database
+from app.data import data_generator as data_gen
 from app.common import http_exceptions as http
 from uuid import uuid4
 from datetime import datetime, timezone
@@ -23,8 +24,11 @@ def create_fetcher(db: Session, fetcher: pyd_models.CreateFetcher):
     ):
         http.raise_http_409(fetcher.contact, fetcher.name)
 
+    new_uuid = str(uuid4())
+
     db_fetcher = db_models.Fetcher(
-        uuid=str(uuid4()),
+        uuid=new_uuid,
+        fetcher_hash=data_gen.generate_hash(new_uuid),
         contact=fetcher.contact,
         name=fetcher.name,
         reg_date=datetime.now(tz=timezone.utc),

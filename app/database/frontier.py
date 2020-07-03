@@ -5,7 +5,6 @@ from app.common import enum, http_exceptions as http_ex, common_values as c
 
 from sqlalchemy.sql.expression import func
 from sqlalchemy.orm import Session
-from sqlalchemy import or_, and_
 
 
 def create_fqdn_list(db, request):
@@ -74,20 +73,6 @@ def create_fqdn_list(db, request):
     return rv
 
 
-# def get_hash_range(fetcher_hashes, fetcher_uuid):
-#     min_hash = ""
-#     min_idx = 0
-#     for idx, (f_uuid, f_hash) in enumerate(fetcher_hashes):
-#         if f_uuid == fetcher_uuid:
-#             min_hash = f_hash
-#             min_idx = idx
-#
-#     max_idx = 0 if min_idx == len(fetcher_hashes)-1 else min_idx + 1
-#     max_hash = fetcher_hashes[max_idx][1]
-#
-#     return min_hash, max_hash
-
-
 def short_term_frontier(db, request, fqdn):
     db_url_list = db.query(db_models.Url).filter(db_models.Url.fqdn == fqdn.fqdn)
 
@@ -113,7 +98,7 @@ def short_term_frontier(db, request, fqdn):
 def long_term_frontier(fqdn, url_list):
     return pyd_models.Frontier(
         fqdn=fqdn.fqdn,
-        fetcher_idx=fqdn.fqdn_hash_fetcher_index,
+        fqdn_hash_fetcher_index=fqdn.fqdn_hash_fetcher_index,
         tld=fqdn.tld,
         url_list=url_list,
         fqdn_last_ipv4=fqdn.fqdn_last_ipv4,

@@ -377,36 +377,6 @@ def test_get_random_urls():
     )
 
 
-#
-# def test_get_consistent_hash_frontier_list():
-#     rest.delete_full_database(full=True)
-#     rest.create_database(fetcher_amount=10, fqdn_amount=300)
-#     uuid = rest.get_first_fetcher_uuid()
-#     fetcher_hashes = (
-#         db.query(db_models.Fetcher.uuid, db_models.Fetcher.fetcher_hash)
-#         .order_by(db_models.Fetcher.fetcher_hash.asc())
-#         .all()
-#     )
-#
-#     min_hash, max_hash = frontier.get_hash_range(fetcher_hashes, uuid)
-#     db_hash_count = (
-#         db.query(func.count(db_models.Frontier.fqdn))
-#         .filter(db_models.Frontier.fqdn_hash >= min_hash)
-#         .filter(db_models.Frontier.fqdn_hash < max_hash)
-#     ).first()[0]
-#
-#     rest_frontier = rest.get_frontier(
-#         {
-#             "fetcher_uuid": uuid,
-#             "amount": 0,
-#             "length": 0,
-#             "long_term_mode": "consistent_hashing",
-#         }
-#     )
-#
-#     assert rest_frontier["url_frontiers_count"] == db_hash_count
-
-
 def test_consistent_hashing_uniformly_distributed():
     fetcher_amount = 10
     fqdn_amount = 250
@@ -416,11 +386,6 @@ def test_consistent_hashing_uniformly_distributed():
 
     fetcher_hashes = database.get_fetcher_hashes(db)
     hashes_sorted = sorted(fetcher_hashes, key=lambda k: k["hash"])
-
-    # print(fetcher_sorted)
-    # [{'uuid': '2060f94f-c066-4e01-bade-56666b39e875', 'hash': 42769531972742889},
-    #  {'uuid': '86e4dc42-0484-4853-8f88-c3990b379ca5', 'hash': 49846838016181166},
-    #   ... ]
 
     fetcher_hash_range = []
     for i in range(len(hashes_sorted) - 1):
@@ -442,11 +407,6 @@ def test_consistent_hashing_uniformly_distributed():
     fetcher_hash_range_sorted_by_min_hash = sorted(
         fetcher_hash_range, key=lambda k: k["min_hash"]
     )
-
-    # print(fetcher_range_sorted)
-    # [{'uuid': '2060f94f-c066-4e01-bade-56666b39e875', 'min_hash': 42769531972742889, 'max_hash': 49846838016181166},
-    #  {'uuid': '86e4dc42-0484-4853-8f88-c3990b379ca5', 'min_hash': 49846838016181166, 'max_hash': 90521961978641458}
-    #   ... ]
 
     for fetcher_hash_range in fetcher_hash_range_sorted_by_min_hash:
         if fetcher_hash_range["min_hash"] < fetcher_hash_range["max_hash"]:
@@ -477,38 +437,11 @@ def test_consistent_hashing_uniformly_distributed():
     group_summed_hash_list = [{'id': id_, 'count': count_} for id_, count_ in return_list.items()]
 
     url_counts = [f["count"] for f in group_summed_hash_list]
-    # print(url_counts)
 
     assert (
         len(fetcher_hash_range_sorted_by_min_hash) == fetcher_amount * c.ch_hash_amount
     )
     mean = sum(url_counts) / len(url_counts)
     variance = sum((xi - mean) ** 2 for xi in url_counts) / len(url_counts)
-    # print(variance)
 
     assert variance <= 5 * mean
-
-
-# def group_and_sum(list_of_dicts):
-#     return_list = defaultdict(int)
-#     for d in list_of_dicts:
-#         return_list[d['id']] += d['count']
-#
-#     return [{'id': id_, 'count': count_} for id_, count_ in return_list.items()]
-#
-#
-# def test_group_and_sum_dict():
-#     list_of_dicts = [
-#         {"id": "a", "count": 3},
-#         {"id": "b", "count": 1},
-#         {"id": "a", "count": 1},
-#         {"id": "c", "count": 2},
-#     ]
-#
-#     result_list = [
-#         {"id": "a", "count": 4},
-#         {"id": "b", "count": 1},
-#         {"id": "c", "count": 2},
-#     ]
-#
-#     assert group_and_sum(list_of_dicts) == result_list

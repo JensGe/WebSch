@@ -191,7 +191,7 @@ def test_get_simple_frontier():
             "delete_fqdns": True,
         },
     )
-    sleep(5)
+    sleep(3)
 
     new_fetcher_uuid = client.post(
         c.fetcher_endpoint, json={"contact": v.test_email_1, "name": "Isaac"}
@@ -303,7 +303,7 @@ def test_generate_example_db():
             "connection_amount": 2,
         },
     )
-    sleep(10)
+    sleep(3)
     after = client.get(c.stats_endpoint).json()
     assert response.status_code == status.HTTP_202_ACCEPTED
     assert after["fetcher_amount"] == before["fetcher_amount"] + 1
@@ -408,8 +408,8 @@ def test_get_random_urls():
 
 
 def test_consistent_hashing_uniformly_distributed():
-    fetcher_amount = 40
-    fqdn_amount = 1000
+    fetcher_amount = 10
+    fqdn_amount = 250
 
     rest.delete_full_database(full=True)
     rest.create_database(fetcher_amount=fetcher_amount, fqdn_amount=fqdn_amount)

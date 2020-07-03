@@ -13,6 +13,7 @@ db = database.SessionLocal()
 def delete_full_database(
     full=False,
     url_refs=False,
+    fetcher_hashes=False,
     fetchers=False,
     urls=False,
     fqdns=False,
@@ -20,6 +21,7 @@ def delete_full_database(
 ):
     if full:
         url_refs = True
+        fetcher_hashes = True
         fetchers = True
         urls = True
         fqdns = True
@@ -28,6 +30,7 @@ def delete_full_database(
         c.database_endpoint,
         json={
             "delete_url_refs": url_refs,
+            "delete_fetcher_hashes": fetcher_hashes,
             "delete_fetchers": fetchers,
             "delete_urls": urls,
             "delete_fqdns": fqdns,
@@ -61,12 +64,9 @@ def get_first_fetcher_uuid():
     return client.get(c.fetcher_endpoint).json()[0]["uuid"]
 
 
-def get_fetcher_uuid_and_hash():
+def get_fetcher_uuids():
     fetcher_obj = client.get(c.fetcher_endpoint).json()
-    return [
-        dict(uuid=fetcher["uuid"], fetcher_hash=fetcher["fetcher_hash"])
-        for fetcher in fetcher_obj
-    ]
+    return [fetcher["uuid"] for fetcher in fetcher_obj]
 
 
 def get_simple_frontier(uuid):

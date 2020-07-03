@@ -40,7 +40,7 @@ def create_fetcher(db: Session, fetcher: pyd_models.CreateFetcher):
     db.refresh(db_fetcher)
 
     db_fetcher_hashes = [
-        db_models.FetcherHashes(
+        db_models.FetcherHash(
             fetcher_uuid=new_uuid,
             fetcher_hash=data_gen.generate_hash(new_uuid, seed=i),
         )
@@ -110,6 +110,12 @@ def delete_fetcher(db: Session, fetcher: pyd_models.DeleteFetcher):
     if not uuid_exists(db, str(fetcher.uuid)):
         http.raise_http_404(fetcher.uuid)
 
+    db.query(db_models.FetcherReservation).filter(
+        db_models.FetcherReservation.fetcher_uuid == str(fetcher.uuid)
+    ).delete()
+    db.query(db_models.FetcherHash).filter(
+        db_models.FetcherHash.fetcher_uuid == str(fetcher.uuid)
+    ).delete()
     db.query(db_models.Fetcher).filter(
         db_models.Fetcher.uuid == str(fetcher.uuid)
     ).delete()
@@ -118,5 +124,7 @@ def delete_fetcher(db: Session, fetcher: pyd_models.DeleteFetcher):
 
 
 def delete_fetchers(db: Session):
+    db.query(db_models.FetcherReservation).delete()
+    db.query(db_models.FetcherHash).delete()
     db.query(db_models.Fetcher).delete()
     db.commit()

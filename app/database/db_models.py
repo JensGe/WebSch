@@ -26,8 +26,10 @@ class Fetcher(Base):
     tld_preference = Column(String)
 
 
-class FetcherHashes(Base):
-    fetcher_hash = Column(BigInteger)
+class FetcherHash(Base):
+    __tablename__ = "fetcher_hashes"
+
+    fetcher_hash = Column(BigInteger, primary_key=True)
     fetcher_uuid = Column(String, ForeignKey(c.db_fetcher_pk))
 
 

@@ -29,7 +29,7 @@ def create_sample_fetcher(db: Session, amount: int = 3):
         )
         fetcher_hashes.extend(
             [
-                db_models.FetcherHashes(
+                db_models.FetcherHash(
                     fetcher_uuid=new_uuid,
                     fetcher_hash=data_gen.generate_hash(new_uuid, seed=i),
                 )
@@ -39,6 +39,8 @@ def create_sample_fetcher(db: Session, amount: int = 3):
 
     for fetcher in fetchers:
         db.add(fetcher)
+
+    db.commit()
 
     db.bulk_save_objects(fetcher_hashes)
     db.commit()

@@ -1,19 +1,20 @@
 from datetime import datetime, timedelta, timezone
 
-from app.database import db_models, pyd_models, fetchers
+from app.database import db_models, pyd_models, fetchers, database
 from app.common import enum, http_exceptions as http_ex, common_values as c
 
 from sqlalchemy.sql.expression import func
 from sqlalchemy.orm import Session
+from sqlalchemy import or_, and_
 
 
 def create_fqdn_list(db, request):
-    fqdn_block_list = db.query(db_models.FetcherReservation.fqdn).filter(
+    fqdn_reservation_list = db.query(db_models.FetcherReservation.fqdn).filter(
         db_models.FetcherReservation.latest_return > datetime.now(tz=timezone.utc)
     )
 
     fqdn_list = db.query(db_models.Frontier).filter(
-        db_models.Frontier.fqdn.notin_(fqdn_block_list)
+        db_models.Frontier.fqdn.notin_(fqdn_reservation_list)
     )
 
     # Filter
@@ -45,15 +46,12 @@ def create_fqdn_list(db, request):
         )
 
     elif request.long_term_part_mode == enum.LONGPART.consistent_hashing:
-        fetcher_hashes = (
-            db.query(db_models.Fetcher.uuid, db_models.Fetcher.fetcher_hash)
-            .order_by(db_models.Fetcher.fetcher_hash.asc())
-            .all()
-        )
-        min_hash, max_hash = get_hash_range(fetcher_hashes, request.fetcher_uuid)
+        fetcher_hash_ranges = database.get_fetcher_hash_ranges(db, str(request.fetcher_uuid))
 
-        fqdn_list = fqdn_list.filter(db_models.Frontier.fqdn_hash >= min_hash)
-        fqdn_list = fqdn_list.filter(db_models.Frontier.fqdn_hash < max_hash)
+        filter_query = database.get_hash_range_filter_query(fetcher_hash_ranges)
+
+        fqdn_list = fqdn_list.filter(filter_query)
+
 
     # Order
     if request.long_term_prio_mode == enum.LONGPRIO.random:
@@ -76,18 +74,18 @@ def create_fqdn_list(db, request):
     return rv
 
 
-def get_hash_range(fetcher_hashes, fetcher_uuid):
-    min_hash = ""
-    min_idx = 0
-    for idx, (f_uuid, f_hash) in enumerate(fetcher_hashes):
-        if f_uuid == fetcher_uuid:
-            min_hash = f_hash
-            min_idx = idx
-
-    max_idx = 0 if min_idx == len(fetcher_hashes)-1 else min_idx + 1
-    max_hash = fetcher_hashes[max_idx][1]
-
-    return min_hash, max_hash
+# def get_hash_range(fetcher_hashes, fetcher_uuid):
+#     min_hash = ""
+#     min_idx = 0
+#     for idx, (f_uuid, f_hash) in enumerate(fetcher_hashes):
+#         if f_uuid == fetcher_uuid:
+#             min_hash = f_hash
+#             min_idx = idx
+#
+#     max_idx = 0 if min_idx == len(fetcher_hashes)-1 else min_idx + 1
+#     max_hash = fetcher_hashes[max_idx][1]
+#
+#     return min_hash, max_hash
 
 
 def short_term_frontier(db, request, fqdn):

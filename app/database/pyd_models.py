@@ -15,7 +15,7 @@ class BasisModel(BaseModel):
 # Fetcher
 class Fetcher(BasisModel):
     uuid: UUID
-    fetcher_hash: int = None
+    fetcher_hashes: List[int] = []
 
     contact: EmailStr
     name: str
@@ -141,6 +141,7 @@ class StatsResponse(BasisModel):
 
 class DeleteDatabase(BasisModel):
     delete_url_refs: bool = False
+    delete_fetcher_hashes: bool = False
     delete_fetchers: bool = False
     delete_urls: bool = False
     delete_fqdns: bool = False

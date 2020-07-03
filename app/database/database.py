@@ -1,11 +1,11 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine, or_, and_
+from sqlalchemy.orm import sessionmaker, aliased
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.sql.expression import func
 
 from app.common import credentials as cred
 from app.common import enum
 from app.database import pyd_models, db_models
-
 
 
 SQLALCHEMY_DATABASE_URL = "postgresql://{}:{}@{}/{}".format(
@@ -21,6 +21,10 @@ Base = declarative_base()
 def reset(db, request: pyd_models.DeleteDatabase):
     if request.delete_url_refs:
         db.query(db_models.URLRef).delete()
+        db.commit()
+
+    if request.delete_fetcher_hashes:
+        db.query(db_models.FetcherHash).delete()
         db.commit()
 
     if request.delete_fetchers:
@@ -72,3 +76,59 @@ def consistent_hash_activated(db):
         .first()[0]
         == enum.LONGPART.consistent_hashing
     )
+
+
+def get_fetcher_hashes(db):
+    return [
+        dict(uuid=f.fetcher_uuid, hash=f.fetcher_hash)
+        for f in db.query(db_models.FetcherHash).all()
+    ]
+
+
+def get_fetcher_hash_ranges(db, uuid):
+    """
+    ordered by start_hash, ascending
+    """
+    fh0 = aliased(db_models.FetcherHash)
+    fh1 = aliased(db_models.FetcherHash)
+    fh2 = aliased(db_models.FetcherHash)
+
+    return (
+        db.query(
+            fh1.fetcher_uuid,
+            fh1.fetcher_hash,
+            func.coalesce(func.min(fh2.fetcher_hash), func.min(fh0.fetcher_hash)),
+        )
+        .join(fh2, fh2.fetcher_hash > fh1.fetcher_hash, isouter=True)
+        .filter(fh1.fetcher_uuid == uuid)
+        .group_by(fh1.fetcher_uuid, fh1.fetcher_hash)
+        .order_by(fh1.fetcher_hash)
+    ).all()
+
+
+def get_hash_range_filter_query(fetcher_hash_range):
+    hash_range_filter = [
+        and_(
+            db_models.Frontier.fqdn_hash >= hash_range[1],
+            db_models.Frontier.fqdn_hash < hash_range[2],
+        )
+        for hash_range in fetcher_hash_range[:-1]
+    ]
+
+    if fetcher_hash_range[-1][1] > fetcher_hash_range[-1][2]:
+        hash_range_filter.append(
+            or_(
+                db_models.Frontier.fqdn_hash >= fetcher_hash_range[-1][1],
+                db_models.Frontier.fqdn_hash < fetcher_hash_range[-1][2],
+            ),
+        )
+
+    else:
+        hash_range_filter.append(
+            and_(
+                db_models.Frontier.fqdn_hash >= fetcher_hash_range[-1][1],
+                db_models.Frontier.fqdn_hash < fetcher_hash_range[-1][2],
+            ),
+        )
+
+    return or_(*hash_range_filter)

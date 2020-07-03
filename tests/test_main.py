@@ -3,7 +3,7 @@ from fastapi import status
 
 from app.main import app
 from app.common import common_values as c, enum
-from app.database import fetchers, frontier, database, db_models
+from app.database import fetchers, frontier, database, db_models, pyd_models
 
 
 from time import sleep
@@ -12,6 +12,7 @@ from tests import rest_api as rest
 
 from sqlalchemy import or_, and_
 from sqlalchemy.sql.expression import func
+from collections import defaultdict
 
 client = TestClient(app)
 db = database.SessionLocal()
@@ -333,6 +334,7 @@ def test_delete_example_db():
         c.database_endpoint,
         json={
             "delete_reserved_fqdns": True,
+            "delete_fetcher_hashes": True,
             "delete_url_refs": True,
             "delete_fetchers": True,
             "delete_urls": True,
@@ -374,6 +376,7 @@ def test_get_random_urls():
         == full_url_list_response["url_list"][0]["fqdn"]
     )
 
+
 #
 # def test_get_consistent_hash_frontier_list():
 #     rest.delete_full_database(full=True)
@@ -402,56 +405,110 @@ def test_get_random_urls():
 #     )
 #
 #     assert rest_frontier["url_frontiers_count"] == db_hash_count
+
+
+def test_consistent_hashing_uniformly_distributed():
+    fetcher_amount = 40
+    fqdn_amount = 1000
+
+    rest.delete_full_database(full=True)
+    rest.create_database(fetcher_amount=fetcher_amount, fqdn_amount=fqdn_amount)
+
+    fetcher_hashes = database.get_fetcher_hashes(db)
+    hashes_sorted = sorted(fetcher_hashes, key=lambda k: k["hash"])
+
+    # print(fetcher_sorted)
+    # [{'uuid': '2060f94f-c066-4e01-bade-56666b39e875', 'hash': 42769531972742889},
+    #  {'uuid': '86e4dc42-0484-4853-8f88-c3990b379ca5', 'hash': 49846838016181166},
+    #   ... ]
+
+    fetcher_hash_range = []
+    for i in range(len(hashes_sorted) - 1):
+        fetcher_hash_range.append(
+            dict(
+                uuid=hashes_sorted[i]["uuid"],
+                min_hash=hashes_sorted[i]["hash"],
+                max_hash=hashes_sorted[i + 1]["hash"],
+            )
+        )
+    fetcher_hash_range.append(
+        dict(
+            uuid=hashes_sorted[-1]["uuid"],
+            min_hash=hashes_sorted[-1]["hash"],
+            max_hash=hashes_sorted[0]["hash"],
+        )
+    )
+
+    fetcher_hash_range_sorted_by_min_hash = sorted(
+        fetcher_hash_range, key=lambda k: k["min_hash"]
+    )
+
+    # print(fetcher_range_sorted)
+    # [{'uuid': '2060f94f-c066-4e01-bade-56666b39e875', 'min_hash': 42769531972742889, 'max_hash': 49846838016181166},
+    #  {'uuid': '86e4dc42-0484-4853-8f88-c3990b379ca5', 'min_hash': 49846838016181166, 'max_hash': 90521961978641458}
+    #   ... ]
+
+    for fetcher_hash_range in fetcher_hash_range_sorted_by_min_hash:
+        if fetcher_hash_range["min_hash"] < fetcher_hash_range["max_hash"]:
+            fetcher_hash_range["url_count"] = (
+                db.query(func.count(db_models.Frontier.fqdn)).filter(
+                    and_(
+                        db_models.Frontier.fqdn_hash >= fetcher_hash_range["min_hash"],
+                        db_models.Frontier.fqdn_hash < fetcher_hash_range["max_hash"],
+                    )
+                )
+            ).first()[0]
+        else:
+            fetcher_hash_range["url_count"] = (
+                db.query(func.count(db_models.Frontier.fqdn))
+                .filter(
+                    or_(
+                        db_models.Frontier.fqdn_hash >= fetcher_hash_range["min_hash"],
+                        db_models.Frontier.fqdn_hash < fetcher_hash_range["max_hash"],
+                    )
+                )
+                .first()[0]
+            )
+
+    return_list = defaultdict(int)
+    for d in fetcher_hash_range_sorted_by_min_hash:
+        return_list[d['uuid']] += d['url_count']
+
+    group_summed_hash_list = [{'id': id_, 'count': count_} for id_, count_ in return_list.items()]
+
+    url_counts = [f["count"] for f in group_summed_hash_list]
+    # print(url_counts)
+
+    assert (
+        len(fetcher_hash_range_sorted_by_min_hash) == fetcher_amount * c.ch_hash_amount
+    )
+    mean = sum(url_counts) / len(url_counts)
+    variance = sum((xi - mean) ** 2 for xi in url_counts) / len(url_counts)
+    # print(variance)
+
+    assert variance <= 5 * mean
+
+
+# def group_and_sum(list_of_dicts):
+#     return_list = defaultdict(int)
+#     for d in list_of_dicts:
+#         return_list[d['id']] += d['count']
+#
+#     return [{'id': id_, 'count': count_} for id_, count_ in return_list.items()]
 #
 #
-# def test_consistent_hashing_uniformly_distributed():
-#     rest.delete_full_database(full=True)
-#     rest.create_database(fetcher_amount=40, fqdn_amount=1000)
+# def test_group_and_sum_dict():
+#     list_of_dicts = [
+#         {"id": "a", "count": 3},
+#         {"id": "b", "count": 1},
+#         {"id": "a", "count": 1},
+#         {"id": "c", "count": 2},
+#     ]
 #
-#     fetcher = rest.get_fetcher_uuid_and_hash()
-#     fetcher_sorted = sorted(fetcher, key=lambda k: k['fetcher_hash'])
+#     result_list = [
+#         {"id": "a", "count": 4},
+#         {"id": "b", "count": 1},
+#         {"id": "c", "count": 2},
+#     ]
 #
-#     fetcher_range = []
-#     for i in range(len(fetcher_sorted) - 1):
-#         fetcher_range.append(
-#             dict(
-#                 uuid=fetcher_sorted[i]["uuid"],
-#                 min_hash=fetcher_sorted[i]["fetcher_hash"],
-#                 max_hash=fetcher_sorted[i + 1]["fetcher_hash"],
-#             )
-#         )
-#     fetcher_range.append(
-#         dict(
-#             uuid=fetcher_sorted[-1]["uuid"],
-#             min_hash=fetcher_sorted[-1]["fetcher_hash"],
-#             max_hash=fetcher_sorted[0]["fetcher_hash"],
-#         )
-#     )
-#
-#     for fetcher_sorted in fetcher_range:
-#         if fetcher_sorted["min_hash"] < fetcher_sorted["max_hash"]:
-#             fetcher_sorted["url_count"] = (
-#                 db.query(func.count(db_models.Frontier.fqdn)).filter(
-#                     and_(
-#                         db_models.Frontier.fqdn_hash >= fetcher_sorted["min_hash"],
-#                         db_models.Frontier.fqdn_hash < fetcher_sorted["max_hash"],
-#                     )
-#                 )
-#             ).first()[0]
-#         else:
-#             fetcher_sorted["url_count"] = db.query(func.count(db_models.Frontier.fqdn)).filter(
-#                 or_(
-#                     db_models.Frontier.fqdn_hash >= fetcher_sorted["min_hash"],
-#                     db_models.Frontier.fqdn_hash < fetcher_sorted["max_hash"],
-#                 )
-#             ).first()[0]
-#
-#     fetcher_range_sorted = sorted(fetcher_range, key=lambda k: k['min_hash'])
-#
-#     print(fetcher_range_sorted)
-#     url_counts = [f["url_count"] for f in fetcher_range_sorted]
-#     print(url_counts)
-#     mean = sum(url_counts) / len(url_counts)
-#     variance = sum((xi - mean) ** 2 for xi in url_counts) / len(url_counts)
-#
-#     assert variance < 10 * mean
+#     assert group_and_sum(list_of_dicts) == result_list

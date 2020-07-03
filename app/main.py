@@ -19,7 +19,7 @@ db_models.Base.metadata.create_all(bind=database.engine)
 app = FastAPI(
     title="WebSch",
     description="A Scheduler for a distributed Web Fetcher System",
-    version="0.3.2",
+    version="0.3.5",
     redoc_url=None,
 )
 
@@ -187,10 +187,11 @@ async def delete_example_db(
     Deletes the complete Example Database
 
     - **delete_url_refs** (default: false): Deletes all URL References
-    - **delete_fetchers (default: false): Deletes all Fetcher Records
-    - **delete_urls (default: false): Deletes all URL Records
-    - **delete_fqdns (default: false): Deletes all FQDN Records
-    - **delete_reserved_fqdns (default: false): Deletes all Reservations
+    - **delete_fetcher_hashes** (default: false): Deletes all Fetcher Hashes
+    - **delete_fetchers** (default: false): Deletes all Fetcher Records
+    - **delete_urls** (default: false): Deletes all URL Records
+    - **delete_fqdns** (default: false): Deletes all FQDN Records
+    - **delete_reserved_fqdns** (default: false): Deletes all Reservations
     """
 
     background_tasks.add_task(database.reset, db, request)

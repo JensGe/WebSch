@@ -1,5 +1,5 @@
 import random
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from uuid import uuid4
 
 from sqlalchemy.orm import Session
@@ -62,6 +62,7 @@ def new_fqdn(fqdn_basis, fqdn_url_amount, fetcher_amount, request):
         fqdn_last_ipv4=rand_gen.get_random_ipv4(),
         fqdn_last_ipv6=rand_gen.random_example_ipv6(),
         fqdn_avg_pagerank=0.0,
+        fqdn_avg_last_visited_date=datetime.utcfromtimestamp(0),
         fqdn_crawl_delay=data_gen.random_crawl_delay()
         if request.fixed_crawl_delay is None
         else request.fixed_crawl_delay,
@@ -71,15 +72,15 @@ def new_fqdn(fqdn_basis, fqdn_url_amount, fetcher_amount, request):
 
 def new_url(url, fqdn, request):
     if random.random() < request.visited_ratio:
-        random_date_time = rand_gen.random_datetime()
+        generated_date_time = rand_gen.random_datetime()
     else:
-        random_date_time = None
+        generated_date_time = datetime.utcfromtimestamp(0)
 
     return db_models.Url(
         url=url,
         fqdn=fqdn,
         url_pagerank=data_gen.random_pagerank(),
-        url_last_visited=random_date_time,
+        url_last_visited=generated_date_time,
         url_blacklisted=False,
         url_bot_excluded=False,
     )
@@ -117,8 +118,13 @@ def create_sample_frontier(db: Session, request):
         ]
 
         db.bulk_save_objects(fqdn_url_list)
+        db.query(db_models.Frontier).filter(db_models.Frontier.fqdn == fqdn).update(
+            {"fqdn_avg_last_visited_date": avg_dates(fqdn_url_list)}
+        )
+
         db.commit()
 
+        # URL Links
         if request.connection_amount > 0:
             db_url_ref_list = []
 
@@ -135,3 +141,12 @@ def create_sample_frontier(db: Session, request):
         global_url_list.extend(fqdn_url_list)
 
     return {"frontier": fqdn_frontier, "url_list": global_url_list}
+
+
+def avg_dates(url_list):
+    any_ref_date = datetime(1900, 1, 1)
+    avg_date = any_ref_date + sum(
+        [url.url_last_visited - any_ref_date for url in url_list], timedelta()
+    ) / len(url_list)
+
+    return avg_date

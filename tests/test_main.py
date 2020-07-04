@@ -312,6 +312,24 @@ def test_generate_example_db():
     assert after["url_ref_amount"] == before["url_ref_amount"] + 2
 
 
+def test_generate_example_db_avg_visited_date():
+    rest.delete_full_database(full=True)
+    response = client.post(
+        c.database_endpoint,
+        json={
+            "fetcher_amount": 0,
+            "fqdn_amount": 10,
+            "min_url_amount": 10,
+            "max_url_amount": 10,
+            "visited_ratio": 0.5,
+        },
+    )
+    sleep(3)
+    stats = client.get(c.stats_endpoint).json()
+    assert response.status_code == status.HTTP_202_ACCEPTED
+    assert isinstance(stats["avg_freshness"], str)
+
+
 def test_generate_example_frontier_wrong_initial_values():
     response = client.post(
         c.database_endpoint,

@@ -65,6 +65,12 @@ def create_fqdn_list(db, request):
     elif request.long_term_prio_mode == enum.LONGPRIO.avg_pagerank:
         fqdn_list = fqdn_list.order_by(db_models.Frontier.fqdn_avg_pagerank.desc())
 
+    elif request.long_term_prio_mode == enum.LONGPRIO.old_sites_first:
+        fqdn_list = fqdn_list.order_by(db_models.Frontier.fqdn_avg_last_visited_date.asc())
+
+    elif request.long_term_prio_mode == enum.LONGPRIO.new_sites_first:
+        fqdn_list = fqdn_list.order_by(db_models.Frontier.fqdn_avg_last_visited_date.desc())
+
     # Limit
     if request.amount > 0:
         fqdn_list = fqdn_list.limit(request.amount)
@@ -88,6 +94,11 @@ def short_term_frontier(db, request, fqdn):
     elif request.short_term_prio_mode == enum.SHORTPRIO.new_pages_first:
         db_url_list = db_url_list.order_by(
             db_models.Url.url_last_visited.desc().nullslast()
+        )
+
+    elif request.short_term_prio_mode == enum.SHORTPRIO.pagerank:
+        db_url_list = db_url_list.order_by(
+            db_models.Url.url_pagerank.desc()
         )
 
     db_url_list = db_url_list[: request.length] if request.length > 0 else db_url_list
@@ -207,14 +218,14 @@ def get_fqdn_frontier(db, request: pyd_models.FrontierRequest):
 
 
 def calculate_avg_freshness(db):
-    sum_timestamps = db.query(
+    avg_timestamps = db.query(
         func.to_timestamp(
             func.avg(func.extract("epoch", db_models.Url.url_last_visited))
         )
     ).first()
     rv = (
-        sum_timestamps[0].strftime("%Y-%m-%d %H:%M:%S.%f")
-        if sum_timestamps[0] is not None
+        avg_timestamps[0].strftime("%Y-%m-%d %H:%M:%S.%f")
+        if avg_timestamps[0] is not None
         else "None"
     )
     return rv

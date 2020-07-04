@@ -1,4 +1,9 @@
 from app.data import data_generator as data_gen
+from app.common import random_data_generator as rand_gen
+from app.database import sample_generator as sam_gen
+from app.database import pyd_models as pyd
+from datetime import datetime
+from uuid import uuid4
 
 
 def test_get_random_pagerank():
@@ -41,3 +46,14 @@ def test_get_random_crawl_delay():
     crawl_delay_list = [data_gen.random_crawl_delay() for _ in range(200)]
     print(crawl_delay_list)
     assert isinstance(crawl_delay_list[0], int) or crawl_delay_list[0] is None
+
+
+def test_avg_dates():
+    request = pyd.GenerateRequest(visited_ratio=0.5)
+    fqdn = rand_gen.get_random_fqdn()
+    url_list = rand_gen.random_urls(fqdn, 10)
+    fqdn_url_list = [sam_gen.new_url(url_list[i], fqdn, request) for i in range(10)]
+
+    avg_date = sam_gen.avg_dates(fqdn_url_list)
+    print(avg_date)
+    assert isinstance(avg_date, datetime)

@@ -255,7 +255,10 @@ def get_db_stats(db: Session = Depends(get_db)):
 )
 def get_random_urls(request: pyd_models.GetRandomUrls, db: Session = Depends(get_db)):
     """
-    Returns a requested amount of random URLs from the Database
+    Returns a requested amount of random existing URLs from the Database
+
+    - **amount** (default: 1): Number of requesting URLs
+    - **fqdn** (default: None): The FQDN, in which the requested URLs reside
     """
     return frontier.get_random_urls(db, request)
 

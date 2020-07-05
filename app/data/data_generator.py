@@ -234,13 +234,17 @@ def random_pagerank(rank: int = random.randint(0, 60000000000)):
     return random_pagerank
 
 
-def random_tld():
+def random_tld(top: int = 0):
+
     with open("app/data/top200_tlds.csv", "r") as file:
         reader = csv.reader(file)
         tld_dist = [(row[0], int(row[1])) for row in reader]
         tlds, dist = map(list, zip(*tld_dist))
 
-    return random.choices(population=tlds, weights=dist, k=1)[0]
+    if top == 0 or top >= len(tlds):
+        return random.choices(population=tlds, weights=dist, k=1)[0]
+    else:
+        return random.choices(population=tlds[:top], weights=dist[:top], k=1)[0]
 
 
 def random_crawl_delay():

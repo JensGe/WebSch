@@ -20,10 +20,16 @@ Distributed Fetcher ask for new URL Lists per REST API call.
 
 ## Python Packages
 
-The project is built on the python package FastAPI (https://fastapi.tiangolo.com/). 
+The project is built on the python package FastAPI (MIT licensed) (https://fastapi.tiangolo.com/). 
 FastApi itself is built on top of the following packages:
-- Starlette (https://www.starlette.io/)
-- pydantic (https://pydantic-docs.helpmanual.io/)
+- Starlette (MIT-licensed) (https://www.starlette.io/)
+- pydantic (MIT-licensed) (https://pydantic-docs.helpmanual.io/)
+
+The Project also import parts of the following Libraries / Frameworks
+- SQLAlchemy (MIT-licensed) (https://www.sqlalchemy.org/)
+- Psycopg (GNU Lesser General Public License) (https://www.psycopg.org/)
+- pytest (MIT-licensed) (https://www.pytest.org)
+- xxhash (BSD licensed) (https://pypi.org/project/xxhash/)
 
 ## Docker Image
 

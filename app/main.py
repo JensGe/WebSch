@@ -276,7 +276,7 @@ def get_fetcher_settings(db: Session = Depends(get_db)):
     return frontier.get_fetcher_settings(db)
 
 
-@app.patch(
+@app.put(
     "/settings/",
     response_model=pyd_models.FetcherSettings,
     tags=["Development Tools"],

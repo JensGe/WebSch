@@ -208,52 +208,6 @@ def test_consistent_hash_deactivated():
     assert database.fqdn_hash_activated(db) is False
 
 
-# def test_get_hash_range_with_db():
-#     rest.delete_full_database(full=True)
-#     rest.create_database(fetcher_amount=5)
-#
-#     uuid = rest.get_first_fetcher_uuid()
-#     fetcher_hashes = (
-#         db.query(db_models.Fetcher.uuid, db_models.Fetcher.fetcher_hash)
-#         .order_by(db_models.Fetcher.fetcher_hash.asc())
-#         .all()
-#     )
-#
-#     print(fetcher_hashes)
-#
-#     min_hash, max_hash = frontier.get_hash_range(fetcher_hashes, uuid)
-#     print("min: {}, max: {}".format(min_hash, max_hash))
-#     assert isinstance(min_hash, int)
-#     assert isinstance(max_hash, int)
-#     assert min_hash < max_hash or max_hash == fetcher_hashes[0][1]
-
-#
-# def test_get_hash_pure():
-#     uuid = "9b200069-3773-4270-aa1c-2d89c1335623"
-#     fetcher_hashes = [
-#         ("9b200069-3773-4270-aa1c-2d89c1335623", 2537359433),
-#         ("2ac1e563-5261-4044-9f94-36a09726d00f", 2638481537),
-#         ("cd21a2f3-c808-453f-b2ee-3e45e01a7573", 2999322988),
-#     ]
-#
-#     min_hash, max_hash = frontier.get_hash_range(fetcher_hashes, uuid)
-#     assert min_hash == fetcher_hashes[0][1]
-#     assert max_hash == fetcher_hashes[1][1]
-#
-#
-# def test_get_hash_pure_circled():
-#     uuid = "cd21a2f3-c808-453f-b2ee-3e45e01a7573"
-#     fetcher_hashes = [
-#         ("9b200069-3773-4270-aa1c-2d89c1335623", 2537359433),
-#         ("2ac1e563-5261-4044-9f94-36a09726d00f", 2638481537),
-#         ("cd21a2f3-c808-453f-b2ee-3e45e01a7573", 2999322988),
-#     ]
-#
-#     min_hash, max_hash = frontier.get_hash_range(fetcher_hashes, uuid)
-#     assert min_hash == fetcher_hashes[2][1]
-#     assert max_hash == fetcher_hashes[0][1]
-
-
 def test_create_fqdn_list_with_consistent_hashing():
     rest.delete_full_database(full=True)
     rest.create_database(fetcher_amount=3, fqdn_amount=100)

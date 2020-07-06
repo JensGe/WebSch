@@ -1,13 +1,7 @@
 import random
 import string
 import csv
-import zlib
-import hashlib
 import xxhash
-
-
-# def generate_hash_zlib(text: str):
-#     return zlib.crc32(str.encode(text)) & 0xffffffff
 
 
 def generate_hash(text: str, seed: int = 0) -> int:
@@ -15,14 +9,7 @@ def generate_hash(text: str, seed: int = 0) -> int:
     return int_hash % 9223372036854775807
 
 
-def generate_hash_hashlib_md5(text: str) -> int:
-    byte_hash = hashlib.md5(str.encode(text)).digest()
-    int_hash = int.from_bytes(byte_hash, "big")
-    return int_hash % 32767
-
-
 def random_text(length: int = None, language: str = "de"):
-
     chars = string.ascii_lowercase
     if length is None:
         length = random.randint(10, 16)
@@ -211,27 +198,27 @@ def random_text(length: int = None, language: str = "de"):
 
 def random_pagerank(rank: int = random.randint(0, 60000000000)):
     if rank <= 10:
-        random_pagerank = random.uniform(8.0, 10.0)
+        generated_pagerank = random.uniform(8.0, 10.0)
     elif rank <= 100:
-        random_pagerank = random.uniform(4.0, 8.0)
+        generated_pagerank = random.uniform(4.0, 8.0)
     elif rank <= 1000:
-        random_pagerank = random.uniform(2.0, 4.0)
+        generated_pagerank = random.uniform(2.0, 4.0)
     elif rank <= 10000:
-        random_pagerank = random.uniform(1.0, 2.0)
+        generated_pagerank = random.uniform(1.0, 2.0)
     elif rank <= 100000:
-        random_pagerank = random.uniform(0.2, 1.0)
+        generated_pagerank = random.uniform(0.2, 1.0)
     elif rank <= 1000000:
-        random_pagerank = random.uniform(0.01, 0.2)
+        generated_pagerank = random.uniform(0.01, 0.2)
     elif rank <= 10000000:
-        random_pagerank = random.uniform(0.001, 0.01)
+        generated_pagerank = random.uniform(0.001, 0.01)
     elif rank <= 100000000:
-        random_pagerank = random.uniform(0.0001, 0.001)
+        generated_pagerank = random.uniform(0.0001, 0.001)
     elif rank <= 1000000000:
-        random_pagerank = random.uniform(0.00001, 0.0001)
+        generated_pagerank = random.uniform(0.00001, 0.0001)
     else:
-        random_pagerank = random.uniform(0.000001, 0.00001)
+        generated_pagerank = random.uniform(0.000001, 0.00001)
 
-    return random_pagerank
+    return generated_pagerank
 
 
 def random_tld(top: int = 0):
@@ -267,7 +254,7 @@ def random_crawl_delay():
         600,
         1000,
     ]
-    distibution = [
+    distribution = [
         0.80000,
         0.00800,
         0.00450,
@@ -287,5 +274,4 @@ def random_crawl_delay():
         0.00080,
     ]
 
-    return random.choices(population=crawl_delays, weights=distibution)[0]
-
+    return random.choices(population=crawl_delays, weights=distribution)[0]

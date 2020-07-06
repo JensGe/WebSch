@@ -64,7 +64,7 @@ def fqdn_hash_activated(db):
     return (
         db.query(db_models.FetcherSettings.long_term_part_mode)
         .filter(db_models.FetcherSettings.id == 1)
-        .first()[0]
+        .scalar()
         == enum.LONGPART.fqdn_hash
     )
 
@@ -73,7 +73,7 @@ def consistent_hash_activated(db):
     return (
         db.query(db_models.FetcherSettings.long_term_part_mode)
         .filter(db_models.FetcherSettings.id == 1)
-        .first()[0]
+        .scalar()
         == enum.LONGPART.consistent_hashing
     )
 

@@ -89,17 +89,17 @@ def get_random_urls(amount: int = 1):
 
 
 def activate_fqdn_hash():
-    client.patch(
+    client.put(
         c.settings_endpoint, json={"long_term_part_mode": enum.LONGPART.fqdn_hash}
     )
 
 
 def activate_consistent_hash():
-    client.patch(
+    client.put(
         c.settings_endpoint,
         json={"long_term_part_mode": enum.LONGPART.consistent_hashing},
     )
 
 
 def reset_long_term_part_strategy():
-    client.patch(c.settings_endpoint, json={"long_term_part_mode": enum.LONGPART.none})
+    client.put(c.settings_endpoint, json={"long_term_part_mode": enum.LONGPART.none})

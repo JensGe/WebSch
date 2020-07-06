@@ -144,9 +144,11 @@ def create_sample_frontier(db: Session, request):
 
 
 def avg_dates(url_list):
-    any_ref_date = datetime(1900, 1, 1)
+    any_ref_date = datetime(2000, 1, 1)
+    dated_url_list = [url for url in url_list if url.url_last_visited is not None]
+
     avg_date = any_ref_date + sum(
-        [url.url_last_visited - any_ref_date for url in url_list], timedelta()
+        [url.url_last_visited - any_ref_date for url in dated_url_list], timedelta()
     ) / len(url_list)
 
     return avg_date

@@ -74,7 +74,7 @@ def new_url(url, fqdn, request):
     if random.random() < request.visited_ratio:
         generated_date_time = rand_gen.random_datetime()
     else:
-        generated_date_time = datetime.utcfromtimestamp(0)
+        generated_date_time = None
 
     return db_models.Url(
         url=url,

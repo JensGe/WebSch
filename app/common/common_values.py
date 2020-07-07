@@ -4,7 +4,7 @@ database_endpoint = "/database/"
 stats_endpoint = "/stats/"
 frontier_endpoint = "/frontiers/"
 settings_endpoint = "/settings/"
-urls_endpoint = "/urls/"
+urls_endpoint = "/urls/random/"
 
 
 # DB_Models

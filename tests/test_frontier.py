@@ -164,7 +164,7 @@ def test_get_random_urls():
     rest.create_database(min_url_amount=10, max_url_amount=10)
 
     result = rest.get_random_urls(amount=5)
-
+    print(result)
     assert len(result["url_list"]) == 5
 
 

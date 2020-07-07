@@ -374,30 +374,30 @@ def test_get_random_urls():
         json={
             "fetcher_amount": 0,
             "fqdn_amount": 10,
-            "min_url_amount": 1,
-            "max_url_amount": 1,
+            "min_url_amount": 2,
+            "max_url_amount": 2,
             "connection_amount": 0,
         },
     )
-    full_url_list_response = client.get("urls", json={"amount": 10}).json()
+    full_url_list_response = client.get("/urls/random/?amount=10").json()
 
     print(full_url_list_response)
     assert len(full_url_list_response["url_list"]) == 10
 
     specific_fqdn_response = client.get(
-        "urls",
-        json={"amount": 1, "fqdn": full_url_list_response["url_list"][0]["fqdn"]},
+        "/urls/random/?amount=2&fqdn={}".format(full_url_list_response["url_list"][0]["fqdn"]),
     ).json()
 
+    print(specific_fqdn_response)
     assert (
-        specific_fqdn_response["url_list"][0]["fqdn"]
+        specific_fqdn_response["url_list"][1]["fqdn"]
         == full_url_list_response["url_list"][0]["fqdn"]
     )
 
 
 def test_consistent_hashing_uniformly_distributed():
-    fetcher_amount = 10
-    fqdn_amount = 250
+    fetcher_amount = 3
+    fqdn_amount = 50
 
     rest.delete_full_database(full=True)
     rest.create_database(fetcher_amount=fetcher_amount, fqdn_amount=fqdn_amount)
@@ -450,9 +450,11 @@ def test_consistent_hashing_uniformly_distributed():
 
     return_list = defaultdict(int)
     for d in fetcher_hash_range_sorted_by_min_hash:
-        return_list[d['uuid']] += d['url_count']
+        return_list[d["uuid"]] += d["url_count"]
 
-    group_summed_hash_list = [{'id': id_, 'count': count_} for id_, count_ in return_list.items()]
+    group_summed_hash_list = [
+        {"id": id_, "count": count_} for id_, count_ in return_list.items()
+    ]
 
     url_counts = [f["count"] for f in group_summed_hash_list]
 

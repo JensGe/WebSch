@@ -85,7 +85,7 @@ def get_stats():
 
 
 def get_random_urls(amount: int = 1):
-    return client.get(c.urls_endpoint, json={"amount": amount}).json()
+    return client.get("{}?amount={}".format(c.urls_endpoint, amount)).json()
 
 
 def activate_fqdn_hash():

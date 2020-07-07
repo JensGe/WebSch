@@ -148,11 +148,6 @@ class DeleteDatabase(BasisModel):
     delete_reserved_fqdns: bool = False
 
 
-class GetRandomUrls(BasisModel):
-    amount: int = 1
-    fqdn: str = None
-
-
 class RandomUrls(BasisModel):
     url_list: List[Url] = []
 

@@ -19,7 +19,7 @@ db_models.Base.metadata.create_all(bind=database.engine)
 app = FastAPI(
     title="WebSch",
     description="A Scheduler for a distributed Web Fetcher System",
-    version="0.3.5",
+    version="0.3.6",
     redoc_url=None,
 )
 
@@ -248,19 +248,20 @@ def get_db_stats(db: Session = Depends(get_db)):
 
 
 @app.get(
-    "/urls/",
+    "/urls/random/",
     response_model=pyd_models.RandomUrls,
     tags=["Development Tools"],
     summary="Get Random Urls from Database",
 )
-def get_random_urls(request: pyd_models.GetRandomUrls, db: Session = Depends(get_db)):
+def get_random_urls(
+    db: Session = Depends(get_db), amount: int = 1, fqdn: str = None
+):
     """
     Returns a requested amount of random existing URLs from the Database
 
-    - **amount** (default: 1): Number of requesting URLs
     - **fqdn** (default: None): The FQDN, in which the requested URLs reside
     """
-    return frontier.get_random_urls(db, request)
+    return frontier.get_random_url(db, amount=amount, fqdn=fqdn)
 
 
 @app.get(

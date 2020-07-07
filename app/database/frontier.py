@@ -290,14 +290,14 @@ def get_db_stats(db: Session):
     return response
 
 
-def get_random_urls(db: Session, request: pyd_models.GetRandomUrls):
-    urls = db.query(db_models.Url)
-    if request.fqdn is not None:
-        urls = urls.filter(db_models.Url.fqdn == request.fqdn)
+def get_random_url(db: Session, amount: int = 1, fqdn: str = None):
+    url = db.query(db_models.Url)
+    if fqdn is not None:
+        url = url.filter(db_models.Url.fqdn == fqdn)
 
-    urls = urls.order_by(func.random()).limit(request.amount)
+    url = url.order_by(func.random()).limit(amount)
 
-    url_list = [url for url in urls]
+    url_list = [url for url in url]
 
     return pyd_models.RandomUrls(url_list=url_list)
 

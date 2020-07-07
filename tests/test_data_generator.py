@@ -3,7 +3,6 @@ from app.common import random_data_generator as rand_gen
 from app.database import sample_generator as sam_gen
 from app.database import pyd_models as pyd
 from datetime import datetime
-from uuid import uuid4
 
 
 def test_get_random_pagerank():
